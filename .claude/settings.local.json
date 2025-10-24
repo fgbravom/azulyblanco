@@ -8,7 +8,10 @@
       "Bash(npx shadcn@latest add button card dialog input label textarea badge avatar calendar dropdown-menu navigation-menu separator tabs)",
       "Bash(npm run dev)",
       "Bash(taskkill:*)",
-      "Bash(npx next@latest dev)"
+      "Bash(npx next@latest dev)",
+      "Bash(git config:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ],
     "deny": [],
     "ask": []
