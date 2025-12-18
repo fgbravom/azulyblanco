@@ -17,7 +17,7 @@ export function Header() {
               height={50}
               className="h-12 w-auto"
             />
-            <span className="text-xl font-bold text-azul-primario hidden sm:block">
+            <span className="text-xl font-bold text-black hidden sm:block">
               {SITE_CONFIG.name}
             </span>
           </Link>
