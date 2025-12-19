@@ -30,6 +30,10 @@ export const metadata: Metadata = {
   keywords: ['fútbol amateur', 'club deportivo', 'azul y blanco', 'fútbol'],
   authors: [{ name: SITE_CONFIG.name }],
   creator: SITE_CONFIG.name,
+  icons: {
+    icon: '/icon.png',
+    apple: '/icon.png',
+  },
   openGraph: {
     type: 'website',
     locale: 'es_ES',
