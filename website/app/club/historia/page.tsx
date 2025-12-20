@@ -1,6 +1,8 @@
 import { Header } from '@/components/layout/Header'
 import { Footer } from '@/components/layout/Footer'
 import { Card, CardContent } from '@/components/ui/card'
+import { ShieldTimeline } from '@/components/club/ShieldTimeline'
+import { getAllShields } from '@/lib/shields'
 
 export const metadata = {
   title: 'Historia',
@@ -8,6 +10,7 @@ export const metadata = {
 }
 
 export default function HistoriaPage() {
+  const shields = getAllShields()
   return (
     <>
       <Header />
@@ -81,27 +84,17 @@ export default function HistoriaPage() {
               </div>
             </div>
 
-            {/* Timeline */}
-            <div>
-              <h2 className="text-3xl font-bold mb-8 text-center">Hitos Importantes</h2>
-              <div className="space-y-8">
-                {[
-                  { year: '2006', title: 'Fundación del Club', desc: 'Nace la escuela de fútbol infantil Azul y Blanco Curicó' },
-                  { year: '2019', title: 'Campeones ANFA', desc: 'Título del campeonato ANFA' },
-                  { year: '2025', title: 'Sitio Web Oficial', desc: 'Nueva etapa digital' },
-                ].map((item, index) => (
-                  <div key={index} className="flex gap-6 items-start">
-                    <div className="flex-shrink-0 w-24 h-24 bg-azul-primario rounded-full flex items-center justify-center text-white text-xl font-bold">
-                      {item.year}
-                    </div>
-                    <div className="flex-1 pt-4">
-                      <h3 className="text-2xl font-bold mb-2">{item.title}</h3>
-                      <p className="text-gray-600">{item.desc}</p>
-                    </div>
-                  </div>
-                ))}
+            {/* Historia del Escudo */}
+            {shields.length > 0 && (
+              <div className="mb-12">
+                <h2 className="text-3xl font-bold mb-8 text-center">Nuestro Escudo</h2>
+                <p className="text-gray-600 text-center mb-8 max-w-2xl mx-auto">
+                  A lo largo de los años, nuestro escudo ha evolucionado manteniendo siempre la esencia
+                  y los colores que nos identifican.
+                </p>
+                <ShieldTimeline shields={shields} />
               </div>
-            </div>
+            )}
           </div>
         </section>
       </main>
