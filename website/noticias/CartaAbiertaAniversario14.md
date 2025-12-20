@@ -3,6 +3,7 @@ title: 'Carta Abierta - 14° Aniversario Azul y Blanco'
 description: 'Reflexión sobre 14 años de historia del club Azul y Blanco Curicó, desde su fundación el 6 de agosto de 2006 hasta convertirse en una familia que ha transformado vidas a través del fútbol.'
 tags: 'historia, aniversario, fundación, comunidad'
 date: '2020-08-06'
+categoria: 'Institucional'
 ---
 
 # Carta Abierta - 14° Aniversario Azul y Blanco

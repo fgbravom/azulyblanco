@@ -50,10 +50,6 @@ export const NAVIGATION_ITEMS = [
     href: '/noticias',
   },
   {
-    title: 'Notas',
-    href: '/notas',
-  },
-  {
     title: 'Partidos',
     href: '/partidos',
   },
