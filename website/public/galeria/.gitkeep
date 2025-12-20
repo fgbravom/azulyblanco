@@ -1,0 +1,45 @@
+# Galería de Imágenes
+
+Esta carpeta contiene las imágenes de la galería del sitio web.
+
+## Estructura de carpetas:
+
+- `partidos/` - Fotos de partidos (organizadas por fecha o torneo)
+- `entrenamientos/` - Fotos de entrenamientos y prácticas
+- `eventos/` - Eventos institucionales, celebraciones, actividades
+- `historia/` - Fotos históricas del club
+
+## Organización de álbumes:
+
+Cada subcarpeta puede contener álbumes organizados por fecha o evento:
+
+Ejemplo:
+```
+partidos/
+  └── 2025-01-15-final-torneo/
+      ├── album.json
+      ├── foto1.jpg
+      ├── foto2.jpg
+      └── foto3.jpg
+```
+
+## Formato del archivo album.json:
+
+```json
+{
+  "title": "Final del Torneo de Verano 2025",
+  "description": "Victoria 3-0 ante nuestro clásico rival",
+  "date": "2025-01-15",
+  "categoria": "partidos",
+  "tags": ["torneo", "final", "victoria"],
+  "cover": "foto1.jpg"
+}
+```
+
+## Optimización de imágenes:
+
+Antes de subir imágenes, optimízalas:
+- Tamaño recomendado: máximo 1920px de ancho
+- Formato: JPG para fotos, PNG para gráficos
+- Calidad: 80-85% para balance entre calidad y tamaño
+- Herramientas: TinyPNG, Squoosh, ImageOptim
