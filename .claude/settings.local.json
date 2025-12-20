@@ -12,7 +12,14 @@
       "Bash(git config:*)",
       "Bash(git add:*)",
       "Bash(git commit:*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(where:*)",
+      "Bash(npm run build:*)",
+      "Bash(npm update:*)",
+      "Bash(find:*)",
+      "Bash(cat:*)",
+      "Bash(ls:*)",
+      "Bash(del next.config.ts)"
     ],
     "deny": [],
     "ask": []

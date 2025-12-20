@@ -30,7 +30,7 @@ export default function HistoriaPage() {
               <CardContent className="p-8">
                 <div className="flex items-center gap-4 mb-4">
                   <div className="w-20 h-20 bg-azul-primario rounded-full flex items-center justify-center text-white text-2xl font-bold">
-                    2010
+                    2006
                   </div>
                   <div>
                     <h2 className="text-2xl font-bold">Los Inicios</h2>
@@ -38,7 +38,7 @@ export default function HistoriaPage() {
                   </div>
                 </div>
                 <p className="text-gray-700 leading-relaxed">
-                  Azul y Blanco nació en 2010 con un sueño simple: jugar al fútbol.
+                  Azul y Blanco nació el 6 de agosto de 2006 con un sueño: crear una escuela de fútbol infantil diferente, sin fines de lucro.
                   Lo que comenzó como un grupo de amigos en un potrero, hoy es una familia
                   que comparte la pasión por este deporte. Somos amateur, y lo llevamos con orgullo.
                 </p>
@@ -86,10 +86,10 @@ export default function HistoriaPage() {
               <h2 className="text-3xl font-bold mb-8 text-center">Hitos Importantes</h2>
               <div className="space-y-8">
                 {[
-                  { year: '2010', title: 'Fundación del Club', desc: 'Nace Azul y Blanco' },
-                  { year: '2012', title: 'Primer Torneo', desc: 'Participación en liga local' },
-                  { year: '2015', title: 'Crecimiento', desc: 'Se suma el equipo de reserva' },
-                  { year: '2020', title: 'Aniversario', desc: '10 años de pasión azul y blanco' },
+                  { year: '2006', title: 'Fundación del Club', desc: 'Nace la escuela de fútbol infantil Azul y Blanco Curicó' },
+                  { year: '2019', title: 'Campeones ANFA', desc: 'Título del campeonato ANFA' },
+                  { year: '2020', title: '14° Aniversario', desc: '14 años de pasión y familia' },
+                  { year: '2024', title: 'Liga Gol', desc: 'Campeones Liga Gol (cuarta vez)' },
                   { year: '2025', title: 'Sitio Web Oficial', desc: 'Nueva etapa digital' },
                 ].map((item, index) => (
                   <div key={index} className="flex gap-6 items-start">

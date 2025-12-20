@@ -19,7 +19,7 @@ export default function HomePage() {
           </h1>
 
           <p className="text-xl md:text-2xl mb-8 text-gray-100 font-light">
-            Pasión Amateur desde 2010
+            Pasión Amateur desde 2006
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
