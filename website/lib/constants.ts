@@ -11,7 +11,7 @@ export const SITE_CONFIG = {
     light: '#4A90E2',
   },
   social: {
-    instagram: 'https://instagram.com/azulyblanco',
+    instagram: 'https://www.instagram.com/azulyblancocurico/',
     facebook: 'https://facebook.com/azulyblanco',
     twitter: 'https://twitter.com/azulyblanco',
   },
@@ -33,12 +33,25 @@ export const NAVIGATION_ITEMS = [
     ],
   },
   {
+    title: 'Series',
+    href: '/series/primera',
+    submenu: [
+      { title: 'Serie Primera', href: '/series/primera' },
+      { title: 'Serie Honor', href: '/series/honor' },
+      { title: 'Serie 35', href: '/series/35' },
+    ],
+  },
+  {
     title: 'Equipos',
     href: '/equipos',
   },
   {
     title: 'Noticias',
     href: '/noticias',
+  },
+  {
+    title: 'Notas',
+    href: '/notas',
   },
   {
     title: 'Partidos',
