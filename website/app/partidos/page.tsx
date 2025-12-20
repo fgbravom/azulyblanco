@@ -106,17 +106,16 @@ export default function PartidosPage() {
         <section className="py-16 px-4">
           <div className="container mx-auto max-w-6xl">
             <Tabs defaultValue="calendario" className="w-full">
-              <TabsList className="grid w-full grid-cols-4 mb-8">
-                <TabsTrigger value="calendario">Calendario</TabsTrigger>
-                <TabsTrigger value="proximos">Próximos Partidos</TabsTrigger>
-                <TabsTrigger value="resultados">Resultados</TabsTrigger>
-                <TabsTrigger value="tabla">Tabla de Posiciones</TabsTrigger>
+              <TabsList className="grid w-full grid-cols-3 mb-8">
+                <TabsTrigger value="calendario" className="text-xs md:text-sm">Calendario</TabsTrigger>
+                <TabsTrigger value="proximos" className="text-xs md:text-sm">Próximos</TabsTrigger>
+                <TabsTrigger value="resultados" className="text-xs md:text-sm">Resultados</TabsTrigger>
               </TabsList>
 
               {/* Calendario Mensual */}
               <TabsContent value="calendario">
                 <div className="flex justify-center">
-                  <CalendarioMensual eventos={eventosDiciembre2024} mes="Diciembre" año={2024} />
+                  <CalendarioMensual eventos={eventosDiciembre2024} mes="Diciembre" año={2025} />
                 </div>
               </TabsContent>
 
@@ -211,60 +210,6 @@ export default function PartidosPage() {
                     </Card>
                   ))}
                 </div>
-              </TabsContent>
-
-              {/* Tabla de Posiciones */}
-              <TabsContent value="tabla">
-                <Card>
-                  <CardContent className="p-6">
-                    <div className="overflow-x-auto">
-                      <table className="w-full">
-                        <thead>
-                          <tr className="border-b">
-                            <th className="text-left py-3 px-2">Pos</th>
-                            <th className="text-left py-3 px-2">Equipo</th>
-                            <th className="text-center py-3 px-2">PJ</th>
-                            <th className="text-center py-3 px-2">PG</th>
-                            <th className="text-center py-3 px-2">PE</th>
-                            <th className="text-center py-3 px-2">PP</th>
-                            <th className="text-center py-3 px-2">GF</th>
-                            <th className="text-center py-3 px-2">GC</th>
-                            <th className="text-center py-3 px-2">DIF</th>
-                            <th className="text-center py-3 px-2 font-bold">PTS</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {[
-                            { pos: 1, equipo: 'Líder FC', pj: 10, pg: 7, pe: 2, pp: 1, gf: 20, gc: 8, pts: 23 },
-                            { pos: 2, equipo: 'Real Amateurs', pj: 10, pg: 6, pe: 3, pp: 1, gf: 18, gc: 9, pts: 21 },
-                            { pos: 3, equipo: 'Azul y Blanco', pj: 10, pg: 6, pe: 2, pp: 2, gf: 17, gc: 10, pts: 20, destacado: true },
-                            { pos: 4, equipo: 'Deportivo Central', pj: 10, pg: 5, pe: 3, pp: 2, gf: 15, gc: 11, pts: 18 },
-                            { pos: 5, equipo: 'FC Juvenil', pj: 10, pg: 4, pe: 4, pp: 2, gf: 14, gc: 12, pts: 16 },
-                            { pos: 6, equipo: 'Atlético Unidos', pj: 10, pg: 3, pe: 3, pp: 4, gf: 11, gc: 14, pts: 12 },
-                            { pos: 7, equipo: 'Sporting FC', pj: 10, pg: 2, pe: 2, pp: 6, gf: 9, gc: 16, pts: 8 },
-                            { pos: 8, equipo: 'Unidos FC', pj: 10, pg: 1, pe: 1, pp: 8, gf: 7, gc: 21, pts: 4 },
-                          ].map((equipo) => (
-                            <tr
-                              key={equipo.pos}
-                              className={`border-b ${equipo.destacado ? 'bg-azul-primario text-white font-bold' : 'hover:bg-gray-50'}`}
-                            >
-                              <td className="py-3 px-2">{equipo.pos}</td>
-                              <td className="py-3 px-2">{equipo.equipo}</td>
-                              <td className="text-center py-3 px-2">{equipo.pj}</td>
-                              <td className="text-center py-3 px-2">{equipo.pg}</td>
-                              <td className="text-center py-3 px-2">{equipo.pe}</td>
-                              <td className="text-center py-3 px-2">{equipo.pp}</td>
-                              <td className="text-center py-3 px-2">{equipo.gf}</td>
-                              <td className="text-center py-3 px-2">{equipo.gc}</td>
-                              <td className="text-center py-3 px-2">{equipo.gf - equipo.gc}</td>
-                              <td className="text-center py-3 px-2 font-bold">{equipo.pts}</td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  </CardContent>
-                </Card>
               </TabsContent>
             </Tabs>
           </div>
