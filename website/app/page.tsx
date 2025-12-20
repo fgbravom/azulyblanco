@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Header } from '@/components/layout/Header'
 import { Footer } from '@/components/layout/Footer'
+import { CalendarioResumido } from '@/components/calendario/CalendarioResumido'
+import { eventosDiciembre2024 } from '@/lib/data/eventos-diciembre'
 
 export default function HomePage() {
   return (
@@ -77,57 +79,10 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* Próximo Partido */}
+        {/* Calendario de Eventos */}
         <section className="py-16 px-4">
           <div className="container mx-auto max-w-4xl">
-            <h2 className="text-3xl font-bold text-center mb-8">Próximo Partido</h2>
-
-            <Card className="border-2 border-azul-primario">
-              <CardContent className="p-8">
-                <div className="text-center mb-6">
-                  <p className="text-sm text-gray-600 mb-2">Sábado 26 de Octubre - 15:00hs</p>
-                  <p className="text-lg font-semibold text-azul-primario">Liga Local - Fecha 10</p>
-                </div>
-
-                <div className="flex items-center justify-between gap-8">
-                  {/* Local */}
-                  <div className="flex-1 text-center">
-                    <div className="w-24 h-24 mx-auto mb-3 flex items-center justify-center">
-                      <Image
-                        src="/images/escudoazulyblanco.png"
-                        alt="Escudo Azul y Blanco"
-                        width={96}
-                        height={96}
-                        className="object-contain"
-                      />
-                    </div>
-                    <p className="font-bold text-lg">Azul y Blanco</p>
-                    <p className="text-sm text-gray-500">Local</p>
-                  </div>
-
-                  {/* VS */}
-                  <div className="text-center">
-                    <span className="text-2xl font-bold text-gray-400">VS</span>
-                  </div>
-
-                  {/* Visitante */}
-                  <div className="flex-1 text-center">
-                    <div className="w-24 h-24 bg-gray-300 rounded-full mx-auto mb-3 flex items-center justify-center">
-                      <span className="text-3xl font-bold text-gray-600">?</span>
-                    </div>
-                    <p className="font-bold text-lg">Próximamente</p>
-                    <p className="text-sm text-gray-500">Visitante</p>
-                  </div>
-                </div>
-
-                <div className="mt-6 text-center">
-                  <p className="text-sm text-gray-600 mb-4">📍 Estadio Municipal</p>
-                  <Button asChild>
-                    <Link href="/partidos">Ver Calendario Completo</Link>
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+            <CalendarioResumido eventos={eventosDiciembre2024} limite={3} />
           </div>
         </section>
 

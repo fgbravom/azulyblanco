@@ -3,6 +3,8 @@ import { Footer } from '@/components/layout/Footer'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { CalendarioMensual } from '@/components/calendario/CalendarioMensual'
+import { eventosDiciembre2024 } from '@/lib/data/eventos-diciembre'
 
 export const metadata = {
   title: 'Partidos',
@@ -103,12 +105,20 @@ export default function PartidosPage() {
         {/* Contenido */}
         <section className="py-16 px-4">
           <div className="container mx-auto max-w-6xl">
-            <Tabs defaultValue="proximos" className="w-full">
-              <TabsList className="grid w-full grid-cols-3 mb-8">
+            <Tabs defaultValue="calendario" className="w-full">
+              <TabsList className="grid w-full grid-cols-4 mb-8">
+                <TabsTrigger value="calendario">Calendario</TabsTrigger>
                 <TabsTrigger value="proximos">Próximos Partidos</TabsTrigger>
                 <TabsTrigger value="resultados">Resultados</TabsTrigger>
                 <TabsTrigger value="tabla">Tabla de Posiciones</TabsTrigger>
               </TabsList>
+
+              {/* Calendario Mensual */}
+              <TabsContent value="calendario">
+                <div className="flex justify-center">
+                  <CalendarioMensual eventos={eventosDiciembre2024} mes="Diciembre" año={2024} />
+                </div>
+              </TabsContent>
 
               {/* Próximos Partidos */}
               <TabsContent value="proximos">
