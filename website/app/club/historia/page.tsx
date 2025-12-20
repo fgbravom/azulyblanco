@@ -88,8 +88,6 @@ export default function HistoriaPage() {
                 {[
                   { year: '2006', title: 'Fundación del Club', desc: 'Nace la escuela de fútbol infantil Azul y Blanco Curicó' },
                   { year: '2019', title: 'Campeones ANFA', desc: 'Título del campeonato ANFA' },
-                  { year: '2020', title: '14° Aniversario', desc: '14 años de pasión y familia' },
-                  { year: '2024', title: 'Liga Gol', desc: 'Campeones Liga Gol (cuarta vez)' },
                   { year: '2025', title: 'Sitio Web Oficial', desc: 'Nueva etapa digital' },
                 ].map((item, index) => (
                   <div key={index} className="flex gap-6 items-start">
