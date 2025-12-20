@@ -3,7 +3,7 @@ import { EventoCalendario } from '@/lib/types/calendario'
 export const eventosDiciembre2024: EventoCalendario[] = [
   {
     id: 'dic-1',
-    fecha: '2024-12-11',
+    fecha: '2025-12-11',
     dia: 'JUEVES',
     diaMes: 11,
     mes: 'DICIEMBRE',
@@ -14,7 +14,7 @@ export const eventosDiciembre2024: EventoCalendario[] = [
   },
   {
     id: 'dic-2',
-    fecha: '2024-12-14',
+    fecha: '2025-12-14',
     dia: 'DOMINGO',
     diaMes: 14,
     mes: 'DICIEMBRE',
@@ -25,7 +25,7 @@ export const eventosDiciembre2024: EventoCalendario[] = [
   },
   {
     id: 'dic-3',
-    fecha: '2024-12-15',
+    fecha: '2025-12-15',
     dia: 'LUNES',
     diaMes: 15,
     mes: 'DICIEMBRE',
@@ -36,7 +36,7 @@ export const eventosDiciembre2024: EventoCalendario[] = [
   },
   {
     id: 'dic-4',
-    fecha: '2024-12-17',
+    fecha: '2025-12-17',
     dia: 'MIÉRCOLES',
     diaMes: 17,
     mes: 'DICIEMBRE',
@@ -47,7 +47,7 @@ export const eventosDiciembre2024: EventoCalendario[] = [
   },
   {
     id: 'dic-5',
-    fecha: '2024-12-22',
+    fecha: '2025-12-22',
     dia: 'LUNES',
     diaMes: 22,
     mes: 'DICIEMBRE',
@@ -58,7 +58,7 @@ export const eventosDiciembre2024: EventoCalendario[] = [
   },
   {
     id: 'dic-6',
-    fecha: '2024-12-27',
+    fecha: '2025-12-27',
     dia: 'SÁBADO',
     diaMes: 27,
     mes: 'DICIEMBRE',
