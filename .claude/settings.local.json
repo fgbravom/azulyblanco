@@ -19,7 +19,14 @@
       "Bash(find:*)",
       "Bash(cat:*)",
       "Bash(ls:*)",
-      "Bash(del next.config.ts)"
+      "Bash(del next.config.ts)",
+      "Bash(dir:*)",
+      "Bash(netstat:*)",
+      "Bash(findstr:*)",
+      "Bash(powershell -Command \"Stop-Process -Id 60708 -Force\")",
+      "Bash(powershell -Command \"Stop-Process -Id 67252 -Force\")",
+      "Bash(rd /s /q .next)",
+      "Bash(powershell:*)"
     ],
     "deny": [],
     "ask": []

@@ -54,7 +54,7 @@ export default function HomePage() {
 
             {/* Subtitle */}
             <p className="text-lg md:text-2xl mb-4 text-gray-100 font-light max-w-3xl mx-auto leading-relaxed">
-              Más que un club, una familia unida por el amor al fútbol amateur
+              Más que un club.
             </p>
 
             <p className="text-base md:text-lg mb-10 text-white/90 font-medium">
