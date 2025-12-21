@@ -7,6 +7,7 @@ const heroImages = [
   '/images/fotoportada.jpg',
   '/images/fotoportada2.jpg',
   '/images/fotoportada3.jpg',
+  '/images/fotoportada4.jpg',
 ]
 
 interface HeroCarouselProps {
