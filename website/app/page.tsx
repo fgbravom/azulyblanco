@@ -8,6 +8,7 @@ import { CalendarioResumido } from '@/components/calendario/CalendarioResumido'
 import { eventosDiciembre2024 } from '@/lib/data/eventos-diciembre'
 import { getAllNoticias } from '@/lib/news'
 import { Badge } from '@/components/ui/badge'
+import { HeroCarousel } from '@/components/hero/HeroCarousel'
 
 export default function HomePage() {
   const noticias = getAllNoticias().slice(0, 3) // Obtener las 3 noticias más recientes
@@ -17,20 +18,8 @@ export default function HomePage() {
       <main className="flex flex-col min-h-screen">
         {/* Hero Section */}
         <section className="relative h-[85vh] min-h-[600px] flex items-center justify-center overflow-hidden">
-          {/* Background Image */}
-          <div className="absolute inset-0">
-            <Image
-              src="/images/fotoportada.jpg"
-              alt="Fútbol de barrio - Azul y Blanco"
-              fill
-              className="object-cover object-center"
-              priority
-              quality={90}
-            />
-            {/* Gradient Overlay */}
-            <div className="absolute inset-0 bg-gradient-to-r from-azul-oscuro/90 via-azul-primario/70 to-azul-oscuro/90" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/40" />
-          </div>
+          {/* Background Carousel */}
+          <HeroCarousel />
 
           {/* Content */}
           <div className="relative z-10 text-center text-white px-4 max-w-5xl mx-auto">

@@ -120,7 +120,7 @@ export default function HomePage() {
             ¿Te gusta el fútbol?
           </h2>
           <p className="text-xl mb-8 text-gray-100">
-            Súmate a nuestra familia. Entrenamos todos los sábados.
+            Súmate a nuestra familia.
           </p>
           <Button size="lg" asChild className="bg-white text-azul-primario hover:bg-gray-100">
             <Link href="/contacto">Contáctanos</Link>
