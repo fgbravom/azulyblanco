@@ -12,7 +12,7 @@ export const SITE_CONFIG = {
   },
   social: {
     instagram: 'https://www.instagram.com/azulyblancocurico/',
-    facebook: 'https://facebook.com/azulyblanco',
+    facebook: 'https://www.facebook.com/nuevoazulyblanco.curico',
     twitter: 'https://twitter.com/azulyblanco',
   },
   contact: {

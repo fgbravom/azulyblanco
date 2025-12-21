@@ -3,6 +3,7 @@ import { Footer } from '@/components/layout/Footer'
 import { Card, CardContent } from '@/components/ui/card'
 import { ShieldTimeline } from '@/components/club/ShieldTimeline'
 import { getAllShields } from '@/lib/shields'
+import Image from 'next/image'
 
 export const metadata = {
   title: 'Historia',
@@ -47,6 +48,85 @@ export default function HistoriaPage() {
                 </p>
               </CardContent>
             </Card>
+
+            {/* Fundadores */}
+            <div className="mb-12">
+              <h2 className="text-3xl font-bold mb-8 text-center">Nuestros Fundadores</h2>
+              <p className="text-gray-600 text-center mb-8 max-w-2xl mx-auto">
+                Tres personas con un sueño en común: crear una escuela de fútbol infantil donde todos los niños
+                pudieran jugar, sin importar su condición económica.
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                {/* Cristina Reyes */}
+                <Card className="text-center hover:shadow-xl transition-shadow">
+                  <CardContent className="p-6">
+                    <div className="mb-4">
+                      <div className="w-32 h-32 mx-auto rounded-full overflow-hidden ring-4 ring-azul-primario/20">
+                        <Image
+                          src="/images/authors/cristina-reyes.jpg"
+                          alt="Cristina Reyes"
+                          width={128}
+                          height={128}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    </div>
+                    <h3 className="text-xl font-bold mb-1">Cristina Reyes</h3>
+                    <p className="text-azul-primario font-medium text-sm mb-3">Fundadora</p>
+                    <p className="text-gray-600 text-sm">
+                      La visionaria detrás del proyecto. Su pasión y dedicación transformaron un sueño
+                      en una realidad que ha cambiado la vida de cientos de niños.
+                    </p>
+                  </CardContent>
+                </Card>
+
+                {/* Víctor Reyes */}
+                <Card className="text-center hover:shadow-xl transition-shadow">
+                  <CardContent className="p-6">
+                    <div className="mb-4">
+                      <div className="w-32 h-32 mx-auto rounded-full overflow-hidden ring-4 ring-azul-primario/20">
+                        <Image
+                          src="/images/authors/victor-reyes.jpg"
+                          alt="Víctor Reyes"
+                          width={128}
+                          height={128}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    </div>
+                    <h3 className="text-xl font-bold mb-1">Víctor Reyes</h3>
+                    <p className="text-azul-primario font-medium text-sm mb-3">Fundador</p>
+                    <p className="text-gray-600 text-sm">
+                      Su compromiso con la formación deportiva y los valores del fútbol amateur
+                      han sido pilares fundamentales del club.
+                    </p>
+                  </CardContent>
+                </Card>
+
+                {/* Javier Lizana */}
+                <Card className="text-center hover:shadow-xl transition-shadow">
+                  <CardContent className="p-6">
+                    <div className="mb-4">
+                      <div className="w-32 h-32 mx-auto rounded-full overflow-hidden ring-4 ring-azul-primario/20">
+                        <Image
+                          src="/images/authors/javier-lizana.jpg"
+                          alt="Javier Lizana"
+                          width={128}
+                          height={128}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    </div>
+                    <h3 className="text-xl font-bold mb-1">Javier Lizana</h3>
+                    <p className="text-azul-primario font-medium text-sm mb-3">Fundador</p>
+                    <p className="text-gray-600 text-sm">
+                      Su espíritu de compañerismo y trabajo en equipo han sido esenciales
+                      para construir la familia que hoy somos.
+                    </p>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
 
             {/* Valores */}
             <div className="mb-12">

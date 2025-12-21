@@ -46,7 +46,7 @@ export default function HomePage() {
                           {noticia.title}
                         </CardTitle>
                         <CardDescription>
-                          {new Date(noticia.date).toLocaleDateString('es-ES', {
+                          {new Date(noticia.date + 'T12:00:00').toLocaleDateString('es-ES', {
                             day: 'numeric',
                             month: 'long',
                             year: 'numeric'
