@@ -4,10 +4,8 @@ description: 'Reflexión sobre 14 años de historia del club Azul y Blanco Curic
 tags: 'historia, aniversario, fundación, comunidad'
 date: '2020-08-06'
 categoria: 'Institucional'
+author: 'Cristina Reyes'
 ---
-
-# Carta Abierta - 14° Aniversario Azul y Blanco
-
 Un día como hoy, **6 de agosto de 2006**, se fundó la escuela de fútbol infantil **"Azul y Blanco Curicó"**, una institución diferente, sin fines de lucro, ayudando a tantos niños que se encontraban sin oportunidades de realizar deporte.
 
 ## Los Inicios
@@ -87,3 +85,8 @@ A todos nuestros hijos adoptivos:
 > "Valentía no es tener la fuerza para seguir adelante, sino seguir adelante cuando no tenemos fuerza para hacerlo."
 
 **Azul y Blanco: Un sueño, una realidad.**
+
+---
+
+**Cristina Reyes**
+*Fundadora Club Deportivo Azul y Blanco*

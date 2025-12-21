@@ -6,8 +6,11 @@ import { Header } from '@/components/layout/Header'
 import { Footer } from '@/components/layout/Footer'
 import { CalendarioResumido } from '@/components/calendario/CalendarioResumido'
 import { eventosDiciembre2024 } from '@/lib/data/eventos-diciembre'
+import { getAllNoticias } from '@/lib/news'
+import { Badge } from '@/components/ui/badge'
 
 export default function HomePage() {
+  const noticias = getAllNoticias().slice(0, 3) // Obtener las 3 noticias más recientes
   return (
     <>
       <Header />
@@ -101,22 +104,43 @@ export default function HomePage() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {[1, 2, 3].map((i) => (
-                <Card key={i} className="hover:shadow-lg transition-shadow">
-                  <div className="h-48 bg-gradient-to-br from-gray-200 to-gray-300" />
-                  <CardHeader>
-                    <CardTitle className="line-clamp-2">
-                      Próximamente: Noticias del club
-                    </CardTitle>
-                    <CardDescription>Hace 2 días</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-gray-600 line-clamp-3">
-                      Esta sección mostrará las últimas noticias y novedades del club.
-                    </p>
-                  </CardContent>
-                </Card>
-              ))}
+              {noticias.length > 0 ? (
+                noticias.map((noticia) => (
+                  <Link key={noticia.slug} href={`/noticias/${noticia.slug}`}>
+                    <Card className="hover:shadow-lg transition-shadow h-full">
+                      <div className="h-48 bg-gradient-to-br from-azul-primario to-azul-oscuro flex items-center justify-center">
+                        <div className="text-white text-center p-6">
+                          <h3 className="text-2xl font-bold mb-2">{noticia.categoria}</h3>
+                        </div>
+                      </div>
+                      <CardHeader>
+                        <div className="flex items-center gap-2 mb-2">
+                          <Badge variant="outline">{noticia.categoria}</Badge>
+                        </div>
+                        <CardTitle className="line-clamp-2">
+                          {noticia.title}
+                        </CardTitle>
+                        <CardDescription>
+                          {new Date(noticia.date).toLocaleDateString('es-ES', {
+                            day: 'numeric',
+                            month: 'long',
+                            year: 'numeric'
+                          })}
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <p className="text-sm text-gray-600 line-clamp-3">
+                          {noticia.description}
+                        </p>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                ))
+              ) : (
+                <div className="col-span-3 text-center py-12 text-gray-500">
+                  No hay noticias disponibles en este momento.
+                </div>
+              )}
             </div>
           </div>
         </section>
@@ -135,7 +159,7 @@ export default function HomePage() {
               ¿Te gusta el fútbol?
             </h2>
             <p className="text-xl mb-8 text-gray-100">
-              Súmate a nuestra familia. Entrenamos todos los sábados.
+              Súmate a nuestra familia.
             </p>
             <Button size="lg" asChild className="bg-white text-azul-primario hover:bg-gray-100">
               <Link href="/contacto">Contáctanos</Link>

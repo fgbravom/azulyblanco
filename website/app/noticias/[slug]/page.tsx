@@ -3,6 +3,7 @@ import { Footer } from '@/components/layout/Footer'
 import { getNoticiaBySlug, getAllNoticiaSlugs } from '@/lib/news'
 import { MDXRenderer } from '@/components/mdx/MDXRenderer'
 import { Badge } from '@/components/ui/badge'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
@@ -70,9 +71,22 @@ export default async function NoticiaPage({ params }: PageProps) {
               <Badge className={`${getCategoryColor(noticia.categoria)} text-white`}>
                 {noticia.categoria}
               </Badge>
+              {noticia.author && (
+                <div className="flex items-center gap-2">
+                  <Avatar className="h-6 w-6">
+                    <AvatarImage src={`/images/authors/${noticia.author.toLowerCase().replace(/\s+/g, '-')}.jpg`} alt={noticia.author} />
+                    <AvatarFallback className="bg-azul-claro text-white text-xs">
+                      {noticia.author.split(' ').map(n => n[0]).join('')}
+                    </AvatarFallback>
+                  </Avatar>
+                  <span className="text-sm text-gray-200">
+                    {noticia.author}
+                  </span>
+                </div>
+              )}
               {noticia.date && (
                 <span className="text-sm text-gray-200">
-                  {new Date(noticia.date).toLocaleDateString('es-CL', {
+                  • {new Date(noticia.date).toLocaleDateString('es-CL', {
                     day: 'numeric',
                     month: 'long',
                     year: 'numeric'

@@ -18,7 +18,7 @@ export const SITE_CONFIG = {
   contact: {
     email: 'contacto@azulyblanco.com',
     phone: '+54 9 11 1234-5678',
-    address: 'Calle Principal 123, Ciudad',
+    address: 'Curicó, Chile',
   },
 }
 

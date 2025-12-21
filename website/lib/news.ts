@@ -11,6 +11,7 @@ export interface Noticia {
   tags: string
   date: string
   categoria: string
+  author?: string
   content: string
 }
 
@@ -21,6 +22,7 @@ export interface NoticiaMetadata {
   tags: string
   date: string
   categoria: string
+  author?: string
 }
 
 /**
@@ -52,6 +54,7 @@ export function getAllNoticias(): NoticiaMetadata[] {
       tags: data.tags || '',
       date: data.date || '',
       categoria: data.categoria || data.tags?.split(',')[0]?.trim() || 'General',
+      author: data.author || data.autor,
     }
   })
 
@@ -105,6 +108,7 @@ export function getNoticiaBySlug(slug: string): Noticia | null {
       tags: data.tags || '',
       date: data.date || '',
       categoria: data.categoria || data.tags?.split(',')[0]?.trim() || 'General',
+      author: data.author || data.autor,
       content,
     }
   } catch (error) {

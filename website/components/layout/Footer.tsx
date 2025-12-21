@@ -56,14 +56,6 @@ export function Footer() {
                   {SITE_CONFIG.contact.email}
                 </a>
               </li>
-              <li>
-                <a
-                  href={`tel:${SITE_CONFIG.contact.phone}`}
-                  className="hover:text-white transition-colors"
-                >
-                  {SITE_CONFIG.contact.phone}
-                </a>
-              </li>
               <li className="text-gray-400">{SITE_CONFIG.contact.address}</li>
             </ul>
           </div>
