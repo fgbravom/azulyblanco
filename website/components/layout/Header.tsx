@@ -25,7 +25,7 @@ export function Header() {
   return (
     <header className="sticky top-0 z-50 w-full border-b-[3px] border-azul-primario/40 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
       <div className="container mx-auto px-4">
-        <div className="flex h-20 items-center justify-between">
+        <div className="flex h-16 md:h-20 items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3">
             <Image
@@ -33,7 +33,7 @@ export function Header() {
               alt={`Escudo ${SITE_CONFIG.name}`}
               width={50}
               height={50}
-              className="h-12 w-auto"
+              className="h-10 md:h-12 w-auto"
             />
             <span className="text-xl font-bold text-black hidden sm:block">
               {SITE_CONFIG.name}
