@@ -128,42 +128,6 @@ export default function HistoriaPage() {
               </div>
             </div>
 
-            {/* Valores */}
-            <div className="mb-12">
-              <h2 className="text-3xl font-bold mb-6 text-center">Nuestros Valores</h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <Card>
-                  <CardContent className="p-6 text-center">
-                    <div className="text-4xl mb-4">⚽</div>
-                    <h3 className="text-xl font-bold mb-2">Pasión</h3>
-                    <p className="text-gray-600">
-                      Amor por el fútbol y dedicación en cada partido
-                    </p>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardContent className="p-6 text-center">
-                    <div className="text-4xl mb-4">🤝</div>
-                    <h3 className="text-xl font-bold mb-2">Compañerismo</h3>
-                    <p className="text-gray-600">
-                      Somos más que un equipo, somos una familia
-                    </p>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardContent className="p-6 text-center">
-                    <div className="text-4xl mb-4">🏆</div>
-                    <h3 className="text-xl font-bold mb-2">Espíritu Amateur</h3>
-                    <p className="text-gray-600">
-                      Jugar por amor al deporte, no por dinero
-                    </p>
-                  </CardContent>
-                </Card>
-              </div>
-            </div>
-
             {/* Historia del Escudo */}
             {shields.length > 0 && (
               <div className="mb-12">
