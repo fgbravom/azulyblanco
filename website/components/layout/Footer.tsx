@@ -23,7 +23,10 @@ export function Footer() {
               </span>
             </div>
             <p className="text-sm text-gray-400">
-              Club de fútbol amateur apasionado por el deporte. Fundado en {SITE_CONFIG.founded}.
+              Desde 2006 • Curicó, Chile.
+            </p>
+            <p className="text-sm text-gray-400">
+              Más que un club.
             </p>
           </div>
 
@@ -56,7 +59,6 @@ export function Footer() {
                   {SITE_CONFIG.contact.email}
                 </a>
               </li>
-              <li className="text-gray-400">{SITE_CONFIG.contact.address}</li>
             </ul>
           </div>
 
