@@ -107,7 +107,7 @@ export default async function NoticiaPage({ params }: PageProps) {
 
         {/* Contenido */}
         <article className="py-12 px-4">
-          <div className="container mx-auto max-w-4xl bg-white rounded-lg shadow-lg p-8 md:p-12">
+          <div className="container mx-auto max-w-5xl bg-white rounded-lg shadow-lg p-6 md:p-12 lg:p-16">
             <MDXRenderer content={noticia.content} />
           </div>
         </article>

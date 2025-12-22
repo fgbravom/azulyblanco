@@ -10,7 +10,7 @@ export function HeroSection() {
   const [carouselIndex, setCarouselIndex] = useState(0)
 
   return (
-    <section className="relative h-[85vh] min-h-[600px] flex items-center justify-center overflow-hidden">
+    <section className="relative w-full flex items-center justify-center overflow-hidden" style={{ height: 'calc(100vh - 64px)' }}>
       {/* Background Carousel */}
       <HeroCarousel currentIndex={carouselIndex} onIndexChange={setCarouselIndex} />
 
@@ -83,8 +83,8 @@ export function HeroSection() {
         </div>
       </div>
 
-      {/* Scroll Indicator */}
-      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
+      {/* Scroll Indicator - Hidden on mobile */}
+      <div className="hidden md:block absolute bottom-12 left-1/2 transform -translate-x-1/2 animate-bounce">
         <div className="w-6 h-10 rounded-full border-2 border-white/50 flex items-start justify-center p-2">
           <div className="w-1 h-3 bg-white/50 rounded-full"></div>
         </div>

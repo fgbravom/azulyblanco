@@ -15,34 +15,34 @@ export function MDXRenderer({ content }: MDXRendererProps) {
       components={{
         // Encabezados
         h1: ({ children }) => (
-          <h1 className="text-4xl font-bold text-gray-900 mb-6 mt-8">{children}</h1>
+          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-8 mt-8 leading-tight">{children}</h1>
         ),
         h2: ({ children }) => (
-          <h2 className="text-3xl font-bold text-azul-primario mb-4 mt-8 border-b-2 border-azul-primario pb-2">
+          <h2 className="text-3xl md:text-4xl font-bold text-azul-primario mb-6 mt-10 border-b-2 border-azul-primario pb-3 leading-tight">
             {children}
           </h2>
         ),
         h3: ({ children }) => (
-          <h3 className="text-2xl font-semibold text-gray-800 mb-3 mt-6">{children}</h3>
+          <h3 className="text-2xl md:text-3xl font-semibold text-gray-800 mb-4 mt-8 leading-snug">{children}</h3>
         ),
         h4: ({ children }) => (
-          <h4 className="text-xl font-semibold text-gray-700 mb-2 mt-4">{children}</h4>
+          <h4 className="text-xl md:text-2xl font-semibold text-gray-700 mb-3 mt-6 leading-snug">{children}</h4>
         ),
 
         // Párrafos
         p: ({ children }) => (
-          <p className="text-lg leading-relaxed text-gray-700 mb-4">{children}</p>
+          <p className="text-lg md:text-xl leading-loose text-gray-800 mb-6">{children}</p>
         ),
 
         // Listas
         ul: ({ children }) => (
-          <ul className="list-disc list-inside space-y-2 mb-4 text-gray-700 ml-4">{children}</ul>
+          <ul className="list-disc list-inside space-y-3 mb-6 text-gray-800 ml-4">{children}</ul>
         ),
         ol: ({ children }) => (
-          <ol className="list-decimal list-inside space-y-2 mb-4 text-gray-700 ml-4">{children}</ol>
+          <ol className="list-decimal list-inside space-y-3 mb-6 text-gray-800 ml-4">{children}</ol>
         ),
         li: ({ children }) => (
-          <li className="text-lg leading-relaxed">{children}</li>
+          <li className="text-lg md:text-xl leading-loose">{children}</li>
         ),
 
         // Enlaces
@@ -57,7 +57,7 @@ export function MDXRenderer({ content }: MDXRendererProps) {
 
         // Blockquotes
         blockquote: ({ children }) => (
-          <blockquote className="border-l-4 border-azul-primario bg-blue-50 pl-6 py-4 my-6 italic text-gray-800">
+          <blockquote className="border-l-4 border-azul-primario bg-blue-50 pl-6 py-5 my-8 italic text-gray-800 text-lg md:text-xl leading-loose">
             {children}
           </blockquote>
         ),
