@@ -6,6 +6,9 @@ import { EventoCalendario } from '@/lib/types/calendario'
 import { CalendarDays, MapPin, ChevronRight } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
+import { useMemo } from 'react'
+import { obtenerProximosEventos } from '@/lib/utils/calendario'
+import { NombrePartido } from './NombrePartido'
 
 interface CalendarioResumidoProps {
   eventos: EventoCalendario[]
@@ -13,12 +16,10 @@ interface CalendarioResumidoProps {
 }
 
 export function CalendarioResumido({ eventos, limite = 3 }: CalendarioResumidoProps) {
-  const hoy = new Date()
-
-  const proximosEventos = eventos
-    .filter(evento => new Date(evento.fecha + 'T12:00:00') >= hoy)
-    .sort((a, b) => new Date(a.fecha).getTime() - new Date(b.fecha).getTime())
-    .slice(0, limite)
+  // Usar función centralizada para obtener próximos eventos
+  const proximosEventos = useMemo(() => {
+    return obtenerProximosEventos(eventos, limite)
+  }, [eventos, limite])
 
   const getBadgeVariant = (tipo: string) => {
     return tipo === 'partido' ? 'default' : 'secondary'
@@ -30,8 +31,8 @@ export function CalendarioResumido({ eventos, limite = 3 }: CalendarioResumidoPr
 
   return (
     <div className="w-full">
-      <Card className="border-2 border-azul-primario/20">
-        <CardHeader className="bg-gradient-to-r from-azul-primario to-azul-claro text-white pb-4">
+      <Card className="border-2 border-azul-primario/20 rounded-lg">
+        <CardHeader className="bg-gradient-to-r from-azul-primario to-azul-claro text-white pb-4 rounded-t-lg">
           <CardTitle className="text-xl md:text-2xl font-bold flex items-center gap-2">
             <CalendarDays className="w-5 h-5 md:w-6 md:h-6" />
             Próximos Eventos
@@ -42,7 +43,7 @@ export function CalendarioResumido({ eventos, limite = 3 }: CalendarioResumidoPr
             {proximosEventos.map((evento) => (
               <Card
                 key={evento.id}
-                className="overflow-hidden border-l-4 hover:shadow-sm transition-shadow"
+                className="overflow-hidden border-l-4 hover:shadow-sm transition-shadow rounded-lg"
                 style={{
                   borderLeftColor: evento.tipo === 'partido' ? '#1e40af' : '#64748b'
                 }}
@@ -74,9 +75,18 @@ export function CalendarioResumido({ eventos, limite = 3 }: CalendarioResumidoPr
                         )}
                       </div>
 
-                      <h3 className="font-bold text-sm md:text-base text-azul-oscuro truncate">
-                        {evento.tipo === 'partido' ? evento.rival : evento.actividad}
-                      </h3>
+                      {evento.tipo === 'partido' ? (
+                        <NombrePartido
+                          rivalText={evento.rival || 'Por confirmar'}
+                          className="text-sm md:text-base text-azul-oscuro"
+                          mostrarVS={true}
+                          tamañoEscudo={20}
+                        />
+                      ) : (
+                        <h3 className="font-bold text-sm md:text-base text-azul-oscuro truncate">
+                          {evento.actividad}
+                        </h3>
+                      )}
 
                       <div className="flex items-center gap-1 text-xs text-gray-600 mt-0.5">
                         <MapPin className="w-3 h-3 flex-shrink-0" />

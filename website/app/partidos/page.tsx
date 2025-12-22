@@ -2,9 +2,14 @@ import { Header } from '@/components/layout/Header'
 import { Footer } from '@/components/layout/Footer'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { CalendarioMensual } from '@/components/calendario/CalendarioMensual'
+import { CalendarioGrid } from '@/components/calendario/CalendarioGrid'
 import { eventosDiciembre2024 } from '@/lib/data/eventos-diciembre'
+import { SITE_CONFIG } from '@/lib/constants'
+import Link from 'next/link'
+import { MessageCircle } from 'lucide-react'
+import { filtrarEventosFuturos, filtrarSoloPartidos, ordenarEventosPorFecha } from '@/lib/utils/calendario'
 
 export const metadata = {
   title: 'Partidos',
@@ -12,36 +17,21 @@ export const metadata = {
 }
 
 export default function PartidosPage() {
-  // Datos de ejemplo - reemplazar con datos reales de Supabase
-  const proximosPartidos = [
-    {
-      id: 1,
-      fecha: '2025-10-26',
-      hora: '15:00',
-      rival: 'Club Deportivo Rival',
-      local: true,
-      estadio: 'Estadio Municipal',
+  // Filtrar solo partidos futuros usando las utilidades centralizadas
+  const eventosFuturos = filtrarEventosFuturos(eventosDiciembre2024)
+  const partidosFuturos = filtrarSoloPartidos(eventosFuturos)
+  const partidosOrdenados = ordenarEventosPorFecha(partidosFuturos)
+
+  const proximosPartidos = partidosOrdenados.map(evento => ({
+      id: evento.id,
+      fecha: evento.fecha,
+      hora: evento.horaInicio || '15:00',
+      rival: evento.rival || 'Por confirmar',
+      local: true, // Ajustar según tus datos
+      estadio: evento.estadio,
       competicion: 'Liga Local',
-    },
-    {
-      id: 2,
-      fecha: '2025-11-02',
-      hora: '16:00',
-      rival: 'Atlético Unidos',
-      local: false,
-      estadio: 'Estadio Unidos',
-      competicion: 'Liga Local',
-    },
-    {
-      id: 3,
-      fecha: '2025-11-09',
-      hora: '15:00',
-      rival: 'Sporting FC',
-      local: true,
-      estadio: 'Estadio Municipal',
-      competicion: 'Copa Regional',
-    },
-  ]
+      confirmado: evento.confirmado
+    }))
 
   const resultados = [
     {
@@ -114,9 +104,7 @@ export default function PartidosPage() {
 
               {/* Calendario Mensual */}
               <TabsContent value="calendario">
-                <div className="flex justify-center">
-                  <CalendarioMensual eventos={eventosDiciembre2024} mes="Diciembre" año={2025} />
-                </div>
+                <CalendarioGrid eventos={eventosDiciembre2024} mes="Diciembre" año={2025} />
               </TabsContent>
 
               {/* Próximos Partidos */}
@@ -157,6 +145,23 @@ export default function PartidosPage() {
                               <p className="font-bold">{partido.rival}</p>
                               {!partido.local && <Badge variant="outline" className="mt-1">Visitante</Badge>}
                             </div>
+                          </div>
+
+                          <div className="flex justify-end mt-4">
+                            <Button
+                              asChild
+                              className="bg-green-500 hover:bg-green-600 text-white"
+                            >
+                              <Link
+                                href={`https://wa.me/${SITE_CONFIG.contact.whatsapp.replace(/[^0-9]/g, '')}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-2"
+                              >
+                                <MessageCircle className="w-4 h-4" />
+                                Revisa la nómina
+                              </Link>
+                            </Button>
                           </div>
                         </div>
                       </CardContent>

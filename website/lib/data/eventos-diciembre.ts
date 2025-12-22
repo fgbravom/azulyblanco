@@ -8,7 +8,7 @@ export const eventosDiciembre2024: EventoCalendario[] = [
     diaMes: 11,
     mes: 'DICIEMBRE',
     tipo: 'partido',
-    rival: 'CLUB AMÉRICA',
+    rival: 'AYB VS CLUB AMÉRICA',
     estadio: 'ESTADIO ANFA',
     confirmado: true
   },
@@ -41,7 +41,7 @@ export const eventosDiciembre2024: EventoCalendario[] = [
     diaMes: 17,
     mes: 'DICIEMBRE',
     tipo: 'partido',
-    rival: 'SITOMANBOY',
+    rival: 'AYB VS SITOMANBOY',
     estadio: 'SOL DE SEPTIEMBRE',
     confirmado: true
   },
@@ -51,8 +51,8 @@ export const eventosDiciembre2024: EventoCalendario[] = [
     dia: 'LUNES',
     diaMes: 22,
     mes: 'DICIEMBRE',
-    tipo: 'entrenamiento',
-    actividad: 'ENTRENAMIENTO TODO AZUL Y BLANCO',
+    tipo: 'partido',
+    rival: 'AYB VS UNIÓN BOLDO',
     estadio: 'ESTADIO ANFA',
     horaInicio: '22:00',
     confirmado: true
@@ -64,7 +64,7 @@ export const eventosDiciembre2024: EventoCalendario[] = [
     diaMes: 27,
     mes: 'DICIEMBRE',
     tipo: 'partido',
-    rival: 'AMIGOS DEL FÚTBOL',
+    rival: 'AYB VS AMIGOS DEL FÚTBOL',
     estadio: 'LA GRANJA',
     confirmado: true
   }

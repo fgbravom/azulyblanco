@@ -18,6 +18,7 @@ export const SITE_CONFIG = {
   contact: {
     email: 'contacto@azulyblanco.com',
     phone: '+54 9 11 1234-5678',
+    whatsapp: '+56912345678', // Número de WhatsApp del club
     address: 'Curicó, Chile',
   },
 }
