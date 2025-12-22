@@ -7,6 +7,7 @@ import { CalendarioResumido } from '@/components/calendario/CalendarioResumido'
 import { eventosDiciembre2024 } from '@/lib/data/eventos-diciembre'
 import { getAllNoticias } from '@/lib/news'
 import { Badge } from '@/components/ui/badge'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { HeroSection } from '@/components/hero/HeroSection'
 
 export default function HomePage() {
@@ -45,12 +46,30 @@ export default function HomePage() {
                         <CardTitle className="line-clamp-2">
                           {noticia.title}
                         </CardTitle>
-                        <CardDescription>
-                          {new Date(noticia.date + 'T12:00:00').toLocaleDateString('es-ES', {
-                            day: 'numeric',
-                            month: 'long',
-                            year: 'numeric'
-                          })}
+                        <CardDescription className="flex items-center gap-2 flex-wrap">
+                          {noticia.author && (
+                            <div className="flex items-center gap-2">
+                              <Avatar className="h-5 w-5">
+                                <AvatarImage src={`/images/authors/${noticia.author.toLowerCase().replace(/\s+/g, '-')}.jpg`} alt={noticia.author} />
+                                <AvatarFallback className="bg-azul-claro text-white text-xs">
+                                  {noticia.author.split(' ').map(n => n[0]).join('')}
+                                </AvatarFallback>
+                              </Avatar>
+                              <span className="text-xs">
+                                {noticia.author}
+                              </span>
+                            </div>
+                          )}
+                          {noticia.author && noticia.date && <span>•</span>}
+                          {noticia.date && (
+                            <span className="text-xs">
+                              {new Date(noticia.date + 'T12:00:00').toLocaleDateString('es-ES', {
+                                day: 'numeric',
+                                month: 'long',
+                                year: 'numeric'
+                              })}
+                            </span>
+                          )}
                         </CardDescription>
                       </CardHeader>
                       <CardContent>
