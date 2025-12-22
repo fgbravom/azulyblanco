@@ -31,13 +31,10 @@ export function Header() {
             <Image
               src="/images/escudoazulyblanco.png"
               alt={`Escudo ${SITE_CONFIG.name}`}
-              width={50}
-              height={50}
-              className="h-10 md:h-12 w-auto"
+              width={100}
+              height={100}
+              className="h-16 md:h-18 w-auto"
             />
-            <span className="text-xl font-bold text-black hidden sm:block">
-              {SITE_CONFIG.name}
-            </span>
           </Link>
 
           {/* Navigation - Desktop */}
