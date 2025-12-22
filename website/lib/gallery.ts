@@ -3,6 +3,11 @@ import path from 'path'
 
 const galeriaDirectory = path.join(process.cwd(), 'public', 'galeria')
 
+export interface PhotoDescription {
+  filename: string
+  description: string
+}
+
 export interface AlbumMetadata {
   title: string
   description: string
@@ -10,6 +15,7 @@ export interface AlbumMetadata {
   categoria: 'partidos' | 'entrenamientos' | 'eventos' | 'historia'
   tags: string[]
   cover: string
+  photoDescriptions?: PhotoDescription[]
 }
 
 export interface Album extends AlbumMetadata {

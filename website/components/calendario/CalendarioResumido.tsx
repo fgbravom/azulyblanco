@@ -81,6 +81,9 @@ export function CalendarioResumido({ eventos, limite = 3 }: CalendarioResumidoPr
                       <div className="flex items-center gap-1 text-xs text-gray-600 mt-0.5">
                         <MapPin className="w-3 h-3 flex-shrink-0" />
                         <span className="truncate">{evento.estadio}</span>
+                        {evento.horaInicio && (
+                          <span className="ml-1 font-semibold">• {evento.horaInicio} hrs</span>
+                        )}
                       </div>
                     </div>
                   </div>

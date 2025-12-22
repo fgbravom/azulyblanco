@@ -52,9 +52,10 @@ export const eventosDiciembre2024: EventoCalendario[] = [
     diaMes: 22,
     mes: 'DICIEMBRE',
     tipo: 'entrenamiento',
-    actividad: 'ENTRENAMIENTO',
+    actividad: 'ENTRENAMIENTO TODO AZUL Y BLANCO',
     estadio: 'ESTADIO ANFA',
-    confirmado: false
+    horaInicio: '22:00',
+    confirmado: true
   },
   {
     id: 'dic-6',

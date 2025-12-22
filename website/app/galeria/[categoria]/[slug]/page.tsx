@@ -117,7 +117,11 @@ export default async function AlbumPage({ params }: PageProps) {
         </section>
 
         {/* Visor de fotos */}
-        <AlbumViewer fotos={fotosUrls} albumTitle={album.title} />
+        <AlbumViewer
+          fotos={fotosUrls}
+          albumTitle={album.title}
+          photoDescriptions={album.photoDescriptions}
+        />
 
         {/* Navegación */}
         <section className="py-8 px-4">
