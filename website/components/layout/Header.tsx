@@ -35,7 +35,7 @@ export function Header() {
       scrolled ? 'bg-azul-primario shadow-lg' : 'bg-azul-primario md:bg-transparent'
     }`}>
       <div className="container mx-auto px-2 md:px-3 lg:px-4">
-        <div className="flex h-24 md:h-16 lg:h-20 items-center justify-between gap-1 md:gap-2 lg:gap-4">
+        <div className="flex h-22 md:h-16 lg:h-20 items-center justify-between gap-1 md:gap-2 lg:gap-4">
           {/* Mobile Menu Button - Left on mobile */}
           <button
             className="md:hidden p-2 text-white order-1"

@@ -52,7 +52,7 @@ export function HeroCarousel({ currentIndex: externalIndex, onIndexChange }: Her
       ))}
 
       {/* Dark Overlay for text contrast */}
-      <div className="absolute inset-0 bg-black/40" />
+      <div className="absolute inset-0 bg-black/0" />
     </div>
   )
 }
