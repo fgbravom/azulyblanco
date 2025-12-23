@@ -15,9 +15,9 @@ export default function GaleriaPage() {
   return (
     <>
       <Header />
-      <main className="min-h-screen">
+      <main className="min-h-screen pt-22 md:pt-16 lg:pt-20">
         {/* Hero */}
-        <section className="bg-gradient-to-br from-azul-oscuro to-azul-primario text-white py-20">
+        <section className="bg-azul-primario text-white py-20">
           <div className="container mx-auto px-4 max-w-6xl text-center">
             <h1 className="text-5xl md:text-6xl font-bold mb-6">Galería</h1>
             <p className="text-xl text-gray-200">
