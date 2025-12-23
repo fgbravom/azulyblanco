@@ -24,27 +24,27 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b-[3px] border-azul-primario/40 bg-white">
-      <div className="container mx-auto px-4">
-        <div className="flex h-16 md:h-20 items-center justify-between">
+      <div className="container mx-auto px-3 md:px-4">
+        <div className="flex h-16 md:h-18 lg:h-20 items-center justify-between gap-2 md:gap-4">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-3">
+          <Link href="/" className="flex items-center flex-shrink-0">
             <Image
               src="/images/escudoazulyblanco.png"
               alt={`Escudo ${SITE_CONFIG.name}`}
               width={100}
               height={100}
-              className="h-16 md:h-18 w-auto"
+              className="h-12 md:h-14 lg:h-16 w-auto"
             />
           </Link>
 
           {/* Navigation - Desktop */}
-          <nav className="hidden md:flex items-center gap-6" suppressHydrationWarning>
+          <nav className="hidden md:flex items-center gap-3 lg:gap-6" suppressHydrationWarning>
             {mounted && NAVIGATION_ITEMS.map((item) => (
               item.submenu ? (
                 <DropdownMenu key={item.href}>
-                  <DropdownMenuTrigger className="flex items-center gap-1 text-sm font-medium text-gray-700 hover:text-azul-primario transition-colors outline-none data-[state=open]:text-azul-primario">
+                  <DropdownMenuTrigger className="flex items-center gap-1 text-xs lg:text-sm font-medium text-gray-700 hover:text-azul-primario transition-colors outline-none data-[state=open]:text-azul-primario whitespace-nowrap">
                     {item.title}
-                    <ChevronDown className="h-4 w-4 transition-transform duration-200 data-[state=open]:rotate-180" />
+                    <ChevronDown className="h-3 w-3 lg:h-4 lg:w-4 transition-transform duration-200 data-[state=open]:rotate-180" />
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="start" className="min-w-[180px] bg-white">
                     {item.submenu.map((subitem) => (
@@ -63,7 +63,7 @@ export function Header() {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className="text-sm font-medium text-gray-700 hover:text-azul-primario transition-colors"
+                  className="text-xs lg:text-sm font-medium text-gray-700 hover:text-azul-primario transition-colors whitespace-nowrap"
                 >
                   {item.title}
                 </Link>
@@ -72,8 +72,8 @@ export function Header() {
           </nav>
 
           {/* CTA Button */}
-          <div className="hidden md:block">
-            <Button asChild className="bg-azul-primario hover:bg-azul-oscuro text-white">
+          <div className="hidden md:block flex-shrink-0">
+            <Button asChild className="bg-azul-primario hover:bg-azul-oscuro text-white text-xs lg:text-sm px-3 lg:px-4 h-8 lg:h-10">
               <Link href="/contacto">Únete al Club</Link>
             </Button>
           </div>
