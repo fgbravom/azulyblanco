@@ -3,11 +3,17 @@
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
 
-const heroImages = [
+const heroImagesDesktop = [
   '/images/fotoportada.jpg',
   '/images/fotoportada2.jpg',
   '/images/fotoportada3.jpg',
   '/images/fotoportada4.jpg',
+]
+
+const heroImagesMobile = [
+  '/images/portadamovil1.jpg',
+  '/images/portadamovil2.jpg',
+  '/images/portadamovil3.jpg',
 ]
 
 interface HeroCarouselProps {
@@ -17,7 +23,21 @@ interface HeroCarouselProps {
 
 export function HeroCarousel({ currentIndex: externalIndex, onIndexChange }: HeroCarouselProps) {
   const [internalIndex, setInternalIndex] = useState(0)
+  const [isMobile, setIsMobile] = useState(false)
   const currentIndex = externalIndex !== undefined ? externalIndex : internalIndex
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
+
+  const heroImages = isMobile ? heroImagesMobile : heroImagesDesktop
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -29,7 +49,7 @@ export function HeroCarousel({ currentIndex: externalIndex, onIndexChange }: Her
     }, 5000) // Cambiar cada 5 segundos
 
     return () => clearInterval(interval)
-  }, [currentIndex, externalIndex, onIndexChange])
+  }, [currentIndex, externalIndex, onIndexChange, heroImages.length])
 
   return (
     <div className="absolute inset-0">
@@ -57,4 +77,4 @@ export function HeroCarousel({ currentIndex: externalIndex, onIndexChange }: Her
   )
 }
 
-export { heroImages }
+export { heroImagesDesktop as heroImages }
