@@ -30,10 +30,10 @@
   --font-heading: var(--font-montserrat);
   --font-mono: var(--font-roboto-mono);
 
-  /* Colores del club */
-  --color-azul-primario: #0047AB;
-  --color-azul-oscuro: #002D6B;
-  --color-azul-claro: #4A90E2;
+  /* Colores oficiales del club */
+  --color-azul-primario: #020280;
+  --color-azul-oscuro: #01015A;
+  --color-azul-claro: #0580FA;
 }
 
 body {

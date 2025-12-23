@@ -10,10 +10,10 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Colores del club
-        'azul-primario': '#0047AB',
-        'azul-oscuro': '#002D6B',
-        'azul-claro': '#4A90E2',
+        // Colores oficiales del club
+        'azul-primario': '#020280',
+        'azul-oscuro': '#01015A',
+        'azul-claro': '#0580FA',
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
         ring: 'hsl(var(--ring))',
