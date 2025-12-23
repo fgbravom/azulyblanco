@@ -51,9 +51,8 @@ export function HeroCarousel({ currentIndex: externalIndex, onIndexChange }: Her
         </div>
       ))}
 
-      {/* Gradient Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-r from-azul-oscuro/90 via-azul-primario/70 to-azul-oscuro/90" />
-      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/40" />
+      {/* Dark Overlay for text contrast */}
+      <div className="absolute inset-0 bg-black/40" />
     </div>
   )
 }

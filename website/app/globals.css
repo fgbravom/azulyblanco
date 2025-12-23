@@ -30,10 +30,15 @@
   --font-heading: var(--font-montserrat);
   --font-mono: var(--font-roboto-mono);
 
-  /* Colores oficiales del club */
-  --color-azul-primario: #020280;
-  --color-azul-oscuro: #01015A;
-  --color-azul-claro: #0580FA;
+  /* Paleta oficial del club - Combinación y contraste */
+  --color-azul-primario: #020280;      /* Azul principal oscuro */
+  --color-azul-oscuro: #01015A;        /* Azul más oscuro (hover/sombras) */
+  --color-azul-profundo: #010140;      /* Azul muy oscuro (acentos) */
+  --color-azul-claro: #0580FA;         /* Azul claro principal */
+  --color-azul-medio: #0350BD;         /* Tono intermedio */
+  --color-azul-brillante: #3DA3FF;     /* Azul brillante (highlights) */
+  --color-azul-cielo: #7EC4FF;         /* Azul muy claro (backgrounds) */
+  --color-azul-pastel: #B8DCFF;        /* Azul pastel (fondos alternativos) */
 }
 
 body {

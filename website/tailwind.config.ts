@@ -10,10 +10,15 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Colores oficiales del club
-        'azul-primario': '#020280',
-        'azul-oscuro': '#01015A',
-        'azul-claro': '#0580FA',
+        // Paleta oficial del club - Combinación y contraste
+        'azul-primario': '#020280',      // Azul principal oscuro
+        'azul-oscuro': '#01015A',        // Azul más oscuro (hover/sombras)
+        'azul-profundo': '#010140',      // Azul muy oscuro (acentos)
+        'azul-claro': '#0580FA',         // Azul claro principal
+        'azul-medio': '#0350BD',         // Tono intermedio entre primario y claro
+        'azul-brillante': '#3DA3FF',     // Azul brillante (highlights)
+        'azul-cielo': '#7EC4FF',         // Azul muy claro (backgrounds suaves)
+        'azul-pastel': '#B8DCFF',        // Azul pastel (fondos alternativos)
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
         ring: 'hsl(var(--ring))',

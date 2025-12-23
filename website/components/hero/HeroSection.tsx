@@ -1,16 +1,14 @@
 'use client'
 
 import { useState } from 'react'
-import Link from 'next/link'
 import Image from 'next/image'
-import { Button } from '@/components/ui/button'
 import { HeroCarousel, heroImages } from './HeroCarousel'
 
 export function HeroSection() {
   const [carouselIndex, setCarouselIndex] = useState(0)
 
   return (
-    <section className="relative w-full flex items-center justify-center overflow-hidden" style={{ height: 'calc(100vh - 64px)' }}>
+    <section className="relative w-full flex items-center justify-center overflow-hidden" style={{ height: '100vh' }}>
       {/* Background Carousel */}
       <HeroCarousel currentIndex={carouselIndex} onIndexChange={setCarouselIndex} />
 
@@ -47,11 +45,11 @@ export function HeroSection() {
         </div>
 
         {/* Main Heading */}
-        <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold mb-6 tracking-tight leading-tight">
+        {/* <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold mb-6 tracking-tight leading-tight">
           Club Deportivo
           <br />
           <span className="text-azul-claro">Azul</span> y <span className="text-white">Blanco</span>
-        </h1>
+        </h1> */}
 
         {/* Subtitle */}
         <p className="text-lg md:text-2xl mb-4 text-gray-100 font-light max-w-3xl mx-auto leading-relaxed">
@@ -61,26 +59,6 @@ export function HeroSection() {
         <p className="text-base md:text-lg mb-10 text-white/90 font-medium">
           Desde 2006 • Curicó, Chile
         </p>
-
-        {/* CTA Buttons */}
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Button
-            size="lg"
-            asChild
-            className="bg-white text-azul-primario hover:bg-gray-100 font-bold text-lg px-8 py-6 shadow-2xl"
-          >
-            <Link href="/contacto">Únete al Club</Link>
-          </Button>
-
-          <Button
-            size="lg"
-            variant="outline"
-            asChild
-            className="bg-transparent backdrop-blur-sm border-2 border-white text-white hover:bg-white/20 font-bold text-lg px-8 py-6"
-          >
-            <Link href="/club/historia">Nuestra Historia</Link>
-          </Button>
-        </div>
       </div>
 
       {/* Scroll Indicator - Hidden on mobile */}
