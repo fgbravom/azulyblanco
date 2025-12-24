@@ -42,7 +42,7 @@ export function Header({ isHome = false }: HeaderProps) {
         isHome
           ? scrolled
             ? 'bg-azul-primario'
-            : 'bg-azul-primario md:bg-transparent'
+            : 'bg-transparent'
           : 'bg-azul-primario'
       }`}>
         <div className="container mx-auto px-2 md:px-3 lg:px-4">
