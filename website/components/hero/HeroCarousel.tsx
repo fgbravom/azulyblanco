@@ -4,13 +4,14 @@ import { useState, useEffect } from 'react'
 import Image from 'next/image'
 
 const heroImagesDesktop = [
-  '/images/fotoportada.jpg',
+  '/images/fotoportada1.jpg',
   '/images/fotoportada2.jpg',
   '/images/fotoportada3.jpg',
   '/images/fotoportada4.jpg',
 ]
 
 const heroImagesMobile = [
+  '/images/portadamovil.jpg',
   '/images/portadamovil1.jpg',
   '/images/portadamovil2.jpg',
   '/images/portadamovil3.jpg',
