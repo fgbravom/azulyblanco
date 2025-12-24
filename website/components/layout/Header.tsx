@@ -148,6 +148,27 @@ export function Header({ isHome = false }: HeaderProps) {
           mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
+        {/* Close button */}
+        <button
+          onClick={() => setMobileMenuOpen(false)}
+          className="absolute top-6 right-6 p-2 text-azul-primario hover:text-azul-claro transition-colors"
+          aria-label="Close menu"
+        >
+          <svg
+            className="w-6 h-6"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M6 18L18 6M6 6l12 12"
+            />
+          </svg>
+        </button>
+
         <nav className="flex flex-col gap-4 p-6 pt-24">
           {NAVIGATION_ITEMS.map((item) => (
             item.submenu ? (
