@@ -19,6 +19,13 @@ export default function HomePage() {
         {/* Hero Section */}
         <HeroSection />
 
+        {/* Calendario de Eventos */}
+        <section className="py-16 px-4">
+          <div className="container mx-auto max-w-4xl">
+            <CalendarioResumido eventos={eventosDiciembre2024} limite={3} />
+          </div>
+        </section>
+
         {/* Noticias Recientes */}
         <section className="py-16 px-4 bg-gray-50">
           <div className="container mx-auto max-w-6xl">
@@ -86,13 +93,6 @@ export default function HomePage() {
                 </div>
               )}
             </div>
-          </div>
-        </section>
-
-        {/* Calendario de Eventos */}
-        <section className="py-16 px-4">
-          <div className="container mx-auto max-w-4xl">
-            <CalendarioResumido eventos={eventosDiciembre2024} limite={3} />
           </div>
         </section>
 

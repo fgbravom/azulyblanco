@@ -38,17 +38,21 @@ export function Header({ isHome = false }: HeaderProps) {
 
   return (
     <header className={`fixed top-0 left-0 right-0 z-50 w-full transition-all duration-300 ${
-      isHome
-        ? scrolled
-          ? 'bg-azul-primario'
-          : 'bg-azul-primario md:bg-transparent'
-        : 'bg-azul-primario'
+      mobileMenuOpen
+        ? 'bg-white'
+        : isHome
+          ? scrolled
+            ? 'bg-azul-primario'
+            : 'bg-azul-primario md:bg-transparent'
+          : 'bg-azul-primario'
     }`}>
       <div className="container mx-auto px-2 md:px-3 lg:px-4">
         <div className="flex h-22 md:h-16 lg:h-20 items-center justify-between gap-1 md:gap-2 lg:gap-4">
           {/* Mobile Menu Button - Left on mobile */}
           <button
-            className="md:hidden p-2 text-white order-1"
+            className={`md:hidden p-2 order-1 transition-colors duration-300 ${
+              mobileMenuOpen ? 'text-azul-primario' : 'text-white'
+            }`}
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-label="Toggle menu"
           >
@@ -134,14 +138,14 @@ export function Header({ isHome = false }: HeaderProps) {
 
         {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div className="md:hidden py-4 px-2 bg-azul-primario -mx-2 md:-mx-3 lg:-mx-4">
+          <div className="md:hidden py-4 px-2 bg-white -mx-2 md:-mx-3 lg:-mx-4 transition-colors duration-300">
             <nav className="flex flex-col gap-2">
               {NAVIGATION_ITEMS.map((item) => (
                 item.submenu ? (
                   <div key={item.href}>
                     <button
                       onClick={() => setOpenSubmenu(openSubmenu === item.title ? null : item.title)}
-                      className="w-full flex items-center justify-between text-base font-medium text-white hover:text-azul-claro transition-colors py-2"
+                      className="w-full flex items-center justify-between text-base font-medium text-azul-primario hover:text-azul-claro transition-colors py-2"
                     >
                       {item.title}
                       <ChevronDown
@@ -156,7 +160,7 @@ export function Header({ isHome = false }: HeaderProps) {
                           <Link
                             key={subitem.href}
                             href={subitem.href}
-                            className="text-sm font-medium text-white/80 hover:text-azul-claro transition-colors py-2"
+                            className="text-sm font-medium text-azul-primario/80 hover:text-azul-claro transition-colors py-2"
                             onClick={() => {
                               setMobileMenuOpen(false)
                               setOpenSubmenu(null)
@@ -172,14 +176,14 @@ export function Header({ isHome = false }: HeaderProps) {
                   <Link
                     key={item.href}
                     href={item.href}
-                    className="text-base font-medium text-white hover:text-azul-claro transition-colors py-2"
+                    className="text-base font-medium text-azul-primario hover:text-azul-claro transition-colors py-2"
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     {item.title}
                   </Link>
                 )
               ))}
-              <Button asChild className="bg-white hover:bg-azul-claro text-azul-primario hover:text-white mt-2 transition-colors">
+              <Button asChild className="bg-azul-primario hover:bg-azul-oscuro text-white mt-2 transition-colors">
                 <Link href="/contacto" onClick={() => setMobileMenuOpen(false)}>
                   Únete al Club
                 </Link>
