@@ -13,7 +13,11 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { ChevronDown } from 'lucide-react'
 
-export function Header() {
+interface HeaderProps {
+  isHome?: boolean
+}
+
+export function Header({ isHome = false }: HeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [openSubmenu, setOpenSubmenu] = useState<string | null>(null)
   const [mounted, setMounted] = useState(false)
@@ -22,17 +26,23 @@ export function Header() {
   useEffect(() => {
     setMounted(true)
 
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 50)
-    }
+    if (isHome) {
+      const handleScroll = () => {
+        setScrolled(window.scrollY > 50)
+      }
 
-    window.addEventListener('scroll', handleScroll)
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
+      window.addEventListener('scroll', handleScroll)
+      return () => window.removeEventListener('scroll', handleScroll)
+    }
+  }, [isHome])
 
   return (
     <header className={`fixed top-0 left-0 right-0 z-50 w-full transition-all duration-300 ${
-      scrolled ? 'bg-azul-primario shadow-lg' : 'bg-azul-primario md:bg-transparent'
+      isHome
+        ? scrolled
+          ? 'bg-azul-primario'
+          : 'bg-azul-primario md:bg-transparent'
+        : 'bg-azul-primario'
     }`}>
       <div className="container mx-auto px-2 md:px-3 lg:px-4">
         <div className="flex h-22 md:h-16 lg:h-20 items-center justify-between gap-1 md:gap-2 lg:gap-4">

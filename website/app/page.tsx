@@ -14,7 +14,7 @@ export default function HomePage() {
   const noticias = getAllNoticias().slice(0, 3) // Obtener las 3 noticias más recientes
   return (
     <>
-      <Header />
+      <Header isHome={true} />
       <main className="flex flex-col min-h-screen">
         {/* Hero Section */}
         <HeroSection />
