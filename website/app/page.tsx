@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Header } from '@/components/layout/Header'
 import { Footer } from '@/components/layout/Footer'
-import { CalendarioResumido } from '@/components/calendario/CalendarioResumido'
+import { ProximosPartidos } from '@/components/calendario/ProximosPartidos'
 import { eventosDiciembre2024 } from '@/lib/data/eventos-diciembre'
 import { getAllNoticias } from '@/lib/news'
 import { Badge } from '@/components/ui/badge'
@@ -19,10 +19,21 @@ export default function HomePage() {
         {/* Hero Section */}
         <HeroSection />
 
-        {/* Calendario de Eventos */}
-        <section className="py-16 px-4">
-          <div className="container mx-auto max-w-4xl">
-            <CalendarioResumido eventos={eventosDiciembre2024} limite={3} />
+        {/* Próximos Partidos */}
+        <section className="py-16">
+          <div className="px-4 md:px-8 mb-8">
+            <div className="container mx-auto max-w-7xl">
+              <h2 className="text-3xl md:text-4xl font-bold text-azul-primario mb-2">Próximos Partidos</h2>
+              <p className="text-gray-600">No te pierdas ningún encuentro del club</p>
+            </div>
+          </div>
+          <div className="w-full">
+            <ProximosPartidos eventos={eventosDiciembre2024} limite={3} />
+          </div>
+          <div className="mt-8 text-center px-4">
+            <Button variant="outline" asChild className="border-azul-primario text-azul-primario hover:bg-azul-primario hover:text-white">
+              <Link href="/partidos">Ver calendario completo →</Link>
+            </Button>
           </div>
         </section>
 
@@ -30,7 +41,7 @@ export default function HomePage() {
         <section className="py-16 px-4 bg-gray-50">
           <div className="container mx-auto max-w-6xl">
             <div className="flex justify-between items-center mb-8">
-              <h2 className="text-3xl font-bold">Últimas Noticias</h2>
+              <h2 className="text-3xl font-bold">Noticias</h2>
               <Button variant="ghost" asChild>
                 <Link href="/noticias">Ver todas →</Link>
               </Button>
