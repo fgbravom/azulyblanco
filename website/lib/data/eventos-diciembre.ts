@@ -10,7 +10,8 @@ export const eventosDiciembre2024: EventoCalendario[] = [
     tipo: 'partido',
     rival: 'AYB VS CLUB AMÉRICA',
     estadio: 'ESTADIO ANFA',
-    confirmado: true
+    confirmado: true,
+    tipoPartido: 'Amistoso'
   },
   {
     id: 'dic-2',
@@ -21,7 +22,8 @@ export const eventosDiciembre2024: EventoCalendario[] = [
     tipo: 'partido',
     rival: 'AYB35 VS AYB',
     estadio: 'LA GRANJA',
-    confirmado: true
+    confirmado: true,
+    tipoPartido: 'Amistoso'
   },
   {
     id: 'dic-3',
@@ -43,7 +45,8 @@ export const eventosDiciembre2024: EventoCalendario[] = [
     tipo: 'partido',
     rival: 'AYB VS SITOMANBOY',
     estadio: 'SOL DE SEPTIEMBRE',
-    confirmado: true
+    confirmado: true,
+    tipoPartido: 'Amistoso'
   },
   {
     id: 'dic-5',
@@ -55,7 +58,8 @@ export const eventosDiciembre2024: EventoCalendario[] = [
     rival: 'AYB VS UNIÓN BOLDO',
     estadio: 'ESTADIO ANFA',
     horaInicio: '22:00',
-    confirmado: true
+    confirmado: true,
+    tipoPartido: 'Amistoso'
   },
   {
     id: 'dic-6',
@@ -66,6 +70,7 @@ export const eventosDiciembre2024: EventoCalendario[] = [
     tipo: 'partido',
     rival: 'AYB VS AMIGOS DEL FÚTBOL',
     estadio: 'LA GRANJA',
-    confirmado: true
+    confirmado: true,
+    tipoPartido: 'Amistoso'
   }
 ]

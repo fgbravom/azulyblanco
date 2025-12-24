@@ -1,4 +1,5 @@
 export type TipoEvento = 'partido' | 'entrenamiento'
+export type TipoPartido = 'Amistoso' | 'Oficial' | 'Torneo' | 'Copa'
 
 export interface EventoCalendario {
   id: string
@@ -12,4 +13,5 @@ export interface EventoCalendario {
   estadio: string
   confirmado: boolean
   horaInicio?: string // formato: "15:00"
+  tipoPartido?: TipoPartido // Amistoso, Oficial, etc.
 }

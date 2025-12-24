@@ -107,7 +107,7 @@ export function ProximosPartidos({ eventos, limite = 3 }: ProximosPartidosProps)
             {/* Banda inferior con información adicional */}
             <div className="bg-azul-primario/30 backdrop-blur-sm px-4 md:px-8 py-2">
               <div className="flex items-center justify-between text-white/80 text-xs md:text-sm">
-                <span className="font-medium">Serie A</span>
+                <span className="font-medium">{evento.tipoPartido || 'Partido'}</span>
                 {!evento.confirmado && (
                   <span className="text-yellow-300 font-semibold">Por confirmar</span>
                 )}
