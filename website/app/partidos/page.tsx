@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { CalendarioGrid } from '@/components/calendario/CalendarioGrid'
-import { eventosDiciembre2024 } from '@/lib/data/eventos-diciembre'
+import { eventosEnero2026, eventosDiciembrePasados } from '@/lib/data/eventos-enero'
 import { SITE_CONFIG } from '@/lib/constants'
 import Link from 'next/link'
 import { MessageCircle } from 'lucide-react'
@@ -17,8 +17,11 @@ export const metadata = {
 }
 
 export default function PartidosPage() {
+  // Combinar eventos pasados y futuros
+  const todosLosEventos = [...eventosDiciembrePasados, ...eventosEnero2026]
+
   // Filtrar solo partidos futuros usando las utilidades centralizadas
-  const eventosFuturos = filtrarEventosFuturos(eventosDiciembre2024)
+  const eventosFuturos = filtrarEventosFuturos(todosLosEventos)
   const partidosFuturos = filtrarSoloPartidos(eventosFuturos)
   const partidosOrdenados = ordenarEventosPorFecha(partidosFuturos)
 
@@ -104,7 +107,7 @@ export default function PartidosPage() {
 
               {/* Calendario Mensual */}
               <TabsContent value="calendario">
-                <CalendarioGrid eventos={eventosDiciembre2024} mes="Diciembre" año={2025} />
+                <CalendarioGrid eventos={todosLosEventos} mes="Diciembre" año={2025} />
               </TabsContent>
 
               {/* Próximos Partidos */}

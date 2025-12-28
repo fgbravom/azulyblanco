@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Header } from '@/components/layout/Header'
 import { Footer } from '@/components/layout/Footer'
 import { ProximosPartidos } from '@/components/calendario/ProximosPartidos'
-import { eventosDiciembre2024 } from '@/lib/data/eventos-diciembre'
+import { eventosEnero2026, eventosDiciembrePasados } from '@/lib/data/eventos-enero'
 import { getAllNoticias } from '@/lib/news'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -20,18 +20,18 @@ export default function HomePage() {
         <HeroSection />
 
         {/* Próximos Partidos */}
-        <section className="py-16">
+        <section className="py-16 bg-azul-primario">
           <div className="px-4 md:px-8 mb-8">
             <div className="container mx-auto max-w-7xl">
-              <h2 className="text-3xl md:text-4xl font-bold text-azul-primario mb-2">Próximos Partidos</h2>
-              <p className="text-gray-600">No te pierdas ningún encuentro del club</p>
+              <h2 className="text-3xl md:text-4xl font-bold text-white mb-2">Próximos Partidos</h2>
+              <p className="text-white">No te pierdas ningún encuentro del club</p>
             </div>
           </div>
           <div className="w-full">
-            <ProximosPartidos eventos={eventosDiciembre2024} limite={3} />
+            <ProximosPartidos eventos={eventosEnero2026} limite={3} />
           </div>
           <div className="mt-8 text-center px-4">
-            <Button variant="outline" asChild className="border-azul-primario text-azul-primario hover:bg-azul-primario hover:text-white">
+            <Button variant="outline" asChild className="border-white text-white hover:bg-white hover:text-azul-primario">
               <Link href="/partidos">Ver calendario completo →</Link>
             </Button>
           </div>

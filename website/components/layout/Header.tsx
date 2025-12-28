@@ -77,14 +77,14 @@ export function Header({ isHome = false }: HeaderProps) {
               </svg>
             </button>
 
-            {/* Logo - Center on mobile, left on desktop */}
-            <Link href="/" className="flex items-center flex-shrink-0 order-2 md:order-1 absolute left-1/2 -translate-x-1/2 md:relative md:left-auto md:translate-x-0">
+            {/* Logo - Always centered */}
+            <Link href="/" className="flex items-center flex-shrink-0 order-2 absolute left-1/2 -translate-x-1/2 lg:top-1">
               <Image
                 src="/images/escudoazulyblanco.png"
                 alt={`Escudo ${SITE_CONFIG.name}`}
-                width={100}
-                height={100}
-                className="h-20 md:h-11 lg:h-16 w-auto"
+                width={200}
+                height={200}
+                className="h-20 md:h-11 lg:h-35 w-auto"
               />
             </Link>
 
