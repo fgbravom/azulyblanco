@@ -102,7 +102,7 @@ export const eventosEnero2026: EventoCalendario[] = [
     estadio: 'ESTADIO ANFA',
     horaInicio: '15:00',
     confirmado: true,
-    tipoPartido: 'Liga Local'
+    tipoPartido: 'Oficial'
   },
   {
     id: 'ene-2',
@@ -127,7 +127,7 @@ export const eventosEnero2026: EventoCalendario[] = [
     estadio: 'LA GRANJA',
     horaInicio: '16:30',
     confirmado: true,
-    tipoPartido: 'Copa Regional'
+    tipoPartido: 'Copa'
   },
   {
     id: 'ene-4',
@@ -152,7 +152,7 @@ export const eventosEnero2026: EventoCalendario[] = [
     estadio: 'ESTADIO ANFA',
     horaInicio: '15:00',
     confirmado: true,
-    tipoPartido: 'Liga Local'
+    tipoPartido: 'Oficial'
   },
   {
     id: 'ene-6',

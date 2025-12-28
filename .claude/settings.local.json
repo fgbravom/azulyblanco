@@ -26,7 +26,8 @@
       "Bash(powershell -Command \"Stop-Process -Id 60708 -Force\")",
       "Bash(powershell -Command \"Stop-Process -Id 67252 -Force\")",
       "Bash(rd /s /q .next)",
-      "Bash(powershell:*)"
+      "Bash(powershell:*)",
+      "Bash(git ls-tree:*)"
     ],
     "deny": [],
     "ask": []
