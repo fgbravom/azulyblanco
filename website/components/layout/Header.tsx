@@ -93,9 +93,9 @@ export function Header({ isHome = false }: HeaderProps) {
               {mounted && NAVIGATION_ITEMS.map((item) => (
                 item.submenu ? (
                   <DropdownMenu key={item.href}>
-                    <DropdownMenuTrigger className="flex items-center gap-0.5 text-[11px] lg:text-sm font-medium text-white hover:text-azul-claro transition-colors outline-none data-[state=open]:text-azul-claro whitespace-nowrap">
+                    <DropdownMenuTrigger className="flex items-center gap-0.5 text-sm lg:text-base font-medium text-white hover:text-azul-claro transition-colors outline-none data-[state=open]:text-azul-claro whitespace-nowrap">
                       {item.title}
-                      <ChevronDown className="h-3 w-3 lg:h-4 lg:w-4 transition-transform duration-200 data-[state=open]:rotate-180" />
+                      <ChevronDown className="h-4 w-4 lg:h-5 lg:w-5 transition-transform duration-200 data-[state=open]:rotate-180" />
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="start" className="min-w-[180px] bg-white">
                       {item.submenu.map((subitem) => (
@@ -114,7 +114,7 @@ export function Header({ isHome = false }: HeaderProps) {
                   <Link
                     key={item.href}
                     href={item.href}
-                    className="text-[11px] lg:text-sm font-medium text-white hover:text-azul-claro transition-colors whitespace-nowrap"
+                    className="text-sm lg:text-base font-medium text-white hover:text-azul-claro transition-colors whitespace-nowrap"
                   >
                     {item.title}
                   </Link>
