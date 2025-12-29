@@ -72,5 +72,18 @@ export const eventosDiciembre2024: EventoCalendario[] = [
     estadio: 'LA GRANJA',
     confirmado: true,
     tipoPartido: 'Amistoso'
+  },
+  {
+    id: 'dic-7',
+    fecha: '2025-12-29',
+    dia: 'LUNES',
+    diaMes: 29,
+    mes: 'DICIEMBRE',
+    tipo: 'entrenamiento',
+    actividad: 'HONOR/PRIMERA vs SERIE 35',
+    estadio: 'ESTADIO ANFA CURICO',
+    horaInicio: '22:00',
+    llevar: '2.000',
+    confirmado: true
   }
 ]
