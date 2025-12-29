@@ -5,6 +5,9 @@ import Image from 'next/image'
 
 const heroImagesDesktop = [
   '/images/fotoportada1.jpg',
+  '/images/fotoportada2.jpg',
+  '/images/fotoportada3.jpg',
+  '/images/fotoportada4.jpg',
 ]
 
 const heroImagesMobile = [
@@ -12,6 +15,7 @@ const heroImagesMobile = [
   '/images/portadamovil1.jpg',
   '/images/portadamovil2.jpg',
   '/images/portadamovil3.jpg',
+  '/images/portadamovil4.jpg',
 ]
 
 interface HeroCarouselProps {
