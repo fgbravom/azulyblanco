@@ -14,4 +14,5 @@ export interface EventoCalendario {
   confirmado: boolean
   horaInicio?: string // formato: "15:00"
   tipoPartido?: TipoPartido // Amistoso, Oficial, etc.
+  llevar?: string // monto a llevar para el evento
 }
