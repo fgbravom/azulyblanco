@@ -10,6 +10,7 @@ const heroImagesDesktop = [
   '/images/fotoportada3.jpg',
   '/images/fotoportada4.jpg',
   '/images/fotoportada5.jpg',
+  '/images/fotoportada6.jpg',
 ]
 
 const heroImagesMobile = [
@@ -19,7 +20,9 @@ const heroImagesMobile = [
   '/images/portadamovil3.jpg',
   '/images/portadamovil4.jpg',
   '/images/portadamovil5.jpg',
+  '/images/portadamovil6.jpg',
 ]
+
 
 interface HeroCarouselProps {
   currentIndex?: number
@@ -87,7 +90,8 @@ export function HeroCarousel({ currentIndex: externalIndex, onIndexChange }: Her
             fill
             className="object-cover object-center"
             priority={index === 0}
-            quality={90}
+            quality={85}
+            sizes="100vw"
           />
         </div>
       ))}
