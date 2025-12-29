@@ -89,15 +89,15 @@ export function Header({ isHome = false }: HeaderProps) {
             </Link>
 
             {/* Navigation - Desktop */}
-            <nav className="hidden md:flex items-center gap-2 lg:gap-6 order-3 md:order-2" suppressHydrationWarning>
+            <nav className="hidden md:flex items-center gap-1 lg:gap-3 order-3 md:order-2" suppressHydrationWarning>
               {mounted && NAVIGATION_ITEMS.map((item) => (
                 item.submenu ? (
                   <DropdownMenu key={item.href}>
-                    <DropdownMenuTrigger className="flex items-center gap-0.5 text-sm lg:text-base font-medium text-white hover:text-azul-claro transition-colors outline-none data-[state=open]:text-azul-claro whitespace-nowrap">
+                    <DropdownMenuTrigger className="flex items-center gap-0.5 text-sm lg:text-base font-medium text-white hover:bg-white hover:text-azul-primario transition-colors outline-none data-[state=open]:bg-white data-[state=open]:text-azul-primario whitespace-nowrap px-2 py-1.5">
                       {item.title}
                       <ChevronDown className="h-4 w-4 lg:h-5 lg:w-5 transition-transform duration-200 data-[state=open]:rotate-180" />
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="start" className="min-w-[180px] bg-azul-primario border-azul-primario p-0 rounded-md overflow-hidden">
+                    <DropdownMenuContent align="start" className="min-w-[180px] bg-azul-primario border-2 border-azul-claro p-0 overflow-hidden">
                       {item.submenu.map((subitem) => (
                         <DropdownMenuItem key={subitem.href} asChild className="focus:bg-white focus:text-azul-primario p-0 m-0 rounded-none">
                           <Link
@@ -114,7 +114,7 @@ export function Header({ isHome = false }: HeaderProps) {
                   <Link
                     key={item.href}
                     href={item.href}
-                    className="text-sm lg:text-base font-medium text-white hover:text-azul-claro transition-colors whitespace-nowrap"
+                    className="text-sm lg:text-base font-medium text-white hover:bg-white hover:text-azul-primario transition-colors whitespace-nowrap px-2 py-1.5"
                   >
                     {item.title}
                   </Link>
