@@ -84,12 +84,12 @@ export const eventosEnero2026: EventoCalendario[] = [
     dia: 'LUNES',
     diaMes: 29,
     mes: 'DICIEMBRE',
-    tipo: 'partido',
-    rival: 'AYB VS UNIDOS FC',
-    estadio: 'LA GRANJA',
-    horaInicio: '17:00',
-    confirmado: true,
-    tipoPartido: 'Amistoso'
+    tipo: 'entrenamiento',
+    actividad: 'HONOR/PRIMERA vs SERIE 35',
+    estadio: 'ESTADIO ANFA CURICO',
+    horaInicio: '22:00',
+    llevar: '2.000',
+    confirmado: true
   },
   {
     id: 'ene-1',
