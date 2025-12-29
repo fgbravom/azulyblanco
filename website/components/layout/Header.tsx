@@ -97,7 +97,7 @@ export function Header({ isHome = false }: HeaderProps) {
                       {item.title}
                       <ChevronDown className="h-4 w-4 lg:h-5 lg:w-5 transition-transform duration-200 data-[state=open]:rotate-180" />
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="start" className="min-w-[180px] bg-azul-primario border-2 border-azul-claro p-0 overflow-hidden">
+                    <DropdownMenuContent align="start" className="min-w-[180px] bg-azul-primario border-0 p-0 overflow-hidden">
                       {item.submenu.map((subitem) => (
                         <DropdownMenuItem key={subitem.href} asChild className="focus:bg-white focus:text-azul-primario p-0 m-0 rounded-none">
                           <Link
