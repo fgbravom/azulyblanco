@@ -53,9 +53,22 @@ export function ProximosPartidos({ eventos, limite = 3 }: ProximosPartidosProps)
     <div className="w-full space-y-4 md:space-y-6">
       {proximosEventos.map((evento) => {
         const esEntrenamiento = evento.tipo === 'entrenamiento'
-        const equipos = esEntrenamiento
-          ? { local: 'AYB', visitante: evento.actividad || 'Entrenamiento' }
-          : parseRival(evento.rival || 'Por confirmar')
+
+        // Para entrenamientos, verificar si tiene formato "X vs Y" para enfrentamiento interno
+        let equipos
+        if (esEntrenamiento && evento.actividad?.toLowerCase().includes(' vs ')) {
+          const partes = evento.actividad.split(/\s+vs\s+/i)
+          equipos = {
+            local: partes[0].trim(),
+            visitante: partes[1].trim()
+          }
+        } else if (esEntrenamiento) {
+          equipos = { local: 'AYB', visitante: evento.actividad || 'Entrenamiento' }
+        } else {
+          equipos = parseRival(evento.rival || 'Por confirmar')
+        }
+
+        const esEnfrentamientoInterno = esEntrenamiento && evento.actividad?.toLowerCase().includes(' vs ')
         const fechaInfo = formatearFecha(evento.fecha, evento.dia)
 
         return (
@@ -97,7 +110,16 @@ export function ProximosPartidos({ eventos, limite = 3 }: ProximosPartidosProps)
                 <h3 className="text-white font-bold text-sm md:text-2xl truncate text-right">
                   {equipos.visitante}
                 </h3>
-                {!esEntrenamiento && (
+                {esEnfrentamientoInterno ? (
+                  <div className="relative w-10 h-10 md:w-16 md:h-16 flex-shrink-0">
+                    <Image
+                      src="/images/escudoazulyblanco.png"
+                      alt={equipos.visitante}
+                      fill
+                      className="object-contain"
+                    />
+                  </div>
+                ) : !esEntrenamiento ? (
                   <div className="relative w-10 h-10 md:w-16 md:h-16 flex-shrink-0 bg-white rounded-full p-2">
                     <div className="w-full h-full bg-gray-200 rounded-full flex items-center justify-center">
                       <span className="text-gray-400 text-[10px] md:text-sm font-bold">
@@ -105,7 +127,7 @@ export function ProximosPartidos({ eventos, limite = 3 }: ProximosPartidosProps)
                       </span>
                     </div>
                   </div>
-                )}
+                ) : null}
               </div>
             </div>
 
