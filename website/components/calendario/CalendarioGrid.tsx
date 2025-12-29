@@ -147,32 +147,40 @@ export function CalendarioGrid({ eventos, mes, año }: CalendarioGridProps) {
 
                       {/* Eventos del día */}
                       <div className="space-y-1">
-                        {eventosDelDia.slice(0, 2).map((evento) => (
-                          <div
-                            key={evento.id}
-                            onClick={() => setEventoSeleccionado(evento)}
-                            className={`
-                              text-xs px-2 py-1 rounded truncate cursor-pointer transition-all
-                              ${evento.tipo === 'partido'
-                                ? 'bg-azul-primario/10 text-azul-oscuro border-l-2 border-azul-primario hover:bg-azul-primario/20'
-                                : 'bg-gray-200 text-gray-700 border-l-2 border-gray-400 hover:bg-gray-300'
-                              }
-                            `}
-                            title={evento.tipo === 'partido' ? evento.rival : evento.actividad}
-                          >
-                            <div className="flex items-center gap-1">
-                              <span>{evento.tipo === 'partido' ? '⚽' : '🏃'}</span>
-                              <span className="truncate">
-                                {evento.tipo === 'partido' ? evento.rival : evento.actividad}
-                              </span>
-                            </div>
-                            {evento.horaInicio && (
-                              <div className="text-[10px] opacity-75">
-                                {evento.horaInicio}hs
+                        {eventosDelDia.slice(0, 2).map((evento) => {
+                          const esPartido = evento.tipo === 'partido'
+                          const esEvento = evento.tipo === 'evento'
+                          const esEntrenamiento = evento.tipo === 'entrenamiento'
+
+                          return (
+                            <div
+                              key={evento.id}
+                              onClick={() => setEventoSeleccionado(evento)}
+                              className={`
+                                text-xs px-2 py-1 rounded truncate cursor-pointer transition-all
+                                ${esPartido
+                                  ? 'bg-azul-primario/10 text-azul-oscuro border-l-2 border-azul-primario hover:bg-azul-primario/20'
+                                  : esEvento
+                                  ? 'bg-purple-100 text-purple-800 border-l-2 border-purple-500 hover:bg-purple-200'
+                                  : 'bg-gray-200 text-gray-700 border-l-2 border-gray-400 hover:bg-gray-300'
+                                }
+                              `}
+                              title={esPartido ? evento.rival : esEvento ? evento.titulo : evento.actividad}
+                            >
+                              <div className="flex items-center gap-1">
+                                <span>{esPartido ? '⚽' : esEvento ? '🎉' : '🏃'}</span>
+                                <span className="truncate">
+                                  {esPartido ? evento.rival : esEvento ? evento.titulo : evento.actividad}
+                                </span>
                               </div>
-                            )}
-                          </div>
-                        ))}
+                              {evento.horaInicio && (
+                                <div className="text-[10px] opacity-75">
+                                  {evento.horaInicio}hs
+                                </div>
+                              )}
+                            </div>
+                          )
+                        })}
                         {eventosDelDia.length > 2 && (
                           <div className="text-[10px] text-gray-500 px-2">
                             +{eventosDelDia.length - 2} más
@@ -189,7 +197,7 @@ export function CalendarioGrid({ eventos, mes, año }: CalendarioGridProps) {
       </Card>
 
       {/* Leyenda */}
-      <div className="mt-4 flex items-center gap-4 text-sm text-gray-600">
+      <div className="mt-4 flex flex-wrap items-center gap-4 text-sm text-gray-600">
         <div className="flex items-center gap-2">
           <div className="w-4 h-4 rounded-full bg-azul-primario"></div>
           <span>Día actual</span>
@@ -197,6 +205,10 @@ export function CalendarioGrid({ eventos, mes, año }: CalendarioGridProps) {
         <div className="flex items-center gap-2">
           <div className="w-4 h-1 bg-azul-primario"></div>
           <span>Partido</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="w-4 h-1 bg-purple-500"></div>
+          <span>Evento Especial</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-4 h-1 bg-gray-400"></div>
@@ -230,9 +242,13 @@ export function CalendarioGrid({ eventos, mes, año }: CalendarioGridProps) {
                 <div className="flex items-center gap-2 mb-3">
                   <Badge
                     variant={eventoSeleccionado.tipo === 'partido' ? 'default' : 'secondary'}
-                    className="bg-white/20 backdrop-blur-sm border-0"
+                    className={`backdrop-blur-sm border-0 ${
+                      eventoSeleccionado.tipo === 'evento'
+                        ? 'bg-purple-500/30 text-white'
+                        : 'bg-white/20'
+                    }`}
                   >
-                    {eventoSeleccionado.tipo === 'partido' ? '⚽' : '🏃'} {eventoSeleccionado.tipo.toUpperCase()}
+                    {eventoSeleccionado.tipo === 'partido' ? '⚽' : eventoSeleccionado.tipo === 'evento' ? '🎉' : '🏃'} {eventoSeleccionado.tipo.toUpperCase()}
                   </Badge>
                   {!eventoSeleccionado.confirmado && (
                     <Badge className="bg-orange-500/20 text-white border-white/40">
@@ -248,6 +264,10 @@ export function CalendarioGrid({ eventos, mes, año }: CalendarioGridProps) {
                     mostrarVS={true}
                     tamañoEscudo={32}
                   />
+                ) : eventoSeleccionado.tipo === 'evento' ? (
+                  <h2 className="text-2xl font-bold mb-2">
+                    {eventoSeleccionado.titulo || 'Evento Especial'}
+                  </h2>
                 ) : (
                   <h2 className="text-2xl font-bold mb-2">
                     {eventoSeleccionado.actividad || 'Entrenamiento'}
@@ -264,6 +284,13 @@ export function CalendarioGrid({ eventos, mes, año }: CalendarioGridProps) {
 
             {/* Contenido del Panel */}
             <div className="p-6 space-y-6">
+              {/* Descripción del evento (solo para tipo evento) */}
+              {eventoSeleccionado.tipo === 'evento' && eventoSeleccionado.descripcion && (
+                <div className="bg-purple-50 rounded-xl p-4 border border-purple-200">
+                  <p className="text-sm text-gray-700 leading-relaxed">{eventoSeleccionado.descripcion}</p>
+                </div>
+              )}
+
               {/* Detalles */}
               <div className="space-y-4">
                 <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
@@ -285,9 +312,43 @@ export function CalendarioGrid({ eventos, mes, año }: CalendarioGridProps) {
                         <Clock className="w-5 h-5 text-azul-primario" />
                       </div>
                       <div className="flex-1">
-                        <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">Hora</div>
-                        <div className="font-semibold text-gray-900">{eventoSeleccionado.horaInicio} hrs</div>
+                        <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">Horario</div>
+                        <div className="font-semibold text-gray-900">
+                          {eventoSeleccionado.horaInicio}
+                          {eventoSeleccionado.horaFin ? ` - ${eventoSeleccionado.horaFin}` : ''} hrs
+                        </div>
                       </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Series participantes (solo para eventos) */}
+                {eventoSeleccionado.tipo === 'evento' && eventoSeleccionado.series && eventoSeleccionado.series.length > 0 && (
+                  <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
+                    <div className="text-xs text-gray-500 uppercase tracking-wide mb-2">Series Participantes</div>
+                    <div className="flex flex-wrap gap-2">
+                      {eventoSeleccionado.series.map((serie, index) => (
+                        <Badge key={index} variant="outline" className="bg-white">
+                          {serie}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Precio de entrada */}
+                {eventoSeleccionado.precioEntrada && (
+                  <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
+                    <div className="text-xs text-gray-500 uppercase tracking-wide mb-2">Entrada</div>
+                    <div className="space-y-1">
+                      <div className="font-semibold text-gray-900">
+                        General: ${eventoSeleccionado.precioEntrada.replace('.', '')}
+                      </div>
+                      {eventoSeleccionado.edadGratis && (
+                        <div className="text-sm text-green-600 font-medium">
+                          {eventoSeleccionado.edadGratis} NO PAGAN
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}

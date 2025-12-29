@@ -54,6 +54,7 @@ export function ProximosPartidos({ eventos, limite = 3 }: ProximosPartidosProps)
     <div className="w-full space-y-4 md:space-y-6">
       {proximosEventos.map((evento) => {
         const esEntrenamiento = evento.tipo === 'entrenamiento'
+        const esEvento = evento.tipo === 'evento'
 
         // Para entrenamientos, verificar si tiene formato "X vs Y" para enfrentamiento interno
         let equipos
@@ -65,6 +66,8 @@ export function ProximosPartidos({ eventos, limite = 3 }: ProximosPartidosProps)
           }
         } else if (esEntrenamiento) {
           equipos = { local: 'AYB', visitante: evento.actividad || 'Entrenamiento' }
+        } else if (esEvento) {
+          equipos = { local: 'AYB', visitante: evento.titulo || 'Evento Especial' }
         } else {
           equipos = parseRival(evento.rival || 'Por confirmar')
         }
@@ -112,7 +115,7 @@ export function ProximosPartidos({ eventos, limite = 3 }: ProximosPartidosProps)
                 <h3 className="text-white font-bold text-sm md:text-2xl truncate text-right">
                   {equipos.visitante}
                 </h3>
-                {esEnfrentamientoInterno ? (
+                {esEnfrentamientoInterno || esEvento ? (
                   <div className="relative w-10 h-10 md:w-16 md:h-16 flex-shrink-0">
                     <Image
                       src="/images/escudoazulyblanco.png"
@@ -137,13 +140,13 @@ export function ProximosPartidos({ eventos, limite = 3 }: ProximosPartidosProps)
             <div className="bg-azul-primario/30 backdrop-blur-sm px-4 md:px-8 py-2">
               <div className="flex items-center justify-between text-white/80 text-xs md:text-sm">
                 <span className="font-medium">
-                  {esEntrenamiento ? 'Entrenamiento' : (evento.tipoPartido || 'Partido')}
+                  {esEvento ? 'Evento Especial' : esEntrenamiento ? 'Entrenamiento' : (evento.tipoPartido || 'Partido')}
                 </span>
                 <div className="flex gap-4">
-                  {evento.llevar && (
+                  {(evento.llevar || evento.precioEntrada) && (
                     <span className="text-white font-semibold flex items-center gap-1">
                       <Banknote className="w-4 h-4" />
-                      ${evento.llevar.replace('.', '')}
+                      ${(evento.llevar || evento.precioEntrada || '').replace('.', '')}
                     </span>
                   )}
                   {!evento.confirmado && (
