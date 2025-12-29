@@ -4,10 +4,12 @@ import { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
 
 const heroImagesDesktop = [
+  '/images/fotoportada0.jpg',
   '/images/fotoportada1.jpg',
   '/images/fotoportada2.jpg',
   '/images/fotoportada3.jpg',
   '/images/fotoportada4.jpg',
+  '/images/fotoportada5.jpg',
 ]
 
 const heroImagesMobile = [
@@ -16,6 +18,7 @@ const heroImagesMobile = [
   '/images/portadamovil2.jpg',
   '/images/portadamovil3.jpg',
   '/images/portadamovil4.jpg',
+  '/images/portadamovil5.jpg',
 ]
 
 interface HeroCarouselProps {
