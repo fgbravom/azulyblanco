@@ -4,6 +4,7 @@ import { EventoCalendario } from '@/lib/types/calendario'
 import { useMemo } from 'react'
 import { obtenerProximosEventos } from '@/lib/utils/calendario'
 import Image from 'next/image'
+import { Banknote, MapPin } from 'lucide-react'
 
 interface ProximosPartidosProps {
   eventos: EventoCalendario[]
@@ -100,8 +101,9 @@ export function ProximosPartidos({ eventos, limite = 3 }: ProximosPartidosProps)
                 <div className="text-white text-base md:text-2xl font-bold">
                   {evento.horaInicio || '—'}
                 </div>
-                <div className="text-white/60 text-[8px] md:text-xs uppercase tracking-wider text-center line-clamp-1">
-                  {evento.estadio}
+                <div className="text-white/60 text-[8px] md:text-xs uppercase tracking-wider text-center line-clamp-1 flex items-center gap-1">
+                  <MapPin className="w-3 h-3 md:w-4 md:h-4" />
+                  <span>{evento.estadio}</span>
                 </div>
               </div>
 
@@ -139,7 +141,10 @@ export function ProximosPartidos({ eventos, limite = 3 }: ProximosPartidosProps)
                 </span>
                 <div className="flex gap-4">
                   {evento.llevar && (
-                    <span className="text-azul-claro font-semibold">Llevar: {evento.llevar}</span>
+                    <span className="text-white font-semibold flex items-center gap-1">
+                      <Banknote className="w-4 h-4" />
+                      ${evento.llevar.replace('.', '')}
+                    </span>
                   )}
                   {!evento.confirmado && (
                     <span className="text-yellow-300 font-semibold">Por confirmar</span>
