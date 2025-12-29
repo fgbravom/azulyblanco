@@ -10,6 +10,8 @@ const heroImagesDesktop = [
   '/images/fotoportada3.jpg',
   '/images/fotoportada4.jpg',
   '/images/fotoportada5.jpg',
+  '/images/fotoportada6.jpg',
+  '/images/fotoportada7.jpg',
 ]
 
 const heroImagesMobile = [

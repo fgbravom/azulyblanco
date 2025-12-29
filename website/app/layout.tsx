@@ -73,7 +73,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es" className={`${montserrat.variable} ${openSans.variable} ${robotoMono.variable}`}>
+    <html lang="es" className={`${montserrat.variable} ${openSans.variable} ${robotoMono.variable}`} suppressHydrationWarning>
       <body className="font-sans antialiased">
         {children}
       </body>

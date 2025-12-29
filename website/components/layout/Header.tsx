@@ -97,12 +97,12 @@ export function Header({ isHome = false }: HeaderProps) {
                       {item.title}
                       <ChevronDown className="h-4 w-4 lg:h-5 lg:w-5 transition-transform duration-200 data-[state=open]:rotate-180" />
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="start" className="min-w-[180px] bg-white">
+                    <DropdownMenuContent align="start" className="min-w-[180px] bg-azul-primario border-azul-primario p-0 rounded-md overflow-hidden">
                       {item.submenu.map((subitem) => (
-                        <DropdownMenuItem key={subitem.href} asChild>
+                        <DropdownMenuItem key={subitem.href} asChild className="focus:bg-white focus:text-azul-primario p-0 m-0 rounded-none">
                           <Link
                             href={subitem.href}
-                            className="cursor-pointer text-gray-700 hover:text-azul-primario hover:bg-blue-50 focus:text-azul-primario focus:bg-blue-50"
+                            className="w-full cursor-pointer text-white hover:text-azul-primario hover:bg-white transition-colors px-4 py-2.5 block"
                           >
                             {subitem.title}
                           </Link>
