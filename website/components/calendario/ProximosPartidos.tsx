@@ -88,61 +88,106 @@ export function ProximosPartidos({ eventos, limite = 3 }: ProximosPartidosProps)
             className="w-full bg-gradient-to-r from-azul-oscuro to-azul-primario overflow-hidden cursor-pointer hover:shadow-xl transition-shadow"
             onClick={() => setEventoSeleccionado(evento)}
           >
-            <div className="flex items-center justify-between px-4 md:px-8 py-6 md:py-8 gap-2 md:gap-4">
-              {/* Equipo Local / Club */}
-              <div className="flex items-center gap-2 md:gap-6 flex-1 min-w-0">
-                <div className="relative w-10 h-10 md:w-16 md:h-16 flex-shrink-0">
-                  <Image
-                    src="/images/escudoazulyblanco.png"
-                    alt={equipos.local}
-                    fill
-                    className="object-contain"
-                  />
-                </div>
-                <h3 className="text-white font-bold text-sm md:text-2xl truncate">
-                  {equipos.local}
-                </h3>
-              </div>
-
-              {/* Fecha y Hora Central */}
-              <div className="flex flex-col items-center gap-0.5 md:gap-2 px-2 md:px-8 flex-shrink-0">
-                <div className="text-white/70 text-[10px] md:text-sm font-medium whitespace-nowrap">
-                  {fechaInfo.mes} {fechaInfo.dia} {fechaInfo.anio}
-                </div>
-                <div className="text-white text-base md:text-2xl font-bold">
-                  {evento.horaInicio || '—'}
-                </div>
-                <div className="text-white/60 text-[8px] md:text-xs uppercase tracking-wider text-center line-clamp-1 flex items-center gap-1">
-                  <MapPin className="w-3 h-3 md:w-4 md:h-4" />
-                  <span>{evento.estadio}</span>
-                </div>
-              </div>
-
-              {/* Rival / Actividad */}
-              <div className="flex items-center gap-2 md:gap-6 flex-1 justify-end min-w-0">
-                <h3 className="text-white font-bold text-sm md:text-2xl truncate text-right">
-                  {equipos.visitante}
-                </h3>
-                {esEnfrentamientoInterno || esEvento ? (
-                  <div className="relative w-10 h-10 md:w-16 md:h-16 flex-shrink-0">
+            {esEvento ? (
+              /* Layout para Eventos Especiales */
+              <div className="flex flex-col items-center justify-center px-4 md:px-8 py-6 md:py-8 gap-3 md:gap-4">
+                {/* Icono y Título del Evento */}
+                <div className="flex items-center gap-3 md:gap-4">
+                  <div className="relative w-12 h-12 md:w-20 md:h-20 flex-shrink-0">
                     <Image
                       src="/images/escudoazulyblanco.png"
-                      alt={equipos.visitante}
+                      alt="Azul y Blanco"
                       fill
                       className="object-contain"
                     />
                   </div>
-                ) : !esEntrenamiento ? (
-                  <div className="relative w-10 h-10 md:w-16 md:h-16 flex-shrink-0 bg-white rounded-full p-2">
-                    <div className="w-full h-full bg-gray-200 rounded-full flex items-center justify-center">
-                      <span className="text-gray-400 text-[10px] md:text-sm font-bold">
-                        {equipos.visitante.substring(0, 3)}
-                      </span>
-                    </div>
+                  <h3 className="text-white font-bold text-base md:text-3xl text-center">
+                    {evento.titulo || 'Evento Especial'}
+                  </h3>
+                  <div className="relative w-12 h-12 md:w-20 md:h-20 flex-shrink-0">
+                    <Image
+                      src="/images/escudoazulyblanco.png"
+                      alt="Azul y Blanco"
+                      fill
+                      className="object-contain"
+                    />
                   </div>
-                ) : null}
+                </div>
+
+                {/* Fecha, Hora y Lugar */}
+                <div className="flex flex-col md:flex-row items-center gap-2 md:gap-6 text-white/90">
+                  <div className="flex items-center gap-2 text-sm md:text-base">
+                    <span className="font-semibold">{fechaInfo.mes} {fechaInfo.dia}, {fechaInfo.anio}</span>
+                  </div>
+                  <div className="hidden md:block text-white/50">•</div>
+                  <div className="flex items-center gap-1 text-sm md:text-base">
+                    <span className="font-bold">{evento.horaInicio}{evento.horaFin ? ` - ${evento.horaFin}` : ''}</span>
+                  </div>
+                  <div className="hidden md:block text-white/50">•</div>
+                  <div className="flex items-center gap-1 text-xs md:text-sm text-white/70">
+                    <MapPin className="w-3 h-3 md:w-4 md:h-4" />
+                    <span>{evento.estadio}</span>
+                  </div>
+                </div>
               </div>
-            </div>
+            ) : (
+              /* Layout normal para Partidos y Entrenamientos */
+              <div className="flex items-center justify-between px-4 md:px-8 py-6 md:py-8 gap-2 md:gap-4">
+                {/* Equipo Local / Club */}
+                <div className="flex items-center gap-2 md:gap-6 flex-1 min-w-0">
+                  <div className="relative w-10 h-10 md:w-16 md:h-16 flex-shrink-0">
+                    <Image
+                      src="/images/escudoazulyblanco.png"
+                      alt={equipos.local}
+                      fill
+                      className="object-contain"
+                    />
+                  </div>
+                  <h3 className="text-white font-bold text-sm md:text-2xl truncate">
+                    {equipos.local}
+                  </h3>
+                </div>
+
+                {/* Fecha y Hora Central */}
+                <div className="flex flex-col items-center gap-0.5 md:gap-2 px-2 md:px-8 flex-shrink-0">
+                  <div className="text-white/70 text-[10px] md:text-sm font-medium whitespace-nowrap">
+                    {fechaInfo.mes} {fechaInfo.dia} {fechaInfo.anio}
+                  </div>
+                  <div className="text-white text-base md:text-2xl font-bold">
+                    {evento.horaInicio || '—'}
+                  </div>
+                  <div className="text-white/60 text-[8px] md:text-xs uppercase tracking-wider text-center line-clamp-1 flex items-center gap-1">
+                    <MapPin className="w-3 h-3 md:w-4 md:h-4" />
+                    <span>{evento.estadio}</span>
+                  </div>
+                </div>
+
+                {/* Rival / Actividad */}
+                <div className="flex items-center gap-2 md:gap-6 flex-1 justify-end min-w-0">
+                  <h3 className="text-white font-bold text-sm md:text-2xl truncate text-right">
+                    {equipos.visitante}
+                  </h3>
+                  {esEnfrentamientoInterno ? (
+                    <div className="relative w-10 h-10 md:w-16 md:h-16 flex-shrink-0">
+                      <Image
+                        src="/images/escudoazulyblanco.png"
+                        alt={equipos.visitante}
+                        fill
+                        className="object-contain"
+                      />
+                    </div>
+                  ) : !esEntrenamiento ? (
+                    <div className="relative w-10 h-10 md:w-16 md:h-16 flex-shrink-0 bg-white rounded-full p-2">
+                      <div className="w-full h-full bg-gray-200 rounded-full flex items-center justify-center">
+                        <span className="text-gray-400 text-[10px] md:text-sm font-bold">
+                          {equipos.visitante.substring(0, 3)}
+                        </span>
+                      </div>
+                    </div>
+                  ) : null}
+                </div>
+              </div>
+            )}
 
             {/* Banda inferior con información adicional */}
             <div className="bg-azul-primario/30 backdrop-blur-sm px-4 md:px-8 py-2">
