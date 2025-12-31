@@ -25,41 +25,41 @@ export const SITE_CONFIG = {
 
 export const NAVIGATION_ITEMS = [
   {
-    title: 'Club',
+    title: 'CLUB',
     href: '/club/historia',
     submenu: [
-      { title: 'Historia', href: '/club/historia' },
-      { title: 'Directiva', href: '/club/directiva' },
-      { title: 'Instalaciones', href: '/club/instalaciones' },
+      { title: 'HISTORIA', href: '/club/historia' },
+      { title: 'DIRECTIVA', href: '/club/directiva' },
+      { title: 'INSTALACIONES', href: '/club/instalaciones' },
     ],
   },
   {
-    title: 'Series',
+    title: 'SERIES',
     href: '/series/primera',
     submenu: [
-      { title: 'Serie Primera', href: '/series/primera' },
-      { title: 'Serie Honor', href: '/series/honor' },
-      { title: 'Serie 35', href: '/series/35' },
+      { title: 'SERIE PRIMERA', href: '/series/primera' },
+      { title: 'SERIE HONOR', href: '/series/honor' },
+      { title: 'SERIE 35', href: '/series/35' },
     ],
   },
   {
-    title: 'Equipos',
+    title: 'EQUIPOS',
     href: '/equipos',
   },
   {
-    title: 'Noticias',
+    title: 'NOTICIAS',
     href: '/noticias',
   },
   {
-    title: 'Partidos',
+    title: 'PARTIDOS',
     href: '/partidos',
   },
   {
-    title: 'Galería',
+    title: 'GALERÍA',
     href: '/galeria',
   },
   {
-    title: 'Contacto',
+    title: 'CONTACTO',
     href: '/contacto',
   },
 ]
