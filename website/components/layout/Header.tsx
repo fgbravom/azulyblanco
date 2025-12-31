@@ -89,7 +89,7 @@ export function Header({ isHome = false }: HeaderProps) {
             </Link>
 
             {/* Navigation - Desktop */}
-            <nav className="hidden md:flex items-center gap-1 lg:gap-3 order-3 md:order-2" suppressHydrationWarning>
+            <nav className="hidden md:flex items-center gap-1 lg:gap-3 order-3 md:order-2 md:mr-auto md:ml-4" suppressHydrationWarning>
               {mounted && NAVIGATION_ITEMS.map((item) => (
                 item.submenu ? (
                   <DropdownMenu key={item.href}>
