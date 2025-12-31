@@ -23,7 +23,7 @@ const robotoMono = Roboto_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: `${SITE_CONFIG.name} - Club deportivo`,
+    default: `Club Deportivo ${SITE_CONFIG.name}`,
     template: `%s | ${SITE_CONFIG.name}`,
   },
   description: SITE_CONFIG.description,

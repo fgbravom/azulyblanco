@@ -23,7 +23,7 @@ export default function HomePage() {
         <section className="py-16 bg-azul-primario">
           <div className="px-4 md:px-8 mb-8">
             <div className="container mx-auto max-w-7xl">
-              <h2 className="text-3xl md:text-4xl font-bold text-white mb-2">Próximos Partidos</h2>
+              <h2 className="text-3xl md:text-4xl font-bold text-white mb-2">PROGRAMACIÓN</h2>
               <p className="text-white">No te pierdas ningún encuentro del club</p>
             </div>
           </div>

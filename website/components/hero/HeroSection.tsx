@@ -23,7 +23,7 @@ export function HeroSection() {
   }, [])
 
   return (
-    <section className="relative w-full flex items-center justify-center overflow-hidden h-[60vh] lg:h-[85vh]">
+    <section className="relative w-full flex items-center justify-center overflow-hidden h-[60vh] lg:h-[84vh]">
       {/* Background Carousel */}
       <HeroCarousel />
 

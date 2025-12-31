@@ -12,6 +12,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { ChevronDown } from 'lucide-react'
+import { FaInstagram, FaFacebook } from 'react-icons/fa'
 
 interface HeaderProps {
   isHome?: boolean
@@ -84,18 +85,18 @@ export function Header({ isHome = false }: HeaderProps) {
                 alt={`Escudo ${SITE_CONFIG.name}`}
                 width={200}
                 height={200}
-                className="h-20 md:h-11 lg:h-35 w-auto"
+                className="h-20 md:h-11 lg:h-40 w-auto"
               />
             </Link>
 
             {/* Navigation - Desktop */}
-            <nav className="hidden md:flex items-center gap-1 lg:gap-3 order-1 md:ml-4" suppressHydrationWarning>
+            <nav className="hidden md:flex items-center gap-0.5 lg:gap-2 order-1 md:ml-4 md:pt-7" suppressHydrationWarning>
               {mounted && NAVIGATION_ITEMS.map((item) => (
                 item.submenu ? (
                   <DropdownMenu key={item.href}>
-                    <DropdownMenuTrigger className="flex items-center gap-0.5 text-sm lg:text-base font-medium text-white hover:bg-white hover:text-azul-primario transition-colors outline-none data-[state=open]:bg-white data-[state=open]:text-azul-primario whitespace-nowrap px-2 py-1.5">
+                    <DropdownMenuTrigger className="flex items-center gap-0.5 text-xs lg:text-sm font-medium text-white hover:bg-white hover:text-azul-primario transition-colors outline-none data-[state=open]:bg-white data-[state=open]:text-azul-primario whitespace-nowrap px-1.5 py-1">
                       {item.title}
-                      <ChevronDown className="h-4 w-4 lg:h-5 lg:w-5 transition-transform duration-200 data-[state=open]:rotate-180" />
+                      <ChevronDown className="h-3 w-3 lg:h-4 lg:w-4 transition-transform duration-200 data-[state=open]:rotate-180" />
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="start" className="min-w-[180px] bg-azul-primario border-0 p-0 overflow-hidden">
                       {item.submenu.map((subitem) => (
@@ -114,7 +115,7 @@ export function Header({ isHome = false }: HeaderProps) {
                   <Link
                     key={item.href}
                     href={item.href}
-                    className="text-sm lg:text-base font-medium text-white hover:bg-white hover:text-azul-primario transition-colors whitespace-nowrap px-2 py-1.5"
+                    className="text-xs lg:text-sm font-medium text-white hover:bg-white hover:text-azul-primario transition-colors whitespace-nowrap px-1.5 py-1"
                   >
                     {item.title}
                   </Link>
@@ -122,8 +123,30 @@ export function Header({ isHome = false }: HeaderProps) {
               ))}
             </nav>
 
+            {/* Social Media Icons - Between logo and CTA */}
+            <div className="hidden md:flex items-center gap-3 flex-shrink-0 order-3 md:pt-7 ml-30">
+              <Link
+                href={SITE_CONFIG.social.instagram}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-white hover:text-azul-claro transition-colors"
+                aria-label="Instagram"
+              >
+                <FaInstagram className="w-5 h-5 lg:w-6 lg:h-6" />
+              </Link>
+              {/*<Link
+                href={SITE_CONFIG.social.facebook}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-white hover:text-azul-claro transition-colors"
+                aria-label="Facebook"
+              >
+                <FaFacebook className="w-5 h-5 lg:w-6 lg:h-6" />
+              </Link>*/}
+            </div>
+
             {/* CTA Button - Right side, hidden on mobile */}
-            <div className="hidden md:block flex-shrink-0 order-3">
+            <div className="hidden md:block flex-shrink-0 order-4 md:pt-3" >
               <Button asChild className="bg-white hover:bg-azul-claro text-azul-primario hover:text-white text-[11px] lg:text-sm px-2 lg:px-4 h-7 lg:h-10 transition-colors">
                 <Link href="/contacto">Únete al Club</Link>
               </Button>
@@ -218,6 +241,21 @@ export function Header({ isHome = false }: HeaderProps) {
               Únete al Club
             </Link>
           </Button>
+
+          {/* Social Media - Mobile */}
+          <div className="mt-6 pt-6 border-t border-gray-200 w-[60%]">
+            
+            <Link
+              href={SITE_CONFIG.social.instagram}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-3 text-azul-primario hover:text-azul-claro transition-colors py-2"
+              aria-label="Instagram"
+            >
+              <FaInstagram className="w-6 h-6" />
+              <span className="text-lg font-medium">Instagram</span>
+            </Link>
+          </div>
         </nav>
       </div>
     </>
