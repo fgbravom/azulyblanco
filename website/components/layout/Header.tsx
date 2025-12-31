@@ -89,7 +89,7 @@ export function Header({ isHome = false }: HeaderProps) {
             </Link>
 
             {/* Navigation - Desktop */}
-            <nav className="hidden md:flex items-center gap-1 lg:gap-3 order-3 md:order-2 md:mr-auto md:ml-4" suppressHydrationWarning>
+            <nav className="hidden md:flex items-center gap-1 lg:gap-3 order-1 md:ml-4" suppressHydrationWarning>
               {mounted && NAVIGATION_ITEMS.map((item) => (
                 item.submenu ? (
                   <DropdownMenu key={item.href}>
@@ -123,7 +123,7 @@ export function Header({ isHome = false }: HeaderProps) {
             </nav>
 
             {/* CTA Button - Right side, hidden on mobile */}
-            <div className="hidden md:block flex-shrink-0 order-4 md:order-3">
+            <div className="hidden md:block flex-shrink-0 order-3">
               <Button asChild className="bg-white hover:bg-azul-claro text-azul-primario hover:text-white text-[11px] lg:text-sm px-2 lg:px-4 h-7 lg:h-10 transition-colors">
                 <Link href="/contacto">Únete al Club</Link>
               </Button>
