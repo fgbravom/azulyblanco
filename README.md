@@ -2,11 +2,16 @@
 
 Sitio web oficial del Club de Fútbol Amateur Azul y Blanco.
 
+> **📅 Última actualización:** 31 de Diciembre 2024
+> **🎯 Estado:** Panel Admin 44% completado - Módulo de Jugadores 100% funcional
+> **📚 Documentación completa:** Ver carpeta [Docs/](./Docs/)
+
 ## Stack Tecnológico
 
-- **Frontend:** Next.js 14 (App Router) + React 18
-- **Styling:** Tailwind CSS 3.4 + shadcn/ui
-- **Backend:** Supabase (PostgreSQL + Auth + Storage)
+- **Frontend:** Next.js 16.1.0 (App Router) + React 19.2.0
+- **Styling:** Tailwind CSS v4 + shadcn/ui
+- **Backend:** Supabase (PostgreSQL + Storage)
+- **Authentication:** bcryptjs + HTTP-only cookies
 - **Hosting:** Vercel
 - **TypeScript:** Para type safety
 
@@ -120,30 +125,36 @@ website/
 ## Panel de Administración
 
 ### Acceso
-- URL: `https://azulyblanco.com/dashboard`
-- Requiere autenticación con Supabase Auth
+- **URL Local:** `http://localhost:3000/admin`
+- **Contraseña actual:** `asd123`
+- **Duración de sesión:** 8 horas
 
-### Crear Primer Usuario Admin
+### Estado de Implementación (44% completado)
 
-```sql
--- Ejecutar en Supabase SQL Editor
--- Reemplazar 'email@example.com' con tu email
+#### ✅ Completado
+- **Autenticación:** Sistema simple con bcrypt y cookies
+- **Layout:** Sidebar con navegación y header
+- **Dashboard:** Estadísticas básicas (pendiente datos reales)
+- **Gestión de Jugadores (100%):**
+  - ✅ CRUD completo (Crear, Leer, Actualizar, Eliminar)
+  - ✅ Formulario de 4 pestañas (Personal, Deportiva, Contacto, Médica)
+  - ✅ Validación con Zod + React Hook Form
+  - ✅ Visualización de ficha completa
+  - ✅ UI coherente con colores del club
+  - ✅ Notificaciones toast
+  - ✅ Tabla con búsqueda y filtros
 
-INSERT INTO profiles (id, email, role)
-VALUES (
-  (SELECT id FROM auth.users WHERE email = 'email@example.com'),
-  'email@example.com',
-  'admin'
-);
-```
+#### ⏳ Pendiente
+- **Gestión de Partidos:** Crear fixture, registrar resultados
+- **Gestión de Estadísticas:** Goles, asistencias, tarjetas por jugador/partido
+- **Gestión de Noticias:** Crear y publicar noticias
+- **Gestión de Galería:** Subir fotos y crear álbumes
 
-### Funcionalidades Admin
-
-- **Noticias:** Crear, editar, publicar noticias
-- **Partidos:** Gestionar fixture y resultados
-- **Galería:** Subir fotos y crear álbumes
-- **Jugadores:** Administrar plantel
-- **Mensajes:** Ver mensajes del formulario de contacto
+### Documentación del Admin
+- **Setup:** [Docs/SETUP_ADMIN.md](./Docs/SETUP_ADMIN.md)
+- **Estado:** [Docs/ADMIN_COMPLETADO.md](./Docs/ADMIN_COMPLETADO.md)
+- **Verificación:** [Docs/PASOS_VERIFICACION.md](./Docs/PASOS_VERIFICACION.md)
+- **Última sesión:** [Docs/SESION-31-DIC-2024.md](./Docs/SESION-31-DIC-2024.md)
 
 ## Gestión de Contenido
 
