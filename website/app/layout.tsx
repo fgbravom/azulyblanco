@@ -3,6 +3,7 @@ import { Montserrat, Open_Sans, Roboto_Mono } from "next/font/google";
 import "./globals.css";
 import { SITE_CONFIG } from "@/lib/constants";
 import { Toaster } from "@/components/ui/sonner";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 const montserrat = Montserrat({
   variable: "--font-montserrat",
@@ -78,6 +79,7 @@ export default function RootLayout({
       <body className="font-sans antialiased">
         {children}
         <Toaster />
+        <SpeedInsights />
       </body>
     </html>
   );
