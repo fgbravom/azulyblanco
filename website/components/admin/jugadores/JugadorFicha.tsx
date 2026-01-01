@@ -130,7 +130,7 @@ export default function JugadorFicha({ jugador, open, onClose }: Props) {
               />
               <InfoField
                 label="Posición"
-                value={`${jugador.posicion_nombre} (${jugador.posicion_abr})`}
+                value={`${jugador.posicion} (${jugador.posicion_abr})`}
                 icon={<Shield className="h-4 w-4" />}
               />
               <InfoField label="Dorsal" value={jugador.dorsal?.toString() || '-'} />
