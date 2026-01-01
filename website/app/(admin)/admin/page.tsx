@@ -1,33 +1,98 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Users, Trophy, BarChart3, Newspaper } from 'lucide-react';
+import { createClient } from '@supabase/supabase-js';
+import Link from 'next/link';
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
+
+async function getStats() {
+  try {
+    // Contar jugadores activos
+    const { count: jugadoresActivos } = await supabase
+      .from('jugadores')
+      .select('*', { count: 'exact', head: true })
+      .eq('activo', true)
+      .eq('estado', 'Activo');
+
+    // Contar próximos partidos (este mes)
+    const inicioMes = new Date();
+    inicioMes.setDate(1);
+    inicioMes.setHours(0, 0, 0, 0);
+
+    const finMes = new Date();
+    finMes.setMonth(finMes.getMonth() + 1);
+    finMes.setDate(0);
+    finMes.setHours(23, 59, 59, 999);
+
+    const { count: proximosPartidos } = await supabase
+      .from('partidos')
+      .select('*', { count: 'exact', head: true })
+      .gte('fecha', inicioMes.toISOString().split('T')[0])
+      .lte('fecha', finMes.toISOString().split('T')[0])
+      .in('estado', ['Programado', 'En curso']);
+
+    // Contar partidos jugados esta temporada
+    const inicioAnio = new Date();
+    inicioAnio.setMonth(0, 1);
+    inicioAnio.setHours(0, 0, 0, 0);
+
+    const { count: partidosJugados } = await supabase
+      .from('partidos')
+      .select('*', { count: 'exact', head: true })
+      .gte('fecha', inicioAnio.toISOString().split('T')[0])
+      .eq('estado', 'Finalizado');
+
+    return {
+      jugadoresActivos: jugadoresActivos || 0,
+      proximosPartidos: proximosPartidos || 0,
+      partidosJugados: partidosJugados || 0,
+      noticias: 0, // Por ahora, cuando tengas noticias en BD lo actualizaremos
+    };
+  } catch (error) {
+    console.error('Error obteniendo estadísticas:', error);
+    return {
+      jugadoresActivos: 0,
+      proximosPartidos: 0,
+      partidosJugados: 0,
+      noticias: 0,
+    };
+  }
+}
 
 export default async function AdminDashboard() {
-  // TODO: Obtener datos reales de la base de datos
+  const statsData = await getStats();
 
   const stats = [
     {
       title: 'Jugadores Activos',
-      value: '0',
+      value: statsData.jugadoresActivos.toString(),
       icon: Users,
       description: 'Total de jugadores en todas las categorías',
+      href: '/admin/jugadores',
     },
     {
       title: 'Próximos Partidos',
-      value: '0',
+      value: statsData.proximosPartidos.toString(),
       icon: Trophy,
       description: 'Partidos programados este mes',
+      href: '/admin/partidos',
     },
     {
       title: 'Partidos Jugados',
-      value: '0',
+      value: statsData.partidosJugados.toString(),
       icon: BarChart3,
       description: 'Partidos finalizados esta temporada',
+      href: '/admin/estadisticas',
     },
     {
       title: 'Noticias',
-      value: '0',
+      value: statsData.noticias.toString(),
       icon: Newspaper,
       description: 'Noticias publicadas',
+      href: '/admin/noticias',
     },
   ];
 
@@ -43,20 +108,22 @@ export default async function AdminDashboard() {
       {/* Grid de estadísticas */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {stats.map((stat) => (
-          <Card key={stat.title} className="border-azul-claro/20 hover:border-azul-primario/50 transition-colors">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-gray-700">
-                {stat.title}
-              </CardTitle>
-              <stat.icon className="h-4 w-4 text-azul-primario" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-azul-primario">{stat.value}</div>
-              <p className="text-xs text-gray-500 mt-1">
-                {stat.description}
-              </p>
-            </CardContent>
-          </Card>
+          <Link key={stat.title} href={stat.href} className="block">
+            <Card className="border-azul-claro/20 hover:border-azul-primario hover:shadow-lg transition-all cursor-pointer h-full">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium text-gray-700">
+                  {stat.title}
+                </CardTitle>
+                <stat.icon className="h-4 w-4 text-azul-primario" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-azul-primario">{stat.value}</div>
+                <p className="text-xs text-gray-500 mt-1">
+                  {stat.description}
+                </p>
+              </CardContent>
+            </Card>
+          </Link>
         ))}
       </div>
 

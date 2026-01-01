@@ -31,7 +31,7 @@ export default function HomePage() {
             <ProximosPartidos eventos={eventosEnero2026} limite={3} />
           </div>
           <div className="mt-8 text-center px-4">
-            <Button variant="outline" asChild className="border-white text-white hover:bg-white hover:text-azul-primario">
+            <Button variant="outline" asChild className="bg-transparent border-2 border-white text-white hover:bg-white hover:text-azul-primario transition-colors">
               <Link href="/partidos">Ver calendario completo →</Link>
             </Button>
           </div>
