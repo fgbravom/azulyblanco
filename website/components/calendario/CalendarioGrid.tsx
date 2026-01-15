@@ -13,12 +13,14 @@ import { NombrePartido } from './NombrePartido'
 
 interface CalendarioGridProps {
   eventos: EventoCalendario[]
-  mes: string
-  año: number
 }
 
-export function CalendarioGrid({ eventos, mes, año }: CalendarioGridProps) {
-  const [mesActual, setMesActual] = useState(new Date(año, 11, 1)) // Diciembre 2025
+export function CalendarioGrid({ eventos }: CalendarioGridProps) {
+  // Inicializar con el mes actual
+  const [mesActual, setMesActual] = useState(() => {
+    const hoy = new Date()
+    return new Date(hoy.getFullYear(), hoy.getMonth(), 1)
+  })
   const [eventoSeleccionado, setEventoSeleccionado] = useState<EventoCalendario | null>(null)
 
   // Días de la semana empezando por LUNES (estándar chileno)

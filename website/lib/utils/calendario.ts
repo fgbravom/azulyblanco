@@ -1,27 +1,50 @@
 import { EventoCalendario } from '@/lib/types/calendario'
 
+// Equipos que pertenecen a Azul y Blanco
+const EQUIPOS_AYB = ['AYB', 'AYB35', 'SERIE HONOR', 'SERIE 35', 'SERIE PRIMERA', 'HONOR', 'PRIMERA']
+
+/**
+ * Verifica si un nombre de equipo pertenece a Azul y Blanco
+ */
+export function esEquipoAYB(nombre: string): boolean {
+  const nombreUpper = nombre.toUpperCase().trim()
+  return EQUIPOS_AYB.some(equipo =>
+    nombreUpper === equipo ||
+    nombreUpper.includes('AYB') ||
+    nombreUpper.includes('AZUL Y BLANCO') ||
+    nombreUpper.startsWith('SERIE ')
+  )
+}
+
 /**
  * Formatea el nombre del rival reemplazando "AYB" con el componente visual del escudo
- * @param rivalText Texto del rival (ej: "AYB VS CLUB AMÉRICA")
+ * @param rivalText Texto del rival (ej: "AYB VS CLUB AMÉRICA" o "Serie Honor vs Serie 35")
  * @returns Objeto con las partes separadas para renderizado
  */
 export function formatearNombrePartido(rivalText: string): {
   esAyBLocal: boolean
+  esAyBVisitante: boolean
   equipoLocal: string
   equipoVisitante: string
 } {
-  if (!rivalText.includes(' VS ')) {
+  // Buscar separador "VS" o "vs" (case insensitive)
+  const vsMatch = rivalText.match(/\s+vs\s+/i)
+  if (!vsMatch) {
     return {
       esAyBLocal: false,
+      esAyBVisitante: false,
       equipoLocal: '',
       equipoVisitante: rivalText
     }
   }
 
-  const [equipoLocal, equipoVisitante] = rivalText.split(' VS ').map(e => e.trim())
+  const parts = rivalText.split(vsMatch[0])
+  const equipoLocal = parts[0].trim()
+  const equipoVisitante = parts[1].trim()
 
   return {
-    esAyBLocal: equipoLocal.toUpperCase() === 'AYB',
+    esAyBLocal: esEquipoAYB(equipoLocal),
+    esAyBVisitante: esEquipoAYB(equipoVisitante),
     equipoLocal,
     equipoVisitante
   }

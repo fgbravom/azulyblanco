@@ -14,30 +14,77 @@ export function NombrePartido({
   mostrarVS = true,
   tamañoEscudo = 24
 }: NombrePartidoProps) {
-  const { esAyBLocal, equipoLocal, equipoVisitante } = formatearNombrePartido(rivalText)
+  const { esAyBLocal, esAyBVisitante, equipoLocal, equipoVisitante } = formatearNombrePartido(rivalText)
 
+  // Enfrentamiento interno (ambos son equipos AYB)
+  if (esAyBLocal && esAyBVisitante) {
+    return (
+      <div className={`flex items-center gap-2 flex-wrap ${className}`}>
+        <div className="relative flex-shrink-0" style={{ width: tamañoEscudo, height: tamañoEscudo }}>
+          <Image
+            src="/images/escudoazulyblanco.png"
+            alt="Azul y Blanco"
+            fill
+            className="object-contain"
+          />
+        </div>
+        <span className="font-bold">{equipoLocal}</span>
+        {mostrarVS && <span className="text-white/70 font-normal">VS</span>}
+        <span className="font-bold">{equipoVisitante}</span>
+        <div className="relative flex-shrink-0" style={{ width: tamañoEscudo, height: tamañoEscudo }}>
+          <Image
+            src="/images/escudoazulyblanco.png"
+            alt="Azul y Blanco"
+            fill
+            className="object-contain"
+          />
+        </div>
+      </div>
+    )
+  }
+
+  // AYB es local
+  if (esAyBLocal) {
+    return (
+      <div className={`flex items-center gap-2 ${className}`}>
+        <div className="relative flex-shrink-0" style={{ width: tamañoEscudo, height: tamañoEscudo }}>
+          <Image
+            src="/images/escudoazulyblanco.png"
+            alt="Azul y Blanco"
+            fill
+            className="object-contain"
+          />
+        </div>
+        <span className="font-bold">{equipoLocal}</span>
+        {mostrarVS && <span className="text-white/70 font-normal">VS</span>}
+        <span>{equipoVisitante}</span>
+      </div>
+    )
+  }
+
+  // AYB es visitante
+  if (esAyBVisitante) {
+    return (
+      <div className={`flex items-center gap-2 ${className}`}>
+        <span>{equipoLocal}</span>
+        {mostrarVS && <span className="text-white/70 font-normal">VS</span>}
+        <span className="font-bold">{equipoVisitante}</span>
+        <div className="relative flex-shrink-0" style={{ width: tamañoEscudo, height: tamañoEscudo }}>
+          <Image
+            src="/images/escudoazulyblanco.png"
+            alt="Azul y Blanco"
+            fill
+            className="object-contain"
+          />
+        </div>
+      </div>
+    )
+  }
+
+  // Ninguno es AYB (no debería pasar normalmente)
   return (
     <div className={`flex items-center gap-2 ${className}`}>
-      {esAyBLocal ? (
-        <>
-          {/* Escudo de AYB */}
-          <div className="relative flex-shrink-0" style={{ width: tamañoEscudo, height: tamañoEscudo }}>
-            <Image
-              src="/images/escudoazulyblanco.png"
-              alt="Azul y Blanco"
-              fill
-              className="object-contain"
-            />
-          </div>
-          <span className="font-bold">AYB</span>
-          {mostrarVS && <span className="text-gray-500 font-normal">VS</span>}
-          <span>{equipoVisitante}</span>
-        </>
-      ) : (
-        <>
-          <span>{equipoLocal || equipoVisitante}</span>
-        </>
-      )}
+      <span>{equipoLocal || equipoVisitante}</span>
     </div>
   )
 }

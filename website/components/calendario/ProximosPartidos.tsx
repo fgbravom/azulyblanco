@@ -23,18 +23,41 @@ export function ProximosPartidos({ eventos, limite = 3 }: ProximosPartidosProps)
     return obtenerProximosEventos(eventos, limite)
   }, [eventos, limite])
 
+  // Equipos que pertenecen a Azul y Blanco
+  const equiposAYB = ['AYB', 'AYB35', 'SERIE HONOR', 'SERIE 35', 'SERIE PRIMERA', 'HONOR', 'PRIMERA']
+
+  const esEquipoAYB = (nombre: string): boolean => {
+    const nombreUpper = nombre.toUpperCase().trim()
+    return equiposAYB.some(equipo =>
+      nombreUpper === equipo ||
+      nombreUpper.includes('AYB') ||
+      nombreUpper.includes('AZUL Y BLANCO') ||
+      nombreUpper.startsWith('SERIE ')
+    )
+  }
+
   const parseRival = (rivalText: string) => {
-    // Formato esperado: "AYB VS RIVAL"
-    const parts = rivalText.split(' VS ')
-    if (parts.length === 2) {
+    // Buscar separador "VS" o "vs"
+    const vsMatch = rivalText.match(/\s+vs\s+/i)
+    if (vsMatch) {
+      const parts = rivalText.split(vsMatch[0])
+      const local = parts[0].trim()
+      const visitante = parts[1].trim()
+
       return {
-        local: parts[0].trim(),
-        visitante: parts[1].trim()
+        local,
+        visitante,
+        localEsAYB: esEquipoAYB(local),
+        visitanteEsAYB: esEquipoAYB(visitante)
       }
     }
+
+    // Sin formato VS, asumir que es solo el nombre del rival
     return {
       local: 'AYB',
-      visitante: rivalText
+      visitante: rivalText,
+      localEsAYB: true,
+      visitanteEsAYB: false
     }
   }
 
@@ -64,22 +87,26 @@ export function ProximosPartidos({ eventos, limite = 3 }: ProximosPartidosProps)
         const esEvento = evento.tipo === 'evento'
 
         // Para entrenamientos, verificar si tiene formato "X vs Y" para enfrentamiento interno
-        let equipos
+        let equipos: { local: string; visitante: string; localEsAYB: boolean; visitanteEsAYB: boolean }
         if (esEntrenamiento && evento.actividad?.toLowerCase().includes(' vs ')) {
           const partes = evento.actividad.split(/\s+vs\s+/i)
+          const local = partes[0].trim()
+          const visitante = partes[1].trim()
           equipos = {
-            local: partes[0].trim(),
-            visitante: partes[1].trim()
+            local,
+            visitante,
+            localEsAYB: esEquipoAYB(local),
+            visitanteEsAYB: esEquipoAYB(visitante)
           }
         } else if (esEntrenamiento) {
-          equipos = { local: 'AYB', visitante: evento.actividad || 'Entrenamiento' }
+          equipos = { local: 'AYB', visitante: evento.actividad || 'Entrenamiento', localEsAYB: true, visitanteEsAYB: false }
         } else if (esEvento) {
-          equipos = { local: 'AYB', visitante: evento.titulo || 'Evento Especial' }
+          equipos = { local: 'AYB', visitante: evento.titulo || 'Evento Especial', localEsAYB: true, visitanteEsAYB: false }
         } else {
           equipos = parseRival(evento.rival || 'Por confirmar')
         }
 
-        const esEnfrentamientoInterno = esEntrenamiento && evento.actividad?.toLowerCase().includes(' vs ')
+        const esEnfrentamientoInterno = equipos.localEsAYB && equipos.visitanteEsAYB
         const fechaInfo = formatearFecha(evento.fecha, evento.dia)
 
         return (
@@ -135,14 +162,24 @@ export function ProximosPartidos({ eventos, limite = 3 }: ProximosPartidosProps)
               <div className="flex items-center justify-between px-4 md:px-8 py-6 md:py-8 gap-2 md:gap-4">
                 {/* Equipo Local / Club */}
                 <div className="flex items-center gap-2 md:gap-6 flex-1 min-w-0">
-                  <div className="relative w-10 h-10 md:w-16 md:h-16 flex-shrink-0">
-                    <Image
-                      src="/images/escudoazulyblanco.png"
-                      alt={equipos.local}
-                      fill
-                      className="object-contain"
-                    />
-                  </div>
+                  {equipos.localEsAYB ? (
+                    <div className="relative w-10 h-10 md:w-16 md:h-16 flex-shrink-0">
+                      <Image
+                        src="/images/escudoazulyblanco.png"
+                        alt={equipos.local}
+                        fill
+                        className="object-contain"
+                      />
+                    </div>
+                  ) : (
+                    <div className="relative w-10 h-10 md:w-16 md:h-16 flex-shrink-0 bg-white rounded-full p-2">
+                      <div className="w-full h-full bg-gray-200 rounded-full flex items-center justify-center">
+                        <span className="text-gray-400 text-[10px] md:text-sm font-bold">
+                          {equipos.local.substring(0, 3).toUpperCase()}
+                        </span>
+                      </div>
+                    </div>
+                  )}
                   <h3 className="text-white font-bold text-sm md:text-2xl truncate">
                     {equipos.local}
                   </h3>
@@ -167,7 +204,7 @@ export function ProximosPartidos({ eventos, limite = 3 }: ProximosPartidosProps)
                   <h3 className="text-white font-bold text-sm md:text-2xl truncate text-right">
                     {equipos.visitante}
                   </h3>
-                  {esEnfrentamientoInterno ? (
+                  {equipos.visitanteEsAYB ? (
                     <div className="relative w-10 h-10 md:w-16 md:h-16 flex-shrink-0">
                       <Image
                         src="/images/escudoazulyblanco.png"
@@ -180,7 +217,7 @@ export function ProximosPartidos({ eventos, limite = 3 }: ProximosPartidosProps)
                     <div className="relative w-10 h-10 md:w-16 md:h-16 flex-shrink-0 bg-white rounded-full p-2">
                       <div className="w-full h-full bg-gray-200 rounded-full flex items-center justify-center">
                         <span className="text-gray-400 text-[10px] md:text-sm font-bold">
-                          {equipos.visitante.substring(0, 3)}
+                          {equipos.visitante.substring(0, 3).toUpperCase()}
                         </span>
                       </div>
                     </div>

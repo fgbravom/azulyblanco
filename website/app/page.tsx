@@ -28,7 +28,7 @@ export default function HomePage() {
             </div>
           </div>
           <div className="w-full">
-            <ProximosPartidos eventos={eventosEnero2026} limite={3} />
+            <ProximosPartidos eventos={eventosEnero2026} limite={4} />
           </div>
           <div className="mt-8 text-center px-4">
             <Button variant="outline" asChild className="bg-transparent border-2 border-white text-white hover:bg-white hover:text-azul-primario transition-colors">
