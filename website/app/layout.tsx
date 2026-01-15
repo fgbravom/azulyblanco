@@ -76,7 +76,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es" className={`${montserrat.variable} ${openSans.variable} ${robotoMono.variable}`} suppressHydrationWarning>
-      <body className="font-sans antialiased">
+      <body className="font-sans antialiased" style={{ backgroundColor: '#020280' }}>
         {children}
         <Toaster />
         <SpeedInsights />

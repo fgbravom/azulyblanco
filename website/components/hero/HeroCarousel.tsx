@@ -30,38 +30,30 @@ interface HeroCarouselProps {
 }
 
 export function HeroCarousel({ currentIndex: externalIndex, onIndexChange }: HeroCarouselProps) {
-  // Calcular isMobile y selectedIndex ANTES del primer render para evitar flash
-  const [isMobile, setIsMobile] = useState(() => {
-    if (typeof window === 'undefined') return false
-    return window.innerWidth < 768
-  })
+  // Iniciar con valores por defecto para que servidor y cliente coincidan
+  const [isMobile, setIsMobile] = useState(false)
+  const [selectedIndex, setSelectedIndex] = useState(0)
+  const hasInitialized = useRef(false)
 
-  const [selectedIndex, setSelectedIndex] = useState(() => {
-    if (typeof window === 'undefined') return 0
+  useEffect(() => {
+    if (hasInitialized.current) return
+    hasInitialized.current = true
 
     // Detectar viewport
     const checkIsMobile = window.innerWidth < 768
-    const images = checkIsMobile ? heroImagesMobile : heroImagesDesktop
+    setIsMobile(checkIsMobile)
 
-    // Calcular siguiente índice
+    // Calcular siguiente índice desde localStorage
+    const images = checkIsMobile ? heroImagesMobile : heroImagesDesktop
     const storageKey = checkIsMobile ? 'heroCarousel_mobile_index' : 'heroCarousel_desktop_index'
     const lastIndex = localStorage.getItem(storageKey)
     const nextIndex = lastIndex === null ? 0 : (parseInt(lastIndex) + 1) % images.length
 
     // Guardar el nuevo índice en localStorage
     localStorage.setItem(storageKey, nextIndex.toString())
+    setSelectedIndex(nextIndex)
 
-    return nextIndex
-  })
-
-  const hasInitialized = useRef(false)
-
-  useEffect(() => {
-    // Solo ejecutar una vez al montar para agregar el listener de resize
-    if (hasInitialized.current) return
-    hasInitialized.current = true
-
-    // Listener para resize (solo para actualizar isMobile, no el índice)
+    // Listener para resize
     const handleResize = () => {
       setIsMobile(window.innerWidth < 768)
     }
@@ -75,29 +67,20 @@ export function HeroCarousel({ currentIndex: externalIndex, onIndexChange }: Her
 
   // Sin rotación automática - la imagen se mantiene fija
 
+  // Solo renderizar la imagen actual - no hay carrusel automático
+  const currentImage = heroImages[currentIndex]
+
   return (
     <div className="absolute inset-0">
-      {heroImages.map((image, index) => (
-        <div
-          key={image}
-          className={`absolute inset-0 transition-opacity duration-1000 ${
-            index === currentIndex ? 'opacity-100' : 'opacity-0'
-          }`}
-        >
-          <Image
-            src={image}
-            alt={`Azul y Blanco ${index + 1}`}
-            fill
-            className="object-cover object-center"
-            priority={index === 0}
-            quality={85}
-            sizes="100vw"
-          />
-        </div>
-      ))}
-
-      {/* Dark Overlay for text contrast */}
-      <div className="absolute inset-0 bg-black/0" />
+      <Image
+        src={currentImage}
+        alt="Azul y Blanco"
+        fill
+        className="object-cover object-center"
+        priority
+        quality={85}
+        sizes="100vw"
+      />
     </div>
   )
 }

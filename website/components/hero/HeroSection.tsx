@@ -4,7 +4,6 @@ import dynamic from 'next/dynamic'
 import { useState, useEffect } from 'react'
 
 const HeroCarousel = dynamic(() => import('./HeroCarousel').then(mod => ({ default: mod.HeroCarousel })), {
-  ssr: false,
   loading: () => (
     <div className="absolute inset-0 bg-azul-primario" />
   )
@@ -17,7 +16,7 @@ export function HeroSection() {
     // Iniciar animación después de un breve delay
     const timer = setTimeout(() => {
       setAnimating(true)
-    }, 300)
+    }, 100)
 
     return () => clearTimeout(timer)
   }, [])
