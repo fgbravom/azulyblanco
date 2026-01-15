@@ -1,11 +1,12 @@
 import { Header } from '@/components/layout/Header'
 import { Footer } from '@/components/layout/Footer'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { SITE_CONFIG } from '@/lib/constants'
+import { Mail, Phone, MapPin, Send } from 'lucide-react'
+import { FaInstagram, FaFacebook } from 'react-icons/fa'
 
 export const metadata = {
   title: 'Contacto',
@@ -22,197 +23,149 @@ export default function ContactoPage() {
           <div className="container mx-auto px-4 max-w-6xl text-center">
             <h1 className="text-5xl md:text-6xl font-bold mb-6">Contacto</h1>
             <p className="text-xl text-gray-200">
-              ¿Querés ser parte del club? ¡Escribinos!
+              ¿Quieres ser parte del club? ¡Escribenos!
             </p>
           </div>
         </section>
 
-        {/* Contenido */}
+        {/* Contenido Principal */}
         <section className="py-16 px-4">
-          <div className="container mx-auto max-w-6xl">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+          <div className="container mx-auto max-w-5xl">
+            <div className="grid grid-cols-1 lg:grid-cols-5 gap-12">
+
               {/* Formulario */}
-              <div>
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Envianos un mensaje</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <form className="space-y-4">
-                      <div>
-                        <Label htmlFor="nombre">Nombre completo *</Label>
+              <div className="lg:col-span-3">
+                <div className="bg-white rounded-lg border border-gray-200">
+                  <div className="p-6 border-b border-gray-100">
+                    <h2 className="text-xl font-semibold text-gray-900">Envianos un mensaje</h2>
+                  </div>
+
+                  <form className="p-6 space-y-5">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                      <div className="space-y-2">
+                        <Label htmlFor="nombre" className="text-gray-700">Nombre completo</Label>
                         <Input
                           id="nombre"
                           type="text"
                           placeholder="Juan Pérez"
                           required
-                          className="mt-1"
+                          className="h-11 border-gray-200 focus:border-azul-primario focus:ring-azul-primario/20"
                         />
                       </div>
 
-                      <div>
-                        <Label htmlFor="email">Email *</Label>
+                      <div className="space-y-2">
+                        <Label htmlFor="email" className="text-gray-700">Email</Label>
                         <Input
                           id="email"
                           type="email"
                           placeholder="tu@email.com"
                           required
-                          className="mt-1"
+                          className="h-11 border-gray-200 focus:border-azul-primario focus:ring-azul-primario/20"
                         />
                       </div>
+                    </div>
 
-                      <div>
-                        <Label htmlFor="telefono">Teléfono</Label>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                      <div className="space-y-2">
+                        <Label htmlFor="telefono" className="text-gray-700">
+                          Teléfono <span className="text-gray-400 text-sm">(opcional)</span>
+                        </Label>
                         <Input
                           id="telefono"
                           type="tel"
-                          placeholder="+54 9 11 1234-5678"
-                          className="mt-1"
+                          placeholder="+569 311 930 07"
+                          className="h-11 border-gray-200 focus:border-azul-primario focus:ring-azul-primario/20"
                         />
                       </div>
 
-                      <div>
-                        <Label htmlFor="asunto">Asunto *</Label>
+                      <div className="space-y-2">
+                        <Label htmlFor="asunto" className="text-gray-700">Asunto</Label>
                         <Input
                           id="asunto"
                           type="text"
                           placeholder="Quiero unirme al club"
                           required
-                          className="mt-1"
+                          className="h-11 border-gray-200 focus:border-azul-primario focus:ring-azul-primario/20"
                         />
                       </div>
+                    </div>
 
-                      <div>
-                        <Label htmlFor="mensaje">Mensaje *</Label>
-                        <Textarea
-                          id="mensaje"
-                          placeholder="Contanos por qué querés ser parte de Azul y Blanco..."
-                          required
-                          className="mt-1 min-h-32"
-                        />
-                      </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="mensaje" className="text-gray-700">Mensaje</Label>
+                      <Textarea
+                        id="mensaje"
+                        placeholder="Cuentanos por qué quieres ser parte de Azul y Blanco..."
+                        required
+                        className="min-h-32 border-gray-200 focus:border-azul-primario focus:ring-azul-primario/20 resize-none"
+                      />
+                    </div>
 
-                      <Button type="submit" className="w-full bg-azul-primario hover:bg-azul-oscuro">
-                        Enviar Mensaje
-                      </Button>
-
-                      <p className="text-xs text-gray-500 text-center">
-                        * Campos obligatorios
-                      </p>
-                    </form>
-                  </CardContent>
-                </Card>
+                    <Button
+                      type="submit"
+                      className="w-full h-12 bg-azul-primario hover:bg-azul-oscuro text-white font-medium transition-colors"
+                    >
+                      <Send className="w-4 h-4 mr-2" />
+                      Enviar Mensaje
+                    </Button>
+                  </form>
+                </div>
               </div>
 
-              {/* Información de Contacto */}
-              <div className="space-y-6">
-                {/* Datos de Contacto */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Información de Contacto</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="flex items-start gap-3">
-                      <div className="text-2xl">📧</div>
-                      <div>
-                        <p className="font-semibold">Email</p>
-                        <a
-                          href={`mailto:${SITE_CONFIG.contact.email}`}
-                          className="text-azul-primario hover:underline"
-                        >
-                          {SITE_CONFIG.contact.email}
-                        </a>
-                      </div>
-                    </div>
+              {/* Sidebar */}
+              <div className="lg:col-span-2 space-y-6">
 
-                    <div className="flex items-start gap-3">
-                      <div className="text-2xl">📱</div>
-                      <div>
-                        <p className="font-semibold">Teléfono</p>
-                        <a
-                          href={`tel:${SITE_CONFIG.contact.phone}`}
-                          className="text-azul-primario hover:underline"
-                        >
-                          {SITE_CONFIG.contact.phone}
-                        </a>
-                      </div>
-                    </div>
+                {/* Información de contacto */}
+                <div className="bg-white rounded-lg border border-gray-200 p-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-5">Información de Contacto</h3>
 
-                    <div className="flex items-start gap-3">
-                      <div className="text-2xl">📍</div>
-                      <div>
-                        <p className="font-semibold">Dirección</p>
-                        <p className="text-gray-600">{SITE_CONFIG.contact.address}</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                  <div className="space-y-4">
+                    <a
+                      href={`mailto:${SITE_CONFIG.contact.email}`}
+                      className="flex items-center gap-3 text-gray-600 hover:text-azul-primario transition-colors"
+                    >
+                      <Mail className="w-5 h-5 text-azul-primario" />
+                      <span>{SITE_CONFIG.contact.email}</span>
+                    </a>
 
-                {/* Horarios */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Horarios de Entrenamiento</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <div className="flex justify-between items-center py-2 border-b">
-                      <span className="font-semibold">Sábados</span>
-                      <span className="text-gray-600">15:00 - 17:00hs</span>
-                    </div>
-                    <div className="flex justify-between items-center py-2 border-b">
-                      <span className="font-semibold">Domingos</span>
-                      <span className="text-gray-600">09:00 - 11:00hs</span>
-                    </div>
-                    <p className="text-sm text-gray-500 mt-4">
-                      📍 Estadio Municipal - Campo 2
-                    </p>
-                  </CardContent>
-                </Card>
+                    <a
+                      href={`tel:${SITE_CONFIG.contact.phone}`}
+                      className="flex items-center gap-3 text-gray-600 hover:text-azul-primario transition-colors"
+                    >
+                      <Phone className="w-5 h-5 text-azul-primario" />
+                      <span>{SITE_CONFIG.contact.phone}</span>
+                    </a>
 
-                {/* Redes Sociales */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Seguinos en Redes</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex gap-4">
+                    <div className="flex items-center gap-3 text-gray-600">
+                      <MapPin className="w-5 h-5 text-azul-primario flex-shrink-0" />
+                      <span>{SITE_CONFIG.contact.address}</span>
+                    </div>
+                  </div>
+
+                  {/* Redes sociales - Botones pequeños */}
+                  <div className="mt-6 pt-5 border-t border-gray-100">
+                    <p className="text-sm text-gray-500 mb-3">Siguenos en redes</p>
+                    <div className="flex gap-3">
                       <a
                         href={SITE_CONFIG.social.instagram}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-2 px-4 py-2 bg-gradient-to-br from-purple-500 to-pink-500 text-white rounded-lg hover:shadow-lg transition-shadow"
+                        className="p-2 rounded-lg bg-gray-100 text-gray-600 hover:bg-azul-primario hover:text-white transition-colors"
+                        aria-label="Instagram"
                       >
-                        <span className="text-xl">📷</span>
-                        <span className="font-semibold">Instagram</span>
+                        <FaInstagram className="w-5 h-5" />
                       </a>
-
                       <a
                         href={SITE_CONFIG.social.facebook}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:shadow-lg transition-shadow"
+                        className="p-2 rounded-lg bg-gray-100 text-gray-600 hover:bg-azul-primario hover:text-white transition-colors"
+                        aria-label="Facebook"
                       >
-                        <span className="text-xl">👍</span>
-                        <span className="font-semibold">Facebook</span>
+                        <FaFacebook className="w-5 h-5" />
                       </a>
                     </div>
-                  </CardContent>
-                </Card>
-
-                {/* Mapa Placeholder */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Cómo Llegar</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="h-64 bg-gradient-to-br from-gray-200 to-gray-300 rounded-lg flex items-center justify-center">
-                      <div className="text-center text-gray-600">
-                        <div className="text-5xl mb-2">🗺️</div>
-                        <p className="text-sm">Mapa de ubicación</p>
-                        <p className="text-xs">(Integrar Google Maps)</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
