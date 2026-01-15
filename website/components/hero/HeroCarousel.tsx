@@ -1,105 +1,110 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import Image from 'next/image'
 
-const heroImagesDesktop = [
-  '/images/fotoportada0.jpg',
-  '/images/fotoportada1.jpg',
-  '/images/fotoportada2.jpg',
-  '/images/fotoportada3.jpg',
-  '/images/fotoportada4.jpg',
-  '/images/fotoportada5.jpg',
-  '/images/fotoportada6.jpg',
-]
+/* ============================================
+ * HeroImage - Imagen de portada rotativa
+ *
+ * Muestra una imagen diferente cada vez que
+ * se carga la página. Mantiene índices separados
+ * para desktop y móvil en localStorage.
+ * ============================================ */
 
-const heroImagesMobile = [
-  '/images/portadamovil0.jpg',
-  '/images/portadamovil1.jpg',
-  '/images/portadamovil2.jpg',
-  '/images/portadamovil3.jpg',
-  '/images/portadamovil4.jpg',
-  '/images/portadamovil5.jpg',
-  '/images/portadamovil6.jpg',
-]
+// Configuración
+const MOBILE_BREAKPOINT = 768
 
+const STORAGE_KEYS = {
+  desktop: 'hero_index_desktop',
+  mobile: 'hero_index_mobile',
+} as const
 
-interface HeroCarouselProps {
-  currentIndex?: number
-  onIndexChange?: (index: number) => void
+// Imágenes por dispositivo
+const IMAGES = {
+  desktop: [
+    '/images/fotoportada0.jpg',
+    '/images/fotoportada1.jpg',
+    '/images/fotoportada2.jpg',
+    '/images/fotoportada3.jpg',
+    '/images/fotoportada4.jpg',
+    '/images/fotoportada5.jpg',
+    '/images/fotoportada6.jpg',
+  ],
+  mobile: [
+    '/images/portadamovil0.jpg',
+    '/images/portadamovil1.jpg',
+    '/images/portadamovil2.jpg',
+    '/images/portadamovil3.jpg',
+    '/images/portadamovil4.jpg',
+    '/images/portadamovil5.jpg',
+    '/images/portadamovil6.jpg',
+  ],
+} as const
+
+/* ============================================
+ * Utilidades
+ * ============================================ */
+
+/**
+ * Detecta si el viewport es móvil
+ */
+function checkIsMobile(): boolean {
+  return typeof window !== 'undefined' && window.innerWidth < MOBILE_BREAKPOINT
 }
 
-export function HeroCarousel({ currentIndex: externalIndex, onIndexChange }: HeroCarouselProps) {
-  // Calcular isMobile y selectedIndex ANTES del primer render para evitar flash
-  const [isMobile, setIsMobile] = useState(() => {
-    if (typeof window === 'undefined') return false
-    return window.innerWidth < 768
-  })
+/**
+ * Obtiene el siguiente índice de imagen y lo guarda en localStorage
+ */
+function getNextImageIndex(isMobile: boolean): number {
+  const key = isMobile ? STORAGE_KEYS.mobile : STORAGE_KEYS.desktop
+  const images = isMobile ? IMAGES.mobile : IMAGES.desktop
 
-  const [selectedIndex, setSelectedIndex] = useState(() => {
-    if (typeof window === 'undefined') return 0
+  const lastIndex = localStorage.getItem(key)
+  const nextIndex = lastIndex === null
+    ? 0
+    : (parseInt(lastIndex, 10) + 1) % images.length
 
-    // Detectar viewport
-    const checkIsMobile = window.innerWidth < 768
-    const images = checkIsMobile ? heroImagesMobile : heroImagesDesktop
+  localStorage.setItem(key, nextIndex.toString())
 
-    // Calcular siguiente índice
-    const storageKey = checkIsMobile ? 'heroCarousel_mobile_index' : 'heroCarousel_desktop_index'
-    const lastIndex = localStorage.getItem(storageKey)
-    const nextIndex = lastIndex === null ? 0 : (parseInt(lastIndex) + 1) % images.length
+  return nextIndex
+}
 
-    // Guardar el nuevo índice en localStorage
-    localStorage.setItem(storageKey, nextIndex.toString())
+/* ============================================
+ * Componente
+ * ============================================ */
 
-    return nextIndex
-  })
+export function HeroCarousel() {
+  // Estado de la imagen a mostrar (null durante SSR)
+  const [imageSrc, setImageSrc] = useState<string | null>(null)
 
-  const hasInitialized = useRef(false)
-
+  // Inicialización en cliente (se ejecuta una vez al montar)
   useEffect(() => {
-    // Solo ejecutar una vez al montar para agregar el listener de resize
-    if (hasInitialized.current) return
-    hasInitialized.current = true
+    const isMobile = checkIsMobile()
+    const index = getNextImageIndex(isMobile)
+    const images = isMobile ? IMAGES.mobile : IMAGES.desktop
 
-    // Listener para resize (solo para actualizar isMobile, no el índice)
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < 768)
-    }
-    window.addEventListener('resize', handleResize)
-
-    return () => window.removeEventListener('resize', handleResize)
+    setImageSrc(images[index])
   }, [])
 
-  const heroImages = isMobile ? heroImagesMobile : heroImagesDesktop
-  const currentIndex = externalIndex !== undefined ? externalIndex : selectedIndex
-
-  // Sin rotación automática - la imagen se mantiene fija
+  // Placeholder durante SSR/hidratación
+  if (!imageSrc) {
+    return <div className="absolute inset-0 bg-gray-900" />
+  }
 
   return (
     <div className="absolute inset-0">
-      {heroImages.map((image, index) => (
-        <div
-          key={image}
-          className={`absolute inset-0 transition-opacity duration-1000 ${
-            index === currentIndex ? 'opacity-100' : 'opacity-0'
-          }`}
-        >
-          <Image
-            src={image}
-            alt={`Azul y Blanco ${index + 1}`}
-            fill
-            className="object-cover object-center"
-            priority={index === 0}
-            quality={85}
-            sizes="100vw"
-          />
-        </div>
-      ))}
-
-      {/* Dark Overlay for text contrast */}
-      <div className="absolute inset-0 bg-black/0" />
+      <Image
+        src={imageSrc}
+        alt="Club Deportivo Azul y Blanco"
+        fill
+        priority
+        quality={85}
+        sizes="100vw"
+        className="object-cover object-center"
+      />
     </div>
   )
 }
 
-export { heroImagesDesktop as heroImages }
+// Export para compatibilidad con otros componentes
+export { IMAGES as heroImages }
