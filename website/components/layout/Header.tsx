@@ -46,11 +46,11 @@ export function Header({ isHome = false }: HeaderProps) {
             : 'bg-transparent'
           : 'bg-azul-primario'
       }`}>
-        <div className="container mx-auto px-2 md:px-3 lg:px-4">
-          <div className="flex h-22 md:h-16 lg:h-20 items-center justify-between gap-1 md:gap-2 lg:gap-4">
-            {/* Mobile Menu Button - Left on mobile */}
+        <div className="container mx-auto px-2 2xl:px-4">
+          <div className="flex h-22 2xl:h-20 items-center justify-between gap-1 2xl:gap-4">
+            {/* Mobile Menu Button - Visible below 1536px */}
             <button
-              className="md:hidden p-2 order-1 text-white transition-colors duration-300 relative z-[60]"
+              className="2xl:hidden p-2 order-1 text-white transition-colors duration-300 relative z-[60]"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               aria-label="Toggle menu"
             >
@@ -79,18 +79,18 @@ export function Header({ isHome = false }: HeaderProps) {
             </button>
 
             {/* Logo - Always centered */}
-            <Link href="/" className="flex items-center flex-shrink-0 order-2 absolute left-1/2 -translate-x-1/2 lg:top-1">
+            <Link href="/" className="flex items-center flex-shrink-0 order-2 absolute left-1/2 -translate-x-1/2 2xl:top-1">
               <Image
                 src="/images/escudoazulyblanco.png"
                 alt={`Escudo ${SITE_CONFIG.name}`}
                 width={200}
                 height={200}
-                className="h-20 md:h-11 lg:h-40 w-auto"
+                className="h-20 2xl:h-35 w-auto"
               />
             </Link>
 
-            {/* Navigation - Desktop */}
-            <nav className="hidden md:flex items-center gap-0.5 lg:gap-2 order-1 md:ml-4 md:pt-7" suppressHydrationWarning>
+            {/* Navigation - Desktop (visible from 1536px to handle 125% zoom) */}
+            <nav className="hidden 2xl:flex items-center gap-2 order-1 2xl:ml-4 2xl:pt-7 max-w-[40%]" suppressHydrationWarning>
               {mounted && NAVIGATION_ITEMS.map((item) => (
                 item.submenu ? (
                   <DropdownMenu key={item.href}>
@@ -124,7 +124,7 @@ export function Header({ isHome = false }: HeaderProps) {
             </nav>
 
             {/* Social Media Icons - Between logo and CTA */}
-            <div className="hidden md:flex items-center gap-3 flex-shrink-0 order-3 md:pt-7 ml-30">
+            <div className="hidden 2xl:flex items-center gap-3 flex-shrink-0 order-3 2xl:pt-7 ml-30">
               <Link
                 href={SITE_CONFIG.social.instagram}
                 target="_blank"
@@ -132,7 +132,7 @@ export function Header({ isHome = false }: HeaderProps) {
                 className="text-white hover:text-azul-claro transition-colors"
                 aria-label="Instagram"
               >
-                <FaInstagram className="w-5 h-5 lg:w-6 lg:h-6" />
+                <FaInstagram className="w-6 h-6" />
               </Link>
               {/*<Link
                 href={SITE_CONFIG.social.facebook}
@@ -141,33 +141,33 @@ export function Header({ isHome = false }: HeaderProps) {
                 className="text-white hover:text-azul-claro transition-colors"
                 aria-label="Facebook"
               >
-                <FaFacebook className="w-5 h-5 lg:w-6 lg:h-6" />
+                <FaFacebook className="w-6 h-6" />
               </Link>*/}
             </div>
 
-            {/* CTA Button - Right side, hidden on mobile */}
-            <div className="hidden md:block flex-shrink-0 order-4 md:pt-3" >
-              <Button asChild className="bg-white hover:bg-azul-claro text-azul-primario hover:text-white text-[11px] lg:text-sm px-2 lg:px-4 h-7 lg:h-10 transition-colors">
+            {/* CTA Button - Right side, visible from 1536px */}
+            <div className="hidden 2xl:block flex-shrink-0 order-4 2xl:pt-3">
+              <Button asChild className="bg-white hover:bg-azul-claro text-azul-primario hover:text-white text-sm px-4 h-10 transition-colors">
                 <Link href="/contacto">Únete al Club</Link>
               </Button>
             </div>
 
             {/* Spacer for mobile to balance layout */}
-            <div className="md:hidden w-10 order-3"></div>
+            <div className="2xl:hidden w-10 order-3"></div>
           </div>
         </div>
       </header>
 
-      {/* Mobile Menu Sidebar */}
+      {/* Mobile Menu Sidebar - Visible below 1536px */}
       <div
-        className={`fixed inset-0 bg-black/50 z-[55] md:hidden transition-opacity duration-300 ${
+        className={`fixed inset-0 bg-black/50 z-[55] 2xl:hidden transition-opacity duration-300 ${
           mobileMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
         }`}
         onClick={() => setMobileMenuOpen(false)}
       />
 
       <div
-        className={`fixed top-0 left-0 h-full w-[80%] bg-white z-[56] md:hidden transform transition-transform duration-300 ease-in-out ${
+        className={`fixed top-0 left-0 h-full w-[80%] max-w-md bg-white z-[56] 2xl:hidden transform transition-transform duration-300 ease-in-out ${
           mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
