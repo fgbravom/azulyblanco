@@ -86,9 +86,9 @@ export function HeroCarousel() {
     setImageSrc(images[index])
   }, [])
 
-  // Placeholder durante SSR/hidratación
+  // Placeholder durante hidratación (el fondo azul viene del padre)
   if (!imageSrc) {
-    return <div className="absolute inset-0 bg-gray-900" />
+    return null
   }
 
   return (
