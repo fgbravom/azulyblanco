@@ -4,6 +4,7 @@ import "./globals.css";
 import { SITE_CONFIG } from "@/lib/constants";
 import { Toaster } from "@/components/ui/sonner";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import { ScrollToTop } from "@/components/layout/ScrollToTop";
 
 const montserrat = Montserrat({
   variable: "--font-montserrat",
@@ -77,6 +78,7 @@ export default function RootLayout({
   return (
     <html lang="es" className={`${montserrat.variable} ${openSans.variable} ${robotoMono.variable}`} suppressHydrationWarning>
       <body className="font-sans antialiased">
+        <ScrollToTop />
         {children}
         <Toaster />
         <SpeedInsights />
