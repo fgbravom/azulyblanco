@@ -15,7 +15,7 @@ export default function HomePage() {
   return (
     <>
       <Header isHome={true} />
-      <main className="flex flex-col min-h-screen">
+      <main className="flex flex-col min-h-screen bg-azul-primario">
         {/* Hero Section */}
         <HeroSection />
 
