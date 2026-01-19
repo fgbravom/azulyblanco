@@ -16,17 +16,29 @@ import { FaInstagram, FaFacebook } from 'react-icons/fa'
 
 interface HeaderProps {
   isHome?: boolean
+  hideInitially?: boolean
 }
 
-export function Header({ isHome = false }: HeaderProps) {
+export function Header({ isHome = false, hideInitially = false }: HeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [openSubmenu, setOpenSubmenu] = useState<string | null>(null)
   const [mounted, setMounted] = useState(false)
   const [scrolled, setScrolled] = useState(false)
+  const [visible, setVisible] = useState(!hideInitially)
 
   useEffect(() => {
     setMounted(true)
 
+    if (hideInitially) {
+      // Mostrar el header junto con el inicio de la animación de la cortina
+      const timer = setTimeout(() => {
+        setVisible(true)
+      }, 300)
+      return () => clearTimeout(timer)
+    }
+  }, [hideInitially])
+
+  useEffect(() => {
     if (isHome) {
       const handleScroll = () => {
         setScrolled(window.scrollY > 50)
@@ -39,13 +51,13 @@ export function Header({ isHome = false }: HeaderProps) {
 
   return (
     <>
-      <header className={`fixed top-0 left-0 right-0 z-50 w-full transition-all duration-300 ${
+      <header className={`fixed top-0 left-0 right-0 z-50 w-full transition-all duration-500 ${
         isHome
           ? scrolled
             ? 'bg-azul-primario'
             : 'bg-transparent'
           : 'bg-azul-primario'
-      }`}>
+      } ${!visible ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
         <div className="container mx-auto px-2 2xl:px-4">
           <div className="flex h-22 2xl:h-20 items-center justify-between gap-1 2xl:gap-4">
             {/* Mobile Menu Button - Visible below 1536px */}
