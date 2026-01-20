@@ -12,20 +12,30 @@ const HeroCarousel = dynamic(() => import('./HeroCarousel').then(mod => ({ defau
 
 export function HeroSection() {
   const [animating, setAnimating] = useState(false)
+  const [imageLoaded, setImageLoaded] = useState(false)
 
   useEffect(() => {
-    // Iniciar animación después de un breve delay
-    const timer = setTimeout(() => {
-      setAnimating(true)
-    }, 300)
+    // Esperar a que la imagen esté cargada antes de animar
+    if (imageLoaded) {
+      const timer = setTimeout(() => {
+        setAnimating(true)
+      }, 100)
 
-    return () => clearTimeout(timer)
-  }, [])
+      return () => clearTimeout(timer)
+    }
+  }, [imageLoaded])
+
+  // Emitir evento global cuando la imagen está lista
+  useEffect(() => {
+    if (imageLoaded) {
+      window.dispatchEvent(new Event('heroImageLoaded'))
+    }
+  }, [imageLoaded])
 
   return (
     <section className="relative w-full flex items-center justify-center overflow-hidden h-[60vh] lg:h-[84vh] bg-azul-primario">
       {/* Background Carousel */}
-      <HeroCarousel />
+      <HeroCarousel onImageLoad={() => setImageLoaded(true)} />
 
       {/* Animated Curtain - Desliza hacia abajo */}
       <div

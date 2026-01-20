@@ -30,11 +30,16 @@ export function Header({ isHome = false, hideInitially = false }: HeaderProps) {
     setMounted(true)
 
     if (hideInitially) {
-      // Mostrar el header junto con el inicio de la animación de la cortina
-      const timer = setTimeout(() => {
-        setVisible(true)
-      }, 300)
-      return () => clearTimeout(timer)
+      // Esperar a que la imagen del hero esté cargada antes de mostrar el header
+      const handleImageLoaded = () => {
+        const timer = setTimeout(() => {
+          setVisible(true)
+        }, 100)
+        return () => clearTimeout(timer)
+      }
+
+      window.addEventListener('heroImageLoaded', handleImageLoaded)
+      return () => window.removeEventListener('heroImageLoaded', handleImageLoaded)
     }
   }, [hideInitially])
 

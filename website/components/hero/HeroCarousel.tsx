@@ -73,7 +73,11 @@ function getNextImageIndex(isMobile: boolean): number {
  * Componente
  * ============================================ */
 
-export function HeroCarousel() {
+interface HeroCarouselProps {
+  onImageLoad?: () => void
+}
+
+export function HeroCarousel({ onImageLoad }: HeroCarouselProps) {
   // Estado de la imagen a mostrar (null durante SSR)
   const [imageSrc, setImageSrc] = useState<string | null>(null)
 
@@ -102,6 +106,7 @@ export function HeroCarousel() {
         sizes="100vw"
         placeholder="empty"
         className="object-cover object-center"
+        onLoad={onImageLoad}
       />
     </div>
   )
