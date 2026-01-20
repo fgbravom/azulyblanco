@@ -100,6 +100,7 @@ export function HeroCarousel() {
         priority
         quality={85}
         sizes="100vw"
+        placeholder="empty"
         className="object-cover object-center"
       />
     </div>
