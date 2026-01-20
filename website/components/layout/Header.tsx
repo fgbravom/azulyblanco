@@ -51,13 +51,20 @@ export function Header({ isHome = false, hideInitially = false }: HeaderProps) {
 
   return (
     <>
-      <header className={`fixed top-0 left-0 right-0 z-50 w-full transition-all duration-500 ${
-        isHome
-          ? scrolled
-            ? 'bg-azul-primario'
-            : 'bg-transparent'
-          : 'bg-azul-primario'
-      } ${!visible ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+      <header
+        className={`fixed top-0 left-0 right-0 z-50 w-full transition-all ${
+          isHome
+            ? scrolled
+              ? 'bg-azul-primario'
+              : 'bg-transparent'
+            : 'bg-azul-primario'
+        }`}
+        style={{
+          opacity: visible ? 1 : 0,
+          pointerEvents: visible ? 'auto' : 'none',
+          transitionDuration: visible ? '500ms' : '0ms'
+        }}
+      >
         <div className="container mx-auto px-2 2xl:px-4">
           <div className="flex h-22 2xl:h-20 items-center justify-between gap-1 2xl:gap-4">
             {/* Mobile Menu Button - Visible below 1536px */}
