@@ -15,7 +15,16 @@ export function HeroSection() {
   const [imageLoaded, setImageLoaded] = useState(false)
 
   useEffect(() => {
-    // Esperar a que la imagen esté cargada antes de animar
+    // Timeout máximo: animar aunque la imagen no haya cargado
+    const maxWait = setTimeout(() => {
+      setAnimating(true)
+    }, 800)
+
+    return () => clearTimeout(maxWait)
+  }, [])
+
+  useEffect(() => {
+    // Animar en cuanto la imagen esté lista (puede ser antes del timeout)
     if (imageLoaded) {
       const timer = setTimeout(() => {
         setAnimating(true)
