@@ -22,6 +22,7 @@ interface HeaderProps {
 export function Header({ isHome = false, hideInitially = false }: HeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [openSubmenu, setOpenSubmenu] = useState<string | null>(null)
+  const [openDesktopMenu, setOpenDesktopMenu] = useState<string | null>(null)
   const [mounted, setMounted] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const [visible, setVisible] = useState(!hideInitially)
@@ -117,7 +118,11 @@ export function Header({ isHome = false, hideInitially = false }: HeaderProps) {
             <nav className="hidden 2xl:flex items-center gap-2 order-1 2xl:ml-4 2xl:pt-7 max-w-[40%]" suppressHydrationWarning>
               {mounted && NAVIGATION_ITEMS.map((item) => (
                 item.submenu ? (
-                  <DropdownMenu key={item.href}>
+                  <DropdownMenu
+                    key={item.href}
+                    open={openDesktopMenu === item.title}
+                    onOpenChange={(open) => setOpenDesktopMenu(open ? item.title : null)}
+                  >
                     <DropdownMenuTrigger className="flex items-center gap-0.5 text-xs lg:text-sm font-medium text-white hover:bg-white hover:text-azul-primario transition-colors outline-none data-[state=open]:bg-white data-[state=open]:text-azul-primario whitespace-nowrap px-1.5 py-1">
                       {item.title}
                       <ChevronDown className="h-3 w-3 lg:h-4 lg:w-4 transition-transform duration-200 data-[state=open]:rotate-180" />
@@ -128,6 +133,7 @@ export function Header({ isHome = false, hideInitially = false }: HeaderProps) {
                           <Link
                             href={subitem.href}
                             className="w-full cursor-pointer text-white hover:text-azul-primario hover:bg-white transition-colors px-4 py-2.5 block"
+                            onClick={() => setOpenDesktopMenu(null)}
                           >
                             {subitem.title}
                           </Link>

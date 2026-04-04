@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { redirect } from 'next/navigation';
 import { verifySession } from '@/lib/auth/session';
 import AdminSidebar from '@/components/admin/layout/AdminSidebar';

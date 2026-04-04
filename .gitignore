@@ -1,0 +1,8 @@
+# Proyecto website-v2 (en desarrollo, no listo para commit)
+website-v2/
+
+# Bases de datos y scripts temporales
+database/README-v2.md
+database/TESTING-GUIDE.md
+database/schema-v2.sql
+database/scripts/

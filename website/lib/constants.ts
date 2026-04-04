@@ -30,7 +30,6 @@ export const NAVIGATION_ITEMS = [
     submenu: [
       { title: 'HISTORIA', href: '/club/historia' },
       { title: 'DIRECTIVA', href: '/club/directiva' },
-      { title: 'INSTALACIONES', href: '/club/instalaciones' },
     ],
   },
   {

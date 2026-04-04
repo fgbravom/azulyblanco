@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { SITE_CONFIG, NAVIGATION_ITEMS } from '@/lib/constants'
-import { Instagram, Facebook } from 'lucide-react'
+import { Instagram } from 'lucide-react'
 
 export function Footer() {
   return (
@@ -74,15 +74,6 @@ export function Footer() {
                 aria-label="Instagram"
               >
                 <Instagram className="w-6 h-6" />
-              </a>
-              <a
-                href={SITE_CONFIG.social.facebook}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:text-white transition-colors"
-                aria-label="Facebook"
-              >
-                <Facebook className="w-6 h-6" />
               </a>
             </div>
           </div>
