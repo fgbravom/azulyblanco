@@ -25,10 +25,11 @@ export function HeroSection() {
 
   useEffect(() => {
     // Animar en cuanto la imagen esté lista (puede ser antes del timeout)
+    // 300ms mínimo para garantizar que el browser pintó el estado inicial
     if (imageLoaded) {
       const timer = setTimeout(() => {
         setAnimating(true)
-      }, 100)
+      }, 300)
 
       return () => clearTimeout(timer)
     }
@@ -42,7 +43,7 @@ export function HeroSection() {
   }, [imageLoaded])
 
   return (
-    <section className="relative w-full flex items-center justify-center overflow-hidden h-[60vh] lg:h-[84vh] bg-azul-primario">
+    <section className="relative w-full flex items-center justify-center overflow-hidden transform-gpu h-[60vh] lg:h-[84vh] bg-azul-primario">
       {/* Background Carousel */}
       <HeroCarousel onImageLoad={() => setImageLoaded(true)} />
 
