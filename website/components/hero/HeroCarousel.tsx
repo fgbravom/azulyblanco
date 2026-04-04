@@ -22,22 +22,22 @@ const STORAGE_KEYS = {
 // Imágenes por dispositivo
 const IMAGES = {
   desktop: [
-    '/images/fotoportada0.jpg',
-    '/images/fotoportada1.jpg',
-    '/images/fotoportada2.jpg',
-    '/images/fotoportada3.jpg',
-    '/images/fotoportada4.jpg',
-    '/images/fotoportada5.jpg',
-    '/images/fotoportada6.jpg',
+    '/images/fotoportada0.webp',
+    '/images/fotoportada1.webp',
+    '/images/fotoportada2.webp',
+    '/images/fotoportada3.webp',
+    '/images/fotoportada4.webp',
+    '/images/fotoportada5.webp',
+    '/images/fotoportada6.webp',
   ],
   mobile: [
-    '/images/portadamovil0.jpg',
-    '/images/portadamovil1.jpg',
-    '/images/portadamovil2.jpg',
-    '/images/portadamovil3.jpg',
-    '/images/portadamovil4.jpg',
-    '/images/portadamovil5.jpg',
-    '/images/portadamovil6.jpg',
+    '/images/portadamovil0.webp',
+    '/images/portadamovil1.webp',
+    '/images/portadamovil2.webp',
+    '/images/portadamovil3.webp',
+    '/images/portadamovil4.webp',
+    '/images/portadamovil5.webp',
+    '/images/portadamovil6.webp',
   ],
 } as const
 
