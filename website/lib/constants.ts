@@ -42,10 +42,6 @@ export const NAVIGATION_ITEMS = [
     ],
   },
   {
-    title: 'EQUIPOS',
-    href: '/equipos',
-  },
-  {
     title: 'NOTICIAS',
     href: '/noticias',
   },
