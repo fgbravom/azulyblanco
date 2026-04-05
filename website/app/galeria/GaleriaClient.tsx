@@ -5,6 +5,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { Camera, Calendar } from 'lucide-react'
 import type { Album } from '@/lib/gallery'
 
 interface GaleriaClientProps {
@@ -12,25 +13,35 @@ interface GaleriaClientProps {
   categorias: string[]
 }
 
-const getCategoriaColor = (categoria: string) => {
-  const colors: Record<string, string> = {
-    'partidos': 'bg-blue-500',
-    'entrenamientos': 'bg-green-500',
-    'eventos': 'bg-orange-500',
-    'historia': 'bg-purple-500',
-  }
-  return colors[categoria] || 'bg-gray-500'
+const CATEGORIA_COLORS: Record<string, string> = {
+  partidos: 'bg-blue-500',
+  entrenamientos: 'bg-green-600',
+  eventos: 'bg-orange-500',
+  historia: 'bg-purple-600',
 }
 
-const getCategoriaLabel = (categoria: string) => {
-  const labels: Record<string, string> = {
-    'todas': 'Todas',
-    'partidos': 'Partidos',
-    'entrenamientos': 'Entrenamientos',
-    'eventos': 'Eventos',
-    'historia': 'Historia',
-  }
-  return labels[categoria] || categoria
+const CATEGORIA_LABELS: Record<string, string> = {
+  todas: 'Todas',
+  partidos: 'Partidos',
+  entrenamientos: 'Entrenamientos',
+  eventos: 'Eventos',
+  historia: 'Historia',
+}
+
+function getCategoriaColor(categoria: string) {
+  return CATEGORIA_COLORS[categoria] ?? 'bg-gray-500'
+}
+
+function getCategoriaLabel(categoria: string) {
+  return CATEGORIA_LABELS[categoria] ?? categoria
+}
+
+function formatFecha(date: string) {
+  return new Date(date).toLocaleDateString('es-CL', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  })
 }
 
 export function GaleriaClient({ albums, categorias }: GaleriaClientProps) {
@@ -38,44 +49,39 @@ export function GaleriaClient({ albums, categorias }: GaleriaClientProps) {
 
   const albumesFiltrados = categoriaActiva === 'todas'
     ? albums
-    : albums.filter(album => album.categoria === categoriaActiva)
+    : albums.filter((album) => album.categoria === categoriaActiva)
 
   return (
     <>
-      {/* Filtros */}
-      <section className="py-8 px-4 bg-gray-50 border-b">
-        <div className="container mx-auto max-w-6xl">
-          <div className="flex flex-wrap gap-3 items-center">
-            <span className="text-sm font-semibold text-gray-700">Filtrar por:</span>
-            {categorias.map((cat) => (
-              <Badge
-                key={cat}
-                variant={categoriaActiva === cat ? 'default' : 'outline'}
-                className={`cursor-pointer ${
-                  categoriaActiva === cat
-                    ? 'bg-azul-primario'
-                    : 'hover:bg-azul-primario hover:text-white'
-                }`}
-                onClick={() => setCategoriaActiva(cat)}
-              >
-                {getCategoriaLabel(cat)}
-              </Badge>
-            ))}
-          </div>
+      {/* Filtros — continúan el fondo azul del hero */}
+      <div className="bg-azul-primario pb-10 px-4">
+        <div className="container mx-auto max-w-6xl flex flex-wrap gap-2 justify-center">
+          {categorias.map((cat) => (
+            <button
+              key={cat}
+              onClick={() => setCategoriaActiva(cat)}
+              className={`px-5 py-2 rounded-full text-sm font-medium transition-all ${
+                categoriaActiva === cat
+                  ? 'bg-white text-azul-primario shadow'
+                  : 'bg-white/15 text-white hover:bg-white/25'
+              }`}
+            >
+              {getCategoriaLabel(cat)}
+            </button>
+          ))}
         </div>
-      </section>
+      </div>
 
-      {/* Grid de Álbumes */}
-      <section className="py-16 px-4">
+      {/* Grid de álbumes */}
+      <section className="py-10 px-4 bg-white">
         <div className="container mx-auto max-w-6xl">
           {albumesFiltrados.length === 0 ? (
-            <div className="text-center py-16">
-              <p className="text-gray-500 text-lg">
-                No hay álbumes en esta categoría todavía.
-              </p>
-              <p className="text-gray-400 text-sm mt-2">
-                ¡Pronto subiremos nuevas fotos!
-              </p>
+            <div className="flex flex-col items-center justify-center py-28 text-center">
+              <div className="w-16 h-16 rounded-full bg-azul-primario/10 flex items-center justify-center mb-4">
+                <Camera className="w-8 h-8 text-azul-primario/40" />
+              </div>
+              <p className="text-gray-600 text-lg font-semibold">Sin álbumes en esta categoría</p>
+              <p className="text-gray-400 text-sm mt-1">Pronto subiremos nuevas fotos</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -83,48 +89,48 @@ export function GaleriaClient({ albums, categorias }: GaleriaClientProps) {
                 <Link
                   key={album.slug}
                   href={`/galeria/${album.categoria}/${album.slug}`}
+                  className="group"
                 >
-                  <Card className="hover:shadow-lg transition-shadow cursor-pointer overflow-hidden h-full">
+                  <Card className="h-full overflow-hidden border-gray-100 transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
                     {/* Imagen de portada */}
-                    <div className="h-64 relative bg-gray-200">
+                    <div className="h-56 relative bg-gray-200">
                       <Image
                         src={album.coverUrl}
                         alt={album.title}
                         fill
-                        className="object-cover"
+                        className="object-cover transition-transform duration-500 group-hover:scale-105"
                         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                       />
-                      <div className="absolute top-4 right-4">
-                        <Badge className={`${getCategoriaColor(album.categoria)} text-white`}>
+                      {/* Overlay suave en hover */}
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
+
+                      <div className="absolute top-3 left-3">
+                        <Badge className={`${getCategoriaColor(album.categoria)} text-white text-xs`}>
                           {getCategoriaLabel(album.categoria)}
                         </Badge>
                       </div>
-                      <div className="absolute bottom-4 left-4 bg-black/60 backdrop-blur-sm px-3 py-1 rounded-full">
-                        <span className="text-white text-sm font-semibold">
-                          📸 {album.fotos.length} fotos
-                        </span>
+
+                      <div className="absolute bottom-3 right-3 bg-black/60 backdrop-blur-sm px-2.5 py-1 rounded-full flex items-center gap-1.5">
+                        <Camera className="w-3.5 h-3.5 text-white" />
+                        <span className="text-white text-xs font-medium">{album.fotos.length} fotos</span>
                       </div>
                     </div>
 
-                    <CardContent className="p-6">
-                      <h3 className="text-xl font-bold mb-2 hover:text-azul-primario transition-colors line-clamp-2">
+                    <CardContent className="p-5">
+                      <h3 className="font-bold text-gray-800 leading-snug line-clamp-2 mb-2 group-hover:text-azul-primario transition-colors">
                         {album.title}
                       </h3>
-                      <p className="text-sm text-gray-600 mb-3 line-clamp-2">
-                        {album.description}
-                      </p>
-                      <div className="flex items-center justify-between text-xs text-gray-500">
-                        <span>
-                          📅 {new Date(album.date).toLocaleDateString('es-CL', {
-                            day: 'numeric',
-                            month: 'long',
-                            year: 'numeric'
-                          })}
-                        </span>
-                        <span className="font-semibold text-azul-primario">
-                          Ver álbum →
-                        </span>
-                      </div>
+                      {album.description && (
+                        <p className="text-sm text-gray-500 line-clamp-2 mb-3">
+                          {album.description}
+                        </p>
+                      )}
+                      {album.date && (
+                        <div className="flex items-center gap-1.5 text-xs text-gray-400">
+                          <Calendar className="w-3.5 h-3.5" />
+                          {formatFecha(album.date)}
+                        </div>
+                      )}
                     </CardContent>
                   </Card>
                 </Link>

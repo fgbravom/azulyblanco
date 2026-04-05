@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { AlbumViewer } from './AlbumViewer'
+import { ArrowLeft, Camera, Calendar } from 'lucide-react'
 
 interface PageProps {
   params: Promise<{ categoria: string; slug: string }>
@@ -67,47 +68,49 @@ export default async function AlbumPage({ params }: PageProps) {
   return (
     <>
       <Header />
-      <main className="min-h-screen bg-gray-50">
+      <main className="min-h-screen bg-white">
         {/* Hero */}
-        <section className="bg-gradient-to-br from-azul-oscuro to-azul-primario text-white py-16">
+        <section className="bg-azul-primario text-white pt-20 pb-12 px-4">
           <div className="container mx-auto px-4 max-w-6xl">
             <Link
               href="/galeria"
-              className="inline-flex items-center text-white hover:text-gray-200 mb-6 transition-colors"
+              className="inline-flex items-center gap-1.5 text-white/70 hover:text-white mb-8 transition-colors text-sm"
             >
-              ← Volver a Galería
+              <ArrowLeft className="w-4 h-4" /> Volver a Galería
             </Link>
 
-            <div className="flex items-center gap-3 mb-4">
-              <Badge className={`${getCategoriaColor(album.categoria)} text-white`}>
+            <div className="flex items-center gap-3 mb-4 flex-wrap">
+              <Badge className={`${getCategoriaColor(album.categoria)} text-white text-xs`}>
                 {getCategoriaLabel(album.categoria)}
               </Badge>
               {album.date && (
-                <span className="text-sm text-gray-200">
+                <div className="flex items-center gap-1.5 text-white/60 text-sm">
+                  <Calendar className="w-3.5 h-3.5" />
                   {new Date(album.date).toLocaleDateString('es-CL', {
                     day: 'numeric',
                     month: 'long',
-                    year: 'numeric'
+                    year: 'numeric',
                   })}
-                </span>
+                </div>
               )}
-              <span className="text-sm text-gray-200">
-                📸 {album.fotos.length} fotos
-              </span>
+              <div className="flex items-center gap-1.5 text-white/60 text-sm">
+                <Camera className="w-3.5 h-3.5" />
+                {album.fotos.length} fotos
+              </div>
             </div>
 
-            <h1 className="text-4xl md:text-5xl font-bold mb-4">{album.title}</h1>
+            <h1 className="text-3xl md:text-4xl font-bold mb-4 leading-tight">{album.title}</h1>
 
             {album.description && (
-              <p className="text-xl text-gray-200">
+              <p className="text-white/75 text-base leading-relaxed">
                 {album.description}
               </p>
             )}
 
             {album.tags && album.tags.length > 0 && (
-              <div className="flex flex-wrap gap-2 mt-4">
+              <div className="flex flex-wrap gap-2 mt-5 pt-5 border-t border-white/15">
                 {album.tags.map((tag, index) => (
-                  <Badge key={index} variant="outline" className="bg-white/10 text-white border-white/20">
+                  <Badge key={index} variant="outline" className="bg-white/10 text-white border-white/20 text-xs">
                     #{tag}
                   </Badge>
                 ))}
@@ -123,17 +126,15 @@ export default async function AlbumPage({ params }: PageProps) {
           photoDescriptions={album.photoDescriptions}
         />
 
-        {/* Navegación */}
-        <section className="py-8 px-4">
-          <div className="container mx-auto max-w-6xl text-center">
-            <Link
-              href="/galeria"
-              className="inline-block bg-azul-primario text-white px-6 py-3 rounded-lg hover:bg-azul-oscuro transition-colors font-semibold"
-            >
-              ← Volver a la galería
-            </Link>
-          </div>
-        </section>
+        {/* Volver */}
+        <div className="pb-16 px-4 text-center">
+          <Link
+            href="/galeria"
+            className="inline-flex items-center gap-2 bg-azul-primario text-white px-6 py-3 rounded-lg hover:bg-azul-oscuro transition-colors font-medium"
+          >
+            <ArrowLeft className="w-4 h-4" /> Volver a la galería
+          </Link>
+        </div>
       </main>
       <Footer />
     </>
