@@ -140,15 +140,16 @@ html[data-hero='open'] header[data-hero-gated] [data-hero-crest-target] {
   transition: opacity 0s linear 900ms;
 }
 
-/* Red de seguridad: la cortina cubre toda la pantalla, así que si el script
-   no llega a abrirla (8s > maxWaitMs de hero-boot.ts) la página se destapa sola */
-.hero-curtain,
-.hero-crest {
+/* Red de seguridad: la cortina cubre toda la pantalla, así que si bootHero()
+   nunca llega a correr la página se destapa sola. Apenas corre pone data-hero
+   en <html> y esto deja de aplicar: una pestaña oculta puede esperar más de 8s. */
+html:not([data-hero]) .hero-curtain,
+html:not([data-hero]) .hero-crest {
   animation: hero-failsafe-hide 1ms linear 8s forwards;
 }
 
-header[data-hero-gated],
-header[data-hero-gated] [data-hero-crest-target] {
+html:not([data-hero]) header[data-hero-gated],
+html:not([data-hero]) header[data-hero-gated] [data-hero-crest-target] {
   animation: hero-failsafe-show 1ms linear 8s forwards;
 }
 

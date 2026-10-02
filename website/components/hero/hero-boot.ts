@@ -56,11 +56,26 @@ export function bootHero(cfg: HeroBootConfig) {
   const photo = found as HTMLImageElement
   photo.setAttribute('data-booted', '1')
 
-  // Al volver al home por navegación interna el atributo sigue en "open"
-  root.removeAttribute('data-hero')
+  // Cierra la cortina (al volver al home por navegación interna sigue en "open")
+  // y apaga la red de seguridad de globals.css: desde aquí abre este script
+  root.setAttribute('data-hero', 'wait')
 
-  const start = Date.now()
+  let start = Date.now()
   let opened = false
+
+  // La intro espera a que haya alguien mirando. En una pestaña oculta decode()
+  // no resuelve: la cortina abriría sin público y, al volver, la foto entraría
+  // tarde con un fundido sobre el fondo azul.
+  function whenVisible(fn: () => void) {
+    if (!document.hidden) return fn()
+
+    function onChange() {
+      if (document.hidden) return
+      document.removeEventListener('visibilitychange', onChange)
+      fn()
+    }
+    document.addEventListener('visibilitychange', onChange)
+  }
 
   // El escudo de la intro viaja desde el centro hasta calzar con el logo del header
   function flyCrest() {
@@ -80,6 +95,15 @@ export function bootHero(cfg: HeroBootConfig) {
   function open() {
     // Ignora temporizadores de un hero anterior que ya no está en la página
     if (opened || document.getElementById(cfg.photoId) !== photo) return
+
+    if (document.hidden) {
+      // Al volver deja ver el escudo un instante antes de abrir
+      whenVisible(function () {
+        setTimeout(open, cfg.minCurtainMs)
+      })
+      return
+    }
+
     opened = true
     try {
       flyCrest()
@@ -103,35 +127,54 @@ export function bootHero(cfg: HeroBootConfig) {
     open()
   }
 
-  setTimeout(giveUp, cfg.maxWaitMs)
+  // El tope de espera solo corre con la pestaña visible
+  function onTimeout() {
+    if (opened) return
+    if (document.hidden) whenVisible(armTimeout)
+    else giveUp()
+  }
 
-  const set = window.matchMedia(cfg.mobileQuery).matches ? cfg.mobile : cfg.desktop
+  function armTimeout() {
+    setTimeout(onTimeout, cfg.maxWaitMs)
+  }
 
-  let index = 0
+  whenVisible(function () {
+    start = Date.now()
+    armTimeout()
+  })
+
   try {
-    const last = parseInt(localStorage.getItem(set.storageKey) || '', 10)
-    index = isNaN(last) ? 0 : (last + 1) % set.names.length
-    localStorage.setItem(set.storageKey, String(index))
+    const set = window.matchMedia(cfg.mobileQuery).matches ? cfg.mobile : cfg.desktop
+
+    let index = 0
+    try {
+      const last = parseInt(localStorage.getItem(set.storageKey) || '', 10)
+      index = isNaN(last) ? 0 : (last + 1) % set.names.length
+      localStorage.setItem(set.storageKey, String(index))
+    } catch {
+      // localStorage bloqueado: se queda con la primera foto
+    }
+
+    const base = cfg.basePath + set.names[index] + '-'
+
+    const sources = photo.parentNode ? photo.parentNode.querySelectorAll('source') : []
+    for (let i = 0; i < sources.length; i++) {
+      const ext = (sources[i].getAttribute('type') || '').split('/')[1]
+      const srcset = set.widths.map(function (width) {
+        return base + width + '.' + ext + ' ' + width + 'w'
+      })
+      sources[i].setAttribute('srcset', srcset.join(', '))
+    }
+
+    photo.onload = function () {
+      // decode() evita que la cortina abra sobre una foto aún sin decodificar
+      if (typeof photo.decode === 'function') photo.decode().then(onReady, onReady)
+      else onReady()
+    }
+    photo.onerror = giveUp
+    photo.src = base + set.widths[Math.floor(set.widths.length / 2)] + '.webp'
   } catch {
-    // localStorage bloqueado: se queda con la primera foto
+    // Pase lo que pase al elegir la foto, la página no se queda tapada
+    giveUp()
   }
-
-  const base = cfg.basePath + set.names[index] + '-'
-
-  const sources = photo.parentNode ? photo.parentNode.querySelectorAll('source') : []
-  for (let i = 0; i < sources.length; i++) {
-    const ext = (sources[i].getAttribute('type') || '').split('/')[1]
-    const srcset = set.widths.map(function (width) {
-      return base + width + '.' + ext + ' ' + width + 'w'
-    })
-    sources[i].setAttribute('srcset', srcset.join(', '))
-  }
-
-  photo.onload = function () {
-    // decode() evita que la cortina abra sobre una foto aún sin decodificar
-    if (typeof photo.decode === 'function') photo.decode().then(onReady, onReady)
-    else onReady()
-  }
-  photo.onerror = giveUp
-  photo.src = base + set.widths[Math.floor(set.widths.length / 2)] + '.webp'
 }
