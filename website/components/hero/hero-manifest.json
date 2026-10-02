@@ -1,0 +1,34 @@
+{
+  "desktop": {
+    "names": [
+      "fotoportada0",
+      "fotoportada1",
+      "fotoportada2",
+      "fotoportada3",
+      "fotoportada4",
+      "fotoportada5",
+      "fotoportada6"
+    ],
+    "widths": [
+      1440,
+      1920,
+      2560
+    ]
+  },
+  "mobile": {
+    "names": [
+      "portadamovil0",
+      "portadamovil1",
+      "portadamovil2",
+      "portadamovil3",
+      "portadamovil4",
+      "portadamovil5",
+      "portadamovil6"
+    ],
+    "widths": [
+      640,
+      828,
+      1080
+    ]
+  }
+}

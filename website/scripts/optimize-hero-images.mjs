@@ -1,10 +1,16 @@
 /**
- * Optimiza las imágenes del hero sin pérdida visible de calidad.
+ * Genera las variantes finales de las imágenes del hero.
  *
- * Desktop: redimensiona a 1920px de ancho máximo, WebP calidad 90
- * Mobile:  redimensiona a 900px de ancho máximo, WebP calidad 90
+ * Lee los originales desde /originals/ (carpeta de respaldo, fuera de git) y escribe en
+ * /public/images/hero/ una versión AVIF y otra WebP por cada ancho.
+ * Se sirven como archivos estáticos (sin pasar por /_next/image), así
+ * la primera visita no espera al optimizador de Vercel.
  *
- * Los originales se mueven a /public/images/originals/ como respaldo.
+ * Desktop: fotoportada{n}.jpg → 1440, 1920 y 2560 px de ancho
+ * Mobile:  portadamovil{n}.jpg → 640, 828 y 1080 px de ancho
+ *
+ * También genera el escudo que se muestra sobre la cortina y el
+ * manifiesto que consume components/hero/HeroSection.tsx.
  */
 
 import sharp from 'sharp'
@@ -14,27 +20,25 @@ import { fileURLToPath } from 'url'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const IMAGES_DIR = path.join(__dirname, '../public/images')
-const BACKUP_DIR = path.join(IMAGES_DIR, 'originals')
+const SOURCE_DIR = path.join(__dirname, '../originals')
+const OUTPUT_DIR = path.join(IMAGES_DIR, 'hero')
+const MANIFEST_PATH = path.join(__dirname, '../components/hero/hero-manifest.json')
 
-const DESKTOP_FILES = [
-  'fotoportada0.jpg',
-  'fotoportada1.jpg',
-  'fotoportada2.jpg',
-  'fotoportada3.jpg',
-  'fotoportada4.jpg',
-  'fotoportada5.jpg',
-  'fotoportada6.jpg',
-]
+const CREST_SOURCE = path.join(IMAGES_DIR, 'escudoazulyblanco.png')
+const CREST_SIZE = 384
 
-const MOBILE_FILES = [
-  'portadamovil0.jpg',
-  'portadamovil1.jpg',
-  'portadamovil2.jpg',
-  'portadamovil3.jpg',
-  'portadamovil4.jpg',
-  'portadamovil5.jpg',
-  'portadamovil6.jpg',
-]
+// En móvil el hero es más alto que ancho (60vh): la imagen debe cubrir
+// una caja de ancho × ancho*1.3 para no verse estirada en fotos apaisadas.
+const MOBILE_BOX_RATIO = 1.3
+
+const SETS = {
+  desktop: { prefix: 'fotoportada', widths: [1440, 1920, 2560] },
+  mobile: { prefix: 'portadamovil', widths: [640, 828, 1080] },
+}
+
+// AVIF 45 no se distingue a simple vista de 55 y pesa casi la mitad
+const AVIF_OPTIONS = { quality: 45, effort: 4 }
+const WEBP_OPTIONS = { quality: 72, effort: 6 }
 
 function formatMB(bytes) {
   return (bytes / 1024 / 1024).toFixed(1) + ' MB'
@@ -44,81 +48,103 @@ function formatKB(bytes) {
   return (bytes / 1024).toFixed(0) + ' KB'
 }
 
-async function optimizeImage(filename, maxWidth, maxHeight) {
-  const inputPath = path.join(IMAGES_DIR, filename)
-  const backupPath = path.join(BACKUP_DIR, filename)
+/**
+ * Busca los originales de un set (prefijo + número) ordenados por número.
+ */
+function findSources(prefix) {
+  const pattern = new RegExp(`^${prefix}(\\d+)\\.jpe?g$`, 'i')
 
-  // Nombre de salida: mismo nombre pero .webp
-  const outputFilename = filename.replace('.jpg', '.webp')
-  const outputPath = path.join(IMAGES_DIR, outputFilename)
+  return fs
+    .readdirSync(SOURCE_DIR)
+    .map((file) => ({ file, match: file.match(pattern) }))
+    .filter(({ match }) => match)
+    .sort((a, b) => Number(a.match[1]) - Number(b.match[1]))
+    .map(({ file }) => file)
+}
 
-  const originalSize = fs.statSync(inputPath).size
+function resizeFor(setName, source, width) {
+  const image = sharp(source).rotate() // respeta la orientación EXIF
 
-  // Mover original a backup si no existe ya
-  if (!fs.existsSync(backupPath)) {
-    fs.copyFileSync(inputPath, backupPath)
-  }
-
-  // Procesar con sharp
-  await sharp(inputPath)
-    .resize(maxWidth, maxHeight, {
-      fit: 'inside',        // nunca agranda, solo achica si es necesario
+  if (setName === 'mobile') {
+    return image.resize(width, Math.round(width * MOBILE_BOX_RATIO), {
+      fit: 'outside',
       withoutEnlargement: true,
     })
-    .webp({
-      quality: 90,          // calidad alta, diferencia visual mínima
-      effort: 6,            // compresión más agresiva (0-6), más lento pero mejor ratio
+  }
+
+  return image.resize({ width, withoutEnlargement: true })
+}
+
+async function buildImage(setName, file, widths) {
+  const source = path.join(SOURCE_DIR, file)
+  const name = path.parse(file).name
+  const sizes = []
+
+  for (const width of widths) {
+    const base = path.join(OUTPUT_DIR, `${name}-${width}`)
+
+    await resizeFor(setName, source, width).avif(AVIF_OPTIONS).toFile(`${base}.avif`)
+    await resizeFor(setName, source, width).webp(WEBP_OPTIONS).toFile(`${base}.webp`)
+
+    sizes.push({
+      width,
+      avif: fs.statSync(`${base}.avif`).size,
+      webp: fs.statSync(`${base}.webp`).size,
     })
-    .toFile(outputPath)
+  }
 
-  const newSize = fs.statSync(outputPath).size
-  const reduction = (((originalSize - newSize) / originalSize) * 100).toFixed(0)
+  const detail = sizes
+    .map((s) => `${s.width}: ${formatKB(s.avif)} avif / ${formatKB(s.webp)} webp`)
+    .join('  |  ')
+  console.log(`  ✓ ${name.padEnd(15)} ${detail}`)
 
-  console.log(
-    `  ✓ ${filename.padEnd(22)} ${formatMB(originalSize).padStart(8)} → ${formatKB(newSize).padStart(8)}  (-${reduction}%)`
-  )
+  return { name, bytes: sizes.reduce((sum, s) => sum + s.avif + s.webp, 0) }
+}
 
-  return { originalSize, newSize }
+async function buildCrest() {
+  const output = path.join(OUTPUT_DIR, `escudo-${CREST_SIZE}.webp`)
+
+  await sharp(CREST_SOURCE)
+    .resize(CREST_SIZE, CREST_SIZE)
+    .webp({ quality: 90, alphaQuality: 100, effort: 6 })
+    .toFile(output)
+
+  console.log(`\nEscudo de la cortina: ${formatKB(fs.statSync(output).size)}`)
 }
 
 async function main() {
-  if (!fs.existsSync(BACKUP_DIR)) {
-    fs.mkdirSync(BACKUP_DIR, { recursive: true })
+  if (!fs.existsSync(SOURCE_DIR)) {
+    throw new Error(`No existe la carpeta de originales: ${SOURCE_DIR}`)
   }
 
-  let totalOriginal = 0
-  let totalNew = 0
+  fs.mkdirSync(OUTPUT_DIR, { recursive: true })
 
-  console.log('\nDesktop (máx 1920×1080):')
-  for (const file of DESKTOP_FILES) {
-    const inputPath = path.join(IMAGES_DIR, file)
-    if (!fs.existsSync(inputPath)) {
-      console.log(`  - ${file} no encontrado, saltando`)
-      continue
+  const manifest = {}
+  let totalBytes = 0
+
+  for (const [setName, { prefix, widths }] of Object.entries(SETS)) {
+    const files = findSources(prefix)
+    console.log(`\n${setName} (${files.length} imágenes, anchos ${widths.join(', ')}):`)
+
+    const names = []
+    for (const file of files) {
+      const { name, bytes } = await buildImage(setName, file, widths)
+      names.push(name)
+      totalBytes += bytes
     }
-    const { originalSize, newSize } = await optimizeImage(file, 1920, 1080)
-    totalOriginal += originalSize
-    totalNew += newSize
+
+    manifest[setName] = { names, widths }
   }
 
-  console.log('\nMobile (máx 900×1350):')
-  for (const file of MOBILE_FILES) {
-    const inputPath = path.join(IMAGES_DIR, file)
-    if (!fs.existsSync(inputPath)) {
-      console.log(`  - ${file} no encontrado, saltando`)
-      continue
-    }
-    const { originalSize, newSize } = await optimizeImage(file, 900, 1350)
-    totalOriginal += originalSize
-    totalNew += newSize
-  }
+  await buildCrest()
 
-  const totalReduction = (((totalOriginal - totalNew) / totalOriginal) * 100).toFixed(0)
-  console.log(`\nTotal: ${formatMB(totalOriginal)} → ${formatMB(totalNew)} (-${totalReduction}%)`)
-  console.log(`\nOriginales guardados en: public/images/originals/`)
-  console.log(`\nAhora actualizá las referencias en HeroCarousel.tsx:`)
-  console.log(`  fotoportada*.jpg → fotoportada*.webp`)
-  console.log(`  portadamovil*.jpg → portadamovil*.webp`)
+  fs.writeFileSync(MANIFEST_PATH, JSON.stringify(manifest, null, 2) + '\n')
+
+  console.log(`\nTotal generado: ${formatMB(totalBytes)} en public/images/hero/`)
+  console.log(`Manifiesto actualizado: components/hero/hero-manifest.json`)
 }
 
-main().catch(console.error)
+main().catch((error) => {
+  console.error(error)
+  process.exit(1)
+})
