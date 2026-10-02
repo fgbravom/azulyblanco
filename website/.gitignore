@@ -39,3 +39,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# originales del hero (fuente de scripts/optimize-hero-images.mjs, ~215 MB)
+/originals/
