@@ -50,3 +50,156 @@ body {
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-heading), system-ui, sans-serif;
 }
+
+/* ============================================
+ * Hero - Cortina de entrada
+ *
+ * bootHero() pone html[data-hero="open"] cuando
+ * la foto está lista. Las transiciones viven solo
+ * en el estado abierto: así, al volver al home,
+ * la cortina se cierra de golpe y no animada.
+ * ============================================ */
+
+/* Foto: parte apenas ampliada y se asienta mientras se descubre */
+.hero-photo {
+  transform: scale(1.07);
+  transition: opacity 800ms ease-out;
+}
+
+html[data-hero='open'] .hero-photo {
+  transform: scale(1);
+  transition:
+    transform 1800ms cubic-bezier(0.22, 1, 0.36, 1) 140ms,
+    opacity 800ms ease-out;
+}
+
+/* Foto que llegó después del tope de espera: entra con fundido */
+.hero-photo[data-late] {
+  opacity: 0;
+}
+
+.hero-photo[data-late][data-loaded] {
+  opacity: 1;
+}
+
+html[data-hero='open'] .hero-curtain {
+  transform: translateY(100%);
+  visibility: hidden;
+  transition:
+    transform 1000ms cubic-bezier(0.76, 0, 0.24, 1) 120ms,
+    visibility 0s linear 1150ms;
+}
+
+/* Escudo: bootHero() le pone el transform que lo lleva hasta el logo del
+   header. Cuando aterriza, el logo real ya está debajo y el escudo se retira. */
+html[data-hero='open'] .hero-crest {
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    transform 900ms cubic-bezier(0.65, 0, 0.35, 1),
+    opacity 150ms linear 950ms,
+    visibility 0s linear 1100ms;
+}
+
+.hero-crest img {
+  animation: hero-crest-in 500ms ease-out both;
+}
+
+@keyframes hero-crest-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Header del home: entra mientras el escudo termina su viaje */
+header[data-hero-gated] {
+  opacity: 0;
+  pointer-events: none;
+}
+
+html[data-hero='open'] header[data-hero-gated] {
+  opacity: 1;
+  pointer-events: auto;
+  transition:
+    opacity 600ms ease-out 500ms,
+    background-color 500ms;
+}
+
+/* El logo real aparece justo cuando aterriza el escudo de la intro (900ms) */
+header[data-hero-gated] [data-hero-crest-target] {
+  opacity: 0;
+}
+
+html[data-hero='open'] header[data-hero-gated] [data-hero-crest-target] {
+  opacity: 1;
+  transition: opacity 0s linear 900ms;
+}
+
+/* Red de seguridad: la cortina cubre toda la pantalla, así que si el script
+   no llega a abrirla (8s > maxWaitMs de hero-boot.ts) la página se destapa sola */
+.hero-curtain,
+.hero-crest {
+  animation: hero-failsafe-hide 1ms linear 8s forwards;
+}
+
+header[data-hero-gated],
+header[data-hero-gated] [data-hero-crest-target] {
+  animation: hero-failsafe-show 1ms linear 8s forwards;
+}
+
+/* opacity y no visibility: Chrome no aplica el visibility final de un keyframe */
+@keyframes hero-failsafe-hide {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes hero-failsafe-show {
+  to {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-photo,
+  html[data-hero='open'] .hero-photo {
+    transform: none;
+    transition: opacity 800ms ease-out;
+  }
+
+  html[data-hero='open'] .hero-curtain {
+    transform: none;
+    opacity: 0;
+    transition:
+      opacity 500ms ease-out,
+      visibility 0s linear 500ms;
+  }
+
+  /* Sin viaje: el escudo se desvanece en su sitio */
+  html[data-hero='open'] .hero-crest {
+    transform: none !important;
+    transition:
+      opacity 300ms ease-out,
+      visibility 0s linear 300ms;
+  }
+
+  .hero-crest img {
+    animation: none;
+  }
+
+  html[data-hero='open'] header[data-hero-gated] {
+    transition:
+      opacity 400ms ease-out 200ms,
+      background-color 500ms;
+  }
+
+  html[data-hero='open'] header[data-hero-gated] [data-hero-crest-target] {
+    transition: none;
+  }
+}

@@ -25,24 +25,10 @@ export function Header({ isHome = false, hideInitially = false }: HeaderProps) {
   const [openDesktopMenu, setOpenDesktopMenu] = useState<string | null>(null)
   const [mounted, setMounted] = useState(false)
   const [scrolled, setScrolled] = useState(false)
-  const [visible, setVisible] = useState(!hideInitially)
 
   useEffect(() => {
     setMounted(true)
-
-    if (hideInitially) {
-      // Esperar a que la imagen del hero esté cargada antes de mostrar el header
-      const handleImageLoaded = () => {
-        const timer = setTimeout(() => {
-          setVisible(true)
-        }, 100)
-        return () => clearTimeout(timer)
-      }
-
-      window.addEventListener('heroImageLoaded', handleImageLoaded)
-      return () => window.removeEventListener('heroImageLoaded', handleImageLoaded)
-    }
-  }, [hideInitially])
+  }, [])
 
   useEffect(() => {
     if (isHome) {
@@ -58,18 +44,15 @@ export function Header({ isHome = false, hideInitially = false }: HeaderProps) {
   return (
     <>
       <header
-        className={`fixed top-0 left-0 right-0 z-50 w-full transition-all ${
+        className={`fixed top-0 left-0 right-0 z-50 w-full transition-all duration-500 ${
           isHome
             ? scrolled
               ? 'bg-azul-primario'
               : 'bg-transparent'
             : 'bg-azul-primario'
         }`}
-        style={{
-          opacity: visible ? 1 : 0,
-          pointerEvents: visible ? 'auto' : 'none',
-          transitionDuration: visible ? '500ms' : '0ms'
-        }}
+        // Oculto hasta que el hero abre la cortina (ver "Hero" en globals.css)
+        data-hero-gated={hideInitially ? '' : undefined}
       >
         <div className="container mx-auto px-2 2xl:px-4">
           <div className="flex h-22 2xl:h-20 items-center justify-between gap-1 2xl:gap-4">
@@ -111,6 +94,7 @@ export function Header({ isHome = false, hideInitially = false }: HeaderProps) {
                 width={200}
                 height={200}
                 className="h-20 2xl:h-35 w-auto"
+                data-hero-crest-target=""
               />
             </Link>
 
