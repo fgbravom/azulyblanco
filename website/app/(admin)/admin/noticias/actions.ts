@@ -17,7 +17,7 @@ const noticiaSchema = z.object({
   tags: z.array(z.string()),
   autor: z.string().trim().nullable().transform((v) => v || null),
   fecha: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Fecha inválida'),
-  portada_url: z.string().url().nullable(),
+  portada_url: z.url({ protocol: /^https?$/ }).nullable(),
   publicado: z.boolean(),
 })
 

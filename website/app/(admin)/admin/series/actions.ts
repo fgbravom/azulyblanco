@@ -25,7 +25,7 @@ const serieSchema = z.object({
   titulo: opcional,
   descripcion: opcional,
   contenido: opcional,
-  imagen_url: z.string().url().nullable(),
+  imagen_url: z.url({ protocol: /^https?$/ }).nullable(),
   horario_entrenamiento: opcional,
   lugar_entrenamiento: opcional,
   competencia: opcional,

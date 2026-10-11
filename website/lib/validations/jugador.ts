@@ -12,7 +12,7 @@ export const jugadorSchema = z.object({
   fecha_nacimiento: z.string().optional().nullable(),
   nacionalidad: z.string().optional().nullable(),
   dni: z.string().optional().nullable(),
-  foto_url: z.string().url('Debe ser una URL válida').optional().nullable().or(z.literal('')),
+  foto_url: z.url({ protocol: /^https?$/, error: 'Debe ser una URL válida' }).optional().nullable().or(z.literal('')),
 
   // Información deportiva
   dorsal: z.number().int().min(1).max(99).optional().nullable(),
