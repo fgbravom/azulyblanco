@@ -7,6 +7,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import {
   LayoutDashboard,
+  MonitorSmartphone,
   CalendarDays,
   Newspaper,
   Images,
@@ -27,6 +28,7 @@ const secciones = [
   {
     titulo: 'Contenido',
     items: [
+      { name: 'Portada', href: '/admin/hero', icon: MonitorSmartphone },
       { name: 'Programación', href: '/admin/programacion', icon: CalendarDays },
       { name: 'Noticias', href: '/admin/noticias', icon: Newspaper },
       { name: 'Galerías', href: '/admin/galeria', icon: Images },

@@ -7,6 +7,15 @@ import { prepararSubida, type DestinoSubida } from '@/app/(admin)/admin/medios/a
 const LADO_MAXIMO = 2400
 const CALIDAD = 0.85
 
+export interface OpcionesImagen {
+  /**
+   * En vez de limitar el lado mayor a 2400 px, reduce solo lo justo para que
+   * la foto siga cubriendo esta caja. Para fotos que el servidor reprocesa.
+   */
+  cubrir?: { ancho: number; alto: number }
+  calidad?: number
+}
+
 export interface ImagenSubida {
   path: string
   nombre: string
@@ -21,7 +30,10 @@ export interface ImagenSubida {
  * navegador no sabe codificar WebP). Una foto de celular de 6 MB queda en
  * unos 400-800 KB sin pérdida visible.
  */
-async function prepararImagen(file: File): Promise<{ archivo: Blob; mime: string; ancho: number; alto: number }> {
+async function prepararImagen(
+  file: File,
+  opciones: OpcionesImagen = {}
+): Promise<{ archivo: Blob; mime: string; ancho: number; alto: number }> {
   const bitmap = await createImageBitmap(file, { imageOrientation: 'from-image' })
   const { width, height } = bitmap
 
@@ -31,7 +43,9 @@ async function prepararImagen(file: File): Promise<{ archivo: Blob; mime: string
     return { archivo: file, mime: file.type, ancho: width, alto: height }
   }
 
-  const escala = Math.min(1, LADO_MAXIMO / Math.max(width, height))
+  const escala = opciones.cubrir
+    ? Math.min(1, Math.max(opciones.cubrir.ancho / width, opciones.cubrir.alto / height))
+    : Math.min(1, LADO_MAXIMO / Math.max(width, height))
   const ancho = Math.round(width * escala)
   const alto = Math.round(height * escala)
 
@@ -42,7 +56,7 @@ async function prepararImagen(file: File): Promise<{ archivo: Blob; mime: string
   bitmap.close()
 
   const codificar = (tipo: string) =>
-    new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, tipo, CALIDAD))
+    new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, tipo, opciones.calidad ?? CALIDAD))
 
   let archivo = await codificar('image/webp')
   if (!archivo || archivo.type !== 'image/webp') archivo = await codificar('image/jpeg')
@@ -56,10 +70,10 @@ async function prepararImagen(file: File): Promise<{ archivo: Blob; mime: string
   return { archivo, mime: archivo.type, ancho, alto }
 }
 
-export async function subirImagen(file: File, destino: DestinoSubida): Promise<ImagenSubida> {
+export async function subirImagen(file: File, destino: DestinoSubida, opciones?: OpcionesImagen): Promise<ImagenSubida> {
   if (!file.type.startsWith('image/')) throw new Error(`${file.name} no es una imagen`)
 
-  const { archivo, mime, ancho, alto } = await prepararImagen(file)
+  const { archivo, mime, ancho, alto } = await prepararImagen(file, opciones)
   const { path, token } = await prepararSubida(destino, mime)
 
   const { error } = await createClient()

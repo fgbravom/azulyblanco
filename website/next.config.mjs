@@ -5,6 +5,16 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
 
 const nextConfig = {
   pageExtensions: ['js', 'jsx', 'ts', 'tsx'],
+  // El admin del hero carga sharp en tiempo de ejecución (lib/admin/sharp.ts),
+  // así que el trazado de archivos no lo detecta solo: se incluye a mano.
+  outputFileTracingIncludes: {
+    '/admin/hero': [
+      './node_modules/sharp/**/*',
+      './node_modules/@img/**/*',
+      './node_modules/detect-libc/**/*',
+      './node_modules/semver/**/*',
+    ],
+  },
   images: {
     // Imágenes subidas desde el admin (bucket público "medios" de Supabase Storage)
     remotePatterns: [

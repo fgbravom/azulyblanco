@@ -13,7 +13,7 @@ const EXTENSIONES: Record<string, string> = {
   'image/avif': 'avif',
 }
 
-export type DestinoSubida = { tipo: 'biblioteca' } | { tipo: 'album'; albumId: string }
+export type DestinoSubida = { tipo: 'biblioteca' } | { tipo: 'album'; albumId: string } | { tipo: 'hero' }
 
 /**
  * Entrega una URL firmada para que el navegador suba el archivo directo a
@@ -26,11 +26,13 @@ export async function prepararSubida(destino: DestinoSubida, mime: string) {
   if (!ext) throw new Error('Formato no permitido. Usa JPG, PNG, WebP, GIF o AVIF.')
 
   const ahora = new Date()
-  const carpeta =
+  const path =
     destino.tipo === 'album'
-      ? `galeria/${destino.albumId}`
-      : `biblioteca/${ahora.getFullYear()}/${String(ahora.getMonth() + 1).padStart(2, '0')}`
-  const path = `${carpeta}/${crypto.randomUUID()}.${ext}`
+      ? `galeria/${destino.albumId}/${crypto.randomUUID()}.${ext}`
+      : destino.tipo === 'hero'
+        ? // El servidor genera los anchos finales en la misma carpeta (ver admin/hero/actions.ts)
+          `hero/${crypto.randomUUID()}/original.${ext}`
+        : `biblioteca/${ahora.getFullYear()}/${String(ahora.getMonth() + 1).padStart(2, '0')}/${crypto.randomUUID()}.${ext}`
 
   const { data, error } = await createAdminClient().storage.from(BUCKET_MEDIOS).createSignedUploadUrl(path)
   if (error) throw new Error(`No se pudo preparar la subida: ${error.message}`)

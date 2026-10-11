@@ -1,17 +1,17 @@
 'use client'
 
 import { useLayoutEffect } from 'react'
-import { bootHero, HERO_BOOT_CONFIG } from './hero-boot'
+import { bootHero, type HeroBootConfig } from './hero-boot'
 
 /**
  * En la carga inicial el script inline de HeroSection ya arrancó el hero y
  * esto no hace nada. Cubre la navegación interna hacia el home, donde React
  * no ejecuta los <script> que renderiza.
  */
-export function HeroBoot() {
+export function HeroBoot({ config }: { config: HeroBootConfig }) {
   useLayoutEffect(() => {
-    bootHero(HERO_BOOT_CONFIG)
-  }, [])
+    bootHero(config)
+  }, [config])
 
   return null
 }

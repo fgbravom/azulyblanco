@@ -21,8 +21,9 @@ import {
   type Album,
 } from '@/lib/gallery'
 import { createPublicClient } from '@/lib/supabase/public'
+import { HERO_FOTOS_REPO, type HeroFotos } from '@/components/hero/hero-boot'
 import { actividadAEvento } from './calendario'
-import type { Actividad, AlbumDB, Foto, NoticiaDB, SerieInfo } from './tipos'
+import type { Actividad, AlbumDB, Foto, HeroFoto, NoticiaDB, SerieInfo } from './tipos'
 
 export type NoticiaPublica = NoticiaMetadata & { coverUrl?: string }
 export type NoticiaCompleta = Noticia & { coverUrl?: string }
@@ -206,3 +207,27 @@ export async function getSerieInfo(slug: string): Promise<SerieInfo | null> {
   )
 }
 
+// ============================================================================
+// HERO
+// ============================================================================
+
+/** Fotos activas de la portada, en orden. Un dispositivo sin fotos usa las del repositorio. */
+export async function getFotosHero(): Promise<HeroFotos> {
+  return conRespaldo(
+    async () => {
+      const { data, error } = await cliente()
+        .from('hero_fotos')
+        .select('dispositivo, base_url')
+        .order('orden')
+        .order('created_at')
+      if (error) throw error
+      const fotos = data as Pick<HeroFoto, 'dispositivo' | 'base_url'>[]
+      const de = (d: HeroFoto['dispositivo']) => fotos.filter((f) => f.dispositivo === d).map((f) => f.base_url)
+      return {
+        desktop: de('desktop').length ? de('desktop') : HERO_FOTOS_REPO.desktop,
+        mobile: de('mobile').length ? de('mobile') : HERO_FOTOS_REPO.mobile,
+      }
+    },
+    () => HERO_FOTOS_REPO
+  )
+}

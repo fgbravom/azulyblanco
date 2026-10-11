@@ -10,17 +10,19 @@ import manifest from './hero-manifest.json'
  * ============================================ */
 
 interface HeroImageSet {
-  names: string[]
+  /** Prefijo de cada foto: se le agrega "<ancho>.avif" o "<ancho>.webp" */
+  bases: string[]
   widths: number[]
   storageKey: string
 }
+
+export type HeroFotos = Record<'desktop' | 'mobile', string[]>
 
 export interface HeroBootConfig {
   photoId: string
   crestId: string
   /** Logo del header donde aterriza el escudo de la intro */
   crestTargetSelector: string
-  basePath: string
   mobileQuery: string
   /** Tiempo mínimo con la cortina cerrada, para que el efecto se lea aunque la foto esté en caché */
   minCurtainMs: number
@@ -30,16 +32,29 @@ export interface HeroBootConfig {
   mobile: HeroImageSet
 }
 
-export const HERO_BOOT_CONFIG: HeroBootConfig = {
-  photoId: 'hero-photo',
-  crestId: 'hero-crest',
-  crestTargetSelector: '[data-hero-crest-target]',
-  basePath: '/images/hero/',
-  mobileQuery: '(max-width: 767px)',
-  minCurtainMs: 700,
-  maxWaitMs: 5000,
-  desktop: { ...manifest.desktop, storageKey: 'hero_index_desktop' },
-  mobile: { ...manifest.mobile, storageKey: 'hero_index_mobile' },
+/** Anchos generados por foto (scripts/optimize-hero-images.mjs y el admin) */
+export const HERO_WIDTHS = {
+  desktop: manifest.desktop.widths,
+  mobile: manifest.mobile.widths,
+}
+
+/** Fotos del repositorio (public/images/hero): respaldo si la base no responde */
+export const HERO_FOTOS_REPO: HeroFotos = {
+  desktop: manifest.desktop.names.map((name) => `/images/hero/${name}-`),
+  mobile: manifest.mobile.names.map((name) => `/images/hero/${name}-`),
+}
+
+export function crearHeroConfig(fotos: HeroFotos): HeroBootConfig {
+  return {
+    photoId: 'hero-photo',
+    crestId: 'hero-crest',
+    crestTargetSelector: '[data-hero-crest-target]',
+    mobileQuery: '(max-width: 767px)',
+    minCurtainMs: 700,
+    maxWaitMs: 5000,
+    desktop: { bases: fotos.desktop, widths: HERO_WIDTHS.desktop, storageKey: 'hero_index_desktop' },
+    mobile: { bases: fotos.mobile, widths: HERO_WIDTHS.mobile, storageKey: 'hero_index_mobile' },
+  }
 }
 
 /**
@@ -149,13 +164,13 @@ export function bootHero(cfg: HeroBootConfig) {
     let index = 0
     try {
       const last = parseInt(localStorage.getItem(set.storageKey) || '', 10)
-      index = isNaN(last) ? 0 : (last + 1) % set.names.length
+      index = isNaN(last) ? 0 : (last + 1) % set.bases.length
       localStorage.setItem(set.storageKey, String(index))
     } catch {
       // localStorage bloqueado: se queda con la primera foto
     }
 
-    const base = cfg.basePath + set.names[index] + '-'
+    const base = set.bases[index]
 
     const sources = photo.parentNode ? photo.parentNode.querySelectorAll('source') : []
     for (let i = 0; i < sources.length; i++) {

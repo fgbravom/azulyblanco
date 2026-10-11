@@ -103,6 +103,20 @@ export interface SerieInfo {
   competencia: string | null
 }
 
+export interface HeroFoto {
+  id: string
+  dispositivo: 'desktop' | 'mobile'
+  /** Prefijo: base_url + ancho + '.avif' | '.webp' */
+  base_url: string
+  /** Carpeta en el bucket; null si la foto vive en public/images/hero */
+  carpeta: string | null
+  orden: number
+  activo: boolean
+  ancho_original: number | null
+  alto_original: number | null
+  created_at: string
+}
+
 export const CATEGORIAS_ALBUM: { value: CategoriaAlbum; label: string }[] = [
   { value: 'partidos', label: 'Partidos' },
   { value: 'entrenamientos', label: 'Entrenamientos' },
