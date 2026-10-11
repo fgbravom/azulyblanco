@@ -100,9 +100,29 @@ Se verificó en producción que existen las tablas de cada una (`jugadores`, `pr
 
 Los datos (por ejemplo el script privado de la Serie 35) no son migraciones: se siguen corriendo a mano.
 
+## Pruebas
+
+Unitarias con [Vitest](https://vitest.dev), en [`website/tests/`](../website/tests/). No necesitan base de datos ni Docker: Supabase se reemplaza por un cliente falso ([`tests/helpers/supabase-falso.ts`](../website/tests/helpers/supabase-falso.ts)) que registra qué se le pide a cada tabla.
+
+| Comando (desde `website/`) | Qué hace |
+|---|---|
+| `npm test` | Corre todas las pruebas una vez |
+| `npm run test:watch` | Las vuelve a correr al guardar |
+
+| Carpeta | Qué cubre |
+|---|---|
+| `tests/admin/auth/` | Token de sesión, contraseña, freno de intentos, login/logout y middleware |
+| `tests/admin/` | Que **cada** ruta `/api` y **cada** server action rechace sin sesión sin tocar la base; cuotas, noticias, series, slugs y validaciones |
+| `tests/sitio/` | Calendario, plantel público, respaldo a archivos y el link personal de cuotas |
+| `tests/seguridad/` | Guardianes estáticos: leen las migraciones y la configuración y fallan si un cambio vuelve a exponer datos personales a la clave pública |
+| `tests/componentes/` | Login y componentes de calendario y cuotas, renderizados con Testing Library (jsdom) |
+
+Una server action o ruta `/api` nueva queda cubierta sola por las pruebas de protección: si no llama a `requireAdmin()` o `rechazarSinSesion()`, la suite falla.
+
 ## Seguridad
 
 - La sesión es una cookie `httpOnly` firmada con HMAC (`SESSION_SECRET`) que expira a las 8 horas.
-- El middleware protege `/admin/*` y todas las `/api/*` salvo login/logout: esas APIs devuelven datos personales del plantel.
+- Tras 10 intentos fallidos de login desde una IP, el login responde 429 durante 15 minutos (tabla `login_intentos`).
+- El middleware protege `/admin/*` y todas las `/api/*` salvo login/logout: esas APIs devuelven datos personales del plantel. Además, cada ruta revisa la sesión por su cuenta (`rechazarSinSesion()`), por si el middleware fallara.
 - `/cuotas/<código>` (solo con las cuotas activadas) es público a propósito: el código (128 bits aleatorios) es la llave. No se indexa ni manda referrer, y se puede regenerar desde el admin.
 - Las escrituras usan la `service_role` key solo en el servidor, siempre después de `requireAdmin()`. El sitio público lee con la anon key y RLS solo le muestra lo publicado.
