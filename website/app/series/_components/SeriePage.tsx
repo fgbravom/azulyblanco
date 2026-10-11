@@ -6,7 +6,7 @@ import { getCategoriaByNombre } from '@/lib/data/equipos'
 import { getEquiposByCategoria } from '@/lib/data/equipos'
 import { getPlantelPublico, getSerieInfo, type PlantelJugador } from '@/lib/contenido/publico'
 import { MDXRenderer } from '@/components/mdx/MDXRenderer'
-import type { Equipo } from '@/types/database'
+import type { EquipoPublico } from '@/types/database'
 import Image from 'next/image'
 import { CalendarClock, MapPin, Trophy } from 'lucide-react'
 
@@ -56,7 +56,7 @@ export default async function SeriePage({ slug, categoriaNombre, titulo: tituloB
 
   // Obtener categoría, equipo y jugadores desde Supabase
   let jugadores: PlantelJugador[] = []
-  let equipo: Equipo | null = null
+  let equipo: EquipoPublico | null = null
 
   try {
     const categoria = await getCategoriaByNombre(categoriaNombre)

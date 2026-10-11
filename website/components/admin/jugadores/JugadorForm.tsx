@@ -16,7 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import type { JugadorCompleto, Equipo, Posicion } from '@/types/database';
+import type { JugadorCompleto, EquipoPublico, Posicion } from '@/types/database';
 import { Loader2, Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
@@ -32,7 +32,7 @@ interface Props {
 }
 
 export default function JugadorForm({ jugador, onSave, onCancel }: Props) {
-  const [equipos, setEquipos] = useState<Equipo[]>([]);
+  const [equipos, setEquipos] = useState<EquipoPublico[]>([]);
   const [posiciones, setPosiciones] = useState<Posicion[]>([]);
   const [loading, setLoading] = useState(false);
   const [loadingData, setLoadingData] = useState(true);

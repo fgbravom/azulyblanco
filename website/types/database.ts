@@ -28,6 +28,9 @@ export interface Categoria {
   updated_at: string;
 }
 
+/** Lo que se lee de equipos con la clave pública: sin los datos de pago (migración 005) */
+export type EquipoPublico = Omit<Equipo, 'cuota_monto' | 'cuota_datos_pago'>;
+
 export interface CategoriaInsert {
   nombre: string;
   descripcion?: string;

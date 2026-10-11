@@ -4,7 +4,7 @@
 
 import { createClient } from '@/lib/supabase/server';
 import type {
-  Equipo,
+  EquipoPublico,
   EquipoInsert,
   EquipoUpdate,
   Categoria,
@@ -13,6 +13,13 @@ import type {
   Posicion,
   PosicionInsert,
 } from '@/types/database';
+
+/**
+ * Columnas de equipos legibles con la clave pública. Los datos de pago de la
+ * serie (cuota_*) solo los lee el servidor con la service_role (migración 005).
+ */
+export const COLUMNAS_EQUIPO =
+  'id, categoria_id, nombre, temporada, entrenador, asistente_tecnico, preparador_fisico, activo, created_at, updated_at';
 
 // ============================================================================
 // CATEGORÍAS
@@ -129,13 +136,13 @@ export async function updateCategoria(
 /**
  * Obtiene todos los equipos activos
  */
-export async function getEquipos(): Promise<Equipo[]> {
+export async function getEquipos(): Promise<EquipoPublico[]> {
   const supabase = await createClient();
 
   const { data, error } = await supabase
     .from('equipos')
     .select(`
-      *,
+      ${COLUMNAS_EQUIPO},
       categoria:categoria_id (nombre, orden)
     `)
     .eq('activo', true)
@@ -152,13 +159,13 @@ export async function getEquipos(): Promise<Equipo[]> {
 /**
  * Obtiene un equipo por ID
  */
-export async function getEquipoById(id: number): Promise<Equipo | null> {
+export async function getEquipoById(id: number): Promise<EquipoPublico | null> {
   const supabase = await createClient();
 
   const { data, error } = await supabase
     .from('equipos')
     .select(`
-      *,
+      ${COLUMNAS_EQUIPO},
       categoria:categoria_id (*)
     `)
     .eq('id', id)
@@ -175,12 +182,12 @@ export async function getEquipoById(id: number): Promise<Equipo | null> {
 /**
  * Obtiene equipos por categoría
  */
-export async function getEquiposByCategoria(categoriaId: number): Promise<Equipo[]> {
+export async function getEquiposByCategoria(categoriaId: number): Promise<EquipoPublico[]> {
   const supabase = await createClient();
 
   const { data, error } = await supabase
     .from('equipos')
-    .select('*')
+    .select(COLUMNAS_EQUIPO)
     .eq('categoria_id', categoriaId)
     .eq('activo', true)
     .order('temporada', { ascending: false });
@@ -196,13 +203,13 @@ export async function getEquiposByCategoria(categoriaId: number): Promise<Equipo
 /**
  * Obtiene equipos por temporada
  */
-export async function getEquiposByTemporada(temporada: string): Promise<Equipo[]> {
+export async function getEquiposByTemporada(temporada: string): Promise<EquipoPublico[]> {
   const supabase = await createClient();
 
   const { data, error } = await supabase
     .from('equipos')
     .select(`
-      *,
+      ${COLUMNAS_EQUIPO},
       categoria:categoria_id (nombre, orden)
     `)
     .eq('temporada', temporada)
@@ -236,7 +243,7 @@ export function getTemporadaActual(): string {
 /**
  * Obtiene equipos de la temporada actual
  */
-export async function getEquiposTemporadaActual(): Promise<Equipo[]> {
+export async function getEquiposTemporadaActual(): Promise<EquipoPublico[]> {
   const temporadaActual = getTemporadaActual();
   return getEquiposByTemporada(temporadaActual);
 }
@@ -244,13 +251,13 @@ export async function getEquiposTemporadaActual(): Promise<Equipo[]> {
 /**
  * Crea un nuevo equipo
  */
-export async function createEquipo(equipo: EquipoInsert): Promise<Equipo> {
+export async function createEquipo(equipo: EquipoInsert): Promise<EquipoPublico> {
   const supabase = await createClient();
 
   const { data, error } = await supabase
     .from('equipos')
     .insert(equipo)
-    .select()
+    .select(COLUMNAS_EQUIPO)
     .single();
 
   if (error) {
@@ -267,14 +274,14 @@ export async function createEquipo(equipo: EquipoInsert): Promise<Equipo> {
 export async function updateEquipo(
   id: number,
   updates: EquipoUpdate
-): Promise<Equipo> {
+): Promise<EquipoPublico> {
   const supabase = await createClient();
 
   const { data, error } = await supabase
     .from('equipos')
     .update(updates)
     .eq('id', id)
-    .select()
+    .select(COLUMNAS_EQUIPO)
     .single();
 
   if (error) {
@@ -288,7 +295,7 @@ export async function updateEquipo(
 /**
  * Marca un equipo como activo/inactivo
  */
-export async function toggleEquipoActivo(id: number): Promise<Equipo> {
+export async function toggleEquipoActivo(id: number): Promise<EquipoPublico> {
   const equipo = await getEquipoById(id);
   if (!equipo) {
     throw new Error('Equipo no encontrado');
@@ -393,7 +400,7 @@ export async function getResumenEquipos() {
   const { data, error } = await supabase
     .from('equipos')
     .select(`
-      *,
+      ${COLUMNAS_EQUIPO},
       categoria:categoria_id (nombre),
       jugadores:jugadores(count)
     `)
@@ -433,9 +440,9 @@ export async function existeEquipo(
 /**
  * Crea equipos para una nueva temporada
  */
-export async function crearEquiposTemporada(temporada: string): Promise<Equipo[]> {
+export async function crearEquiposTemporada(temporada: string): Promise<EquipoPublico[]> {
   const categorias = await getCategorias();
-  const equiposCreados: Equipo[] = [];
+  const equiposCreados: EquipoPublico[] = [];
 
   for (const categoria of categorias) {
     // Verificar si ya existe

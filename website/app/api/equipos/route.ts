@@ -4,11 +4,13 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { rechazarSinSesion } from '@/lib/auth/session';
 import {
   getEquipos,
   getEquiposTemporadaActual,
   getCategorias,
   getPosiciones,
+  COLUMNAS_EQUIPO,
 } from '@/lib/data/equipos';
 
 /**
@@ -16,6 +18,9 @@ import {
  * Obtiene lista de equipos
  */
 export async function GET(request: NextRequest) {
+  const denegado = await rechazarSinSesion();
+  if (denegado) return denegado;
+
   try {
     const searchParams = request.nextUrl.searchParams;
     const tipo = searchParams.get('tipo');
@@ -58,7 +63,7 @@ export async function GET(request: NextRequest) {
 
     const { data: equipos, error } = await supabase
       .from('equipos')
-      .select('*')
+      .select(COLUMNAS_EQUIPO)
       .eq('activo', true)
       .order('id', { ascending: true });
 

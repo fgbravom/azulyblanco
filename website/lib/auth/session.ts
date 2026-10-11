@@ -1,4 +1,5 @@
 import { cookies } from 'next/headers';
+import { NextResponse } from 'next/server';
 import { SESSION_COOKIE, SESSION_MAX_AGE, firmarToken, verificarToken } from './token';
 
 /**
@@ -37,6 +38,15 @@ export async function requireAdmin() {
   if (!(await verifySession())) {
     throw new Error('No autorizado');
   }
+}
+
+/**
+ * Para las rutas /api: respuesta 401 si no hay sesión, null si la hay.
+ * El middleware ya las protege; esto cubre un eventual bypass del middleware.
+ */
+export async function rechazarSinSesion(): Promise<NextResponse | null> {
+  if (await verifySession()) return null;
+  return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
 }
 
 /**
