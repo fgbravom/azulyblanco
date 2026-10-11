@@ -126,7 +126,7 @@ website/
 
 ### Acceso
 - **URL Local:** `http://localhost:3000/admin`
-- **Contraseña actual:** `asd123`
+- **Contraseña:** la de `ADMIN_PASSWORD_HASH` (ver [Docs/ADMIN.md](Docs/ADMIN.md))
 - **Duración de sesión:** 8 horas
 
 ### Estado de Implementación (44% completado)

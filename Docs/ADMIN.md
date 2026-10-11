@@ -31,7 +31,8 @@ Al guardar, el admin regenera las páginas públicas afectadas (`revalidatePath`
      ```bash
      node -e "const b=require('bcryptjs');console.log(Buffer.from(b.hashSync(process.argv[1],10)).toString('base64'))" 'contraseña-nueva'
      ```
-     Mientras no exista, rige la contraseña temporal de `lib/auth/password.ts`.
+     Es obligatoria en producción: sin ella el login queda cerrado. En local (`npm run dev`) rige la contraseña de desarrollo de `lib/auth/password.ts`.
+   - Después de aplicar la migración 005, en Supabase → Authentication → Sign In / Providers, desactivar «Allow new users to sign up». El sitio no usa Supabase Auth, y una cuenta registrada era la puerta a las políticas de escritura antiguas.
    - `CUOTAS_HABILITADAS`: `true` muestra el sistema de cuotas. Sin la variable queda oculto ([CUOTAS.md](CUOTAS.md)).
 3. **Importar el contenido actual, antes de desplegar**: con `npm run dev` y `.env.local` apuntando a la base de producción, entrar a `/admin` y pulsar «Importar». Copia los eventos de `lib/data/eventos-enero.ts`, las noticias de `noticias/*.md` y los álbumes de `public/galeria`. Hay que hacerlo desde el equipo que tiene las fotos de la galería, porque no están en git.
 4. **Desplegar el código.**

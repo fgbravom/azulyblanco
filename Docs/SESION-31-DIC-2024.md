@@ -373,7 +373,7 @@ La base de datos PostgreSQL incluye:
 
 ### Sistema Implementado
 - **Tipo**: Password simple con bcrypt
-- **Contraseña actual**: `asd123`
+- **Contraseña**: la de `ADMIN_PASSWORD_HASH`
 - **Hash hardcoded**: En `website/lib/auth/password.ts` (workaround para evitar problemas con $ en .env.local)
 
 ### Rutas Protegidas
@@ -391,7 +391,7 @@ La base de datos PostgreSQL incluye:
 ## 🧪 Testing y Verificación
 
 ### Funcionalidades Probadas ✅
-1. **Login**: ✅ Funciona con contraseña `asd123`
+1. **Login**: ✅ Funciona
 2. **Crear Jugador**: ✅ Formulario completo con 4 pestañas
 3. **Editar Jugador**: ✅ Pre-carga datos correctamente
 4. **Eliminar Jugador**: ✅ Con confirmación

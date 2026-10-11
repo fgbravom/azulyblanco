@@ -120,7 +120,7 @@ npm run dev
 # 6. Abrir navegador
 # Sitio público: http://localhost:3000
 # Panel admin: http://localhost:3000/admin
-# Contraseña: asd123
+# Contraseña: la de ADMIN_PASSWORD_HASH (ver Docs/ADMIN.md)
 ```
 
 ---
@@ -128,7 +128,7 @@ npm run dev
 ## 🔐 Acceso al Panel Admin
 
 - **URL**: http://localhost:3000/admin
-- **Contraseña actual**: `asd123`
+- **Contraseña**: la de `ADMIN_PASSWORD_HASH` (ver [ADMIN.md](ADMIN.md))
 - **Duración de sesión**: 8 horas
 
 ### Funcionalidades Disponibles
