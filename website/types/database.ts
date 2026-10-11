@@ -112,7 +112,7 @@ export interface Jugador {
 
   // Información deportiva
   equipo_id: number;
-  posicion_id: number;
+  posicion_id: number | null;
   dorsal: number | null;
   altura_cm: number | null;
   peso_kg: number | null;
@@ -383,8 +383,13 @@ export interface EstadisticaPartidoUpdate {
 export interface JugadorCompleto extends Jugador {
   nombre_completo: string;
   edad: number | null;
-  posicion: string;
-  posicion_abr: string;
+  /** Posición principal (jugadores.posicion_id); null si está por definir (migración 004) */
+  posicion: string | null;
+  posicion_abr: string | null;
+  /** Todas sus posiciones, la principal primero (migración 003) */
+  posiciones_ids: number[];
+  posiciones: string[];
+  posiciones_abr: string[];
   equipo: string;
   categoria: string;
 }

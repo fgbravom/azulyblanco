@@ -61,9 +61,20 @@ export default function JugadoresTable({ jugadores, loading, onView, onEdit, onD
                 {jugador.nombre_completo}
               </TableCell>
               <TableCell>
-                <span className="text-xs bg-gray-100 px-2 py-1 rounded">
-                  {jugador.posicion_abr}
-                </span>
+                <div className="flex flex-wrap gap-1">
+                  {!jugador.posiciones_abr?.length && !jugador.posicion_abr && (
+                    <span className="text-xs text-gray-400">Por definir</span>
+                  )}
+                  {(jugador.posiciones_abr?.length ? jugador.posiciones_abr : [jugador.posicion_abr]).filter(Boolean).map((abr, i) => (
+                    <span
+                      key={abr}
+                      title={i === 0 ? 'Posición principal' : undefined}
+                      className={i === 0 ? 'text-xs bg-azul-primario/10 text-azul-primario font-semibold px-2 py-1 rounded' : 'text-xs bg-gray-100 px-2 py-1 rounded'}
+                    >
+                      {abr}
+                    </span>
+                  ))}
+                </div>
               </TableCell>
               <TableCell className="text-sm text-muted-foreground">
                 {jugador.categoria}

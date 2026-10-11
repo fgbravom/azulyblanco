@@ -4,7 +4,8 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getJugadores, createJugador } from '@/lib/data/jugadores';
+import { getJugadores, createJugador, setPosicionesJugador } from '@/lib/data/jugadores';
+import { parsePosiciones } from '@/lib/validations/jugador';
 import type { JugadorInsert, JugadoresFilter, QueryOptions } from '@/types/database';
 
 /**
@@ -85,8 +86,11 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
 
+    // posiciones_ids (1 o más, la primera es la principal) reemplaza a posicion_id
+    const posicionesIds = parsePosiciones(body.posiciones_ids) ?? (body.posicion_id ? [body.posicion_id] : []);
+
     // Validar campos requeridos
-    if (!body.nombre || !body.apellidos || !body.equipo_id || !body.posicion_id) {
+    if (!body.nombre || !body.apellidos || !body.equipo_id || posicionesIds.length === 0) {
       return NextResponse.json(
         {
           success: false,
@@ -101,7 +105,7 @@ export async function POST(request: NextRequest) {
       nombre: body.nombre,
       apellidos: body.apellidos,
       equipo_id: body.equipo_id,
-      posicion_id: body.posicion_id,
+      posicion_id: posicionesIds[0],
       fecha_nacimiento: body.fecha_nacimiento,
       nacionalidad: body.nacionalidad,
       dni: body.dni,
@@ -124,6 +128,7 @@ export async function POST(request: NextRequest) {
     };
 
     const jugador = await createJugador(jugadorData);
+    await setPosicionesJugador(jugador.id, posicionesIds);
 
     return NextResponse.json(
       {

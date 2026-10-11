@@ -2,7 +2,6 @@
  * Funciones de acceso a datos para Jugadores
  */
 
-import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import type {
   Jugador,
@@ -25,7 +24,7 @@ export async function getJugadores(
   filter?: JugadoresFilter,
   options?: QueryOptions
 ): Promise<PaginatedResponse<JugadorCompleto>> {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   let query = supabase
     .from('vista_jugadores_completa')
@@ -83,7 +82,7 @@ export async function getJugadores(
  * Obtiene un jugador por ID con información completa
  */
 export async function getJugadorById(id: number): Promise<JugadorCompleto | null> {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   const { data, error } = await supabase
     .from('vista_jugadores_completa')
@@ -121,6 +120,32 @@ export async function getJugadoresByPosicion(posicionId: number): Promise<Jugado
 export async function buscarJugadores(busqueda: string): Promise<JugadorCompleto[]> {
   const result = await getJugadores({ busqueda });
   return result.data;
+}
+
+// ============================================================================
+// POSICIONES
+// ============================================================================
+
+/**
+ * Reemplaza las posiciones de un jugador. La primera es la principal y se
+ * copia a jugadores.posicion_id, que agrupa el plantel en la web.
+ */
+export async function setPosicionesJugador(id: number, posicionesIds: number[]): Promise<void> {
+  const ids = Array.from(new Set(posicionesIds));
+  if (ids.length === 0) throw new Error('El jugador necesita al menos una posición');
+
+  const supabase = createAdminClient();
+
+  const { error: errorBorrado } = await supabase.from('jugador_posiciones').delete().eq('jugador_id', id);
+  if (errorBorrado) throw new Error(`Error al guardar posiciones: ${errorBorrado.message}`);
+
+  const { error } = await supabase
+    .from('jugador_posiciones')
+    .insert(ids.map((posicion_id, orden) => ({ jugador_id: id, posicion_id, orden })));
+  if (error) throw new Error(`Error al guardar posiciones: ${error.message}`);
+
+  const { error: errorPrincipal } = await supabase.from('jugadores').update({ posicion_id: ids[0] }).eq('id', id);
+  if (errorPrincipal) throw new Error(`Error al guardar posiciones: ${errorPrincipal.message}`);
 }
 
 // ============================================================================
@@ -240,7 +265,7 @@ export async function isDorsalDisponible(
   dorsal: number,
   jugadorId?: number
 ): Promise<boolean> {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   let query = supabase
     .from('jugadores')
@@ -268,7 +293,7 @@ export async function isDorsalDisponible(
  * Obtiene el siguiente dorsal disponible en un equipo
  */
 export async function getNextDorsalDisponible(equipoId: number): Promise<number> {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   const { data, error } = await supabase
     .from('jugadores')
@@ -290,7 +315,7 @@ export async function getNextDorsalDisponible(equipoId: number): Promise<number>
  * Obtiene el conteo de jugadores por equipo
  */
 export async function getConteoJugadoresPorEquipo(equipoId: number): Promise<number> {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   const { count, error } = await supabase
     .from('jugadores')
@@ -310,7 +335,7 @@ export async function getConteoJugadoresPorEquipo(equipoId: number): Promise<num
  * Obtiene jugadores convocados para un partido
  */
 export async function getJugadoresConvocados(partidoId: number): Promise<JugadorCompleto[]> {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   const { data, error } = await supabase
     .from('estadisticas_partido')

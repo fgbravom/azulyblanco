@@ -5,7 +5,8 @@ export const jugadorSchema = z.object({
   nombre: z.string().min(1, 'El nombre es requerido'),
   apellidos: z.string().min(1, 'Los apellidos son requeridos'),
   equipo_id: z.number().int().positive('Debe seleccionar un equipo'),
-  posicion_id: z.number().int().positive('Debe seleccionar una posición'),
+  // La primera es la principal; la API la copia a jugadores.posicion_id
+  posiciones_ids: z.array(z.number().int().positive()).min(1, 'Elige al menos una posición'),
 
   // Información personal (opcional)
   fecha_nacimiento: z.string().optional().nullable(),
@@ -39,3 +40,9 @@ export const jugadorSchema = z.object({
 });
 
 export type JugadorFormData = z.infer<typeof jugadorSchema>;
+
+/** Ids de posición que llegan a la API, o undefined si el body no los trae */
+export function parsePosiciones(valor: unknown): number[] | undefined {
+  if (!Array.isArray(valor)) return undefined;
+  return valor.map(Number).filter((n) => Number.isInteger(n) && n > 0);
+}

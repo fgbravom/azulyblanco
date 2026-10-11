@@ -129,8 +129,8 @@ export default function JugadorFicha({ jugador, open, onClose }: Props) {
                 icon={<Shield className="h-4 w-4" />}
               />
               <InfoField
-                label="Posición"
-                value={`${jugador.posicion} (${jugador.posicion_abr})`}
+                label={(jugador.posiciones?.length ?? 1) > 1 ? 'Posiciones' : 'Posición'}
+                value={(jugador.posiciones?.length ? jugador.posiciones : [jugador.posicion]).filter(Boolean).join(', ') || 'Por definir'}
                 icon={<Shield className="h-4 w-4" />}
               />
               <InfoField label="Dorsal" value={jugador.dorsal?.toString() || '-'} />

@@ -4,12 +4,13 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { getCategoriaByNombre } from '@/lib/data/equipos'
 import { getEquiposByCategoria } from '@/lib/data/equipos'
-import { getJugadoresByEquipo } from '@/lib/data/jugadores'
-import { getSerieInfo } from '@/lib/contenido/publico'
+import { getPlantelPublico, getSerieInfo, type PlantelJugador } from '@/lib/contenido/publico'
 import { MDXRenderer } from '@/components/mdx/MDXRenderer'
-import type { JugadorCompleto, Equipo } from '@/types/database'
+import type { Equipo } from '@/types/database'
 import Image from 'next/image'
 import { CalendarClock, MapPin, Trophy } from 'lucide-react'
+
+const SIN_POSICION = 'sin-posicion'
 
 const POSICION_COLORS: Record<string, string> = {
   Arquero: 'bg-yellow-500',
@@ -18,8 +19,8 @@ const POSICION_COLORS: Record<string, string> = {
   Delantero: 'bg-red-600',
 }
 
-function getPosicionColor(posicion: string): string {
-  return POSICION_COLORS[posicion] ?? 'bg-gray-500'
+function getPosicionColor(posicion: string | null): string {
+  return (posicion && POSICION_COLORS[posicion]) ?? 'bg-gray-500'
 }
 
 function getEstadoBadge(estado: string) {
@@ -54,7 +55,7 @@ export default async function SeriePage({ slug, categoriaNombre, titulo: tituloB
   ].filter((d) => d.valor)
 
   // Obtener categoría, equipo y jugadores desde Supabase
-  let jugadores: JugadorCompleto[] = []
+  let jugadores: PlantelJugador[] = []
   let equipo: Equipo | null = null
 
   try {
@@ -64,24 +65,26 @@ export default async function SeriePage({ slug, categoriaNombre, titulo: tituloB
       if (equipos.length > 0) {
         // Tomar el equipo más reciente (mayor temporada)
         equipo = equipos[0]
-        jugadores = await getJugadoresByEquipo(equipo.id)
+        jugadores = await getPlantelPublico(equipo.id)
       }
     }
   } catch {
     // Si hay error de conexión, mostrar estado vacío
   }
 
-  // Agrupar jugadores por posición
-  const porPosicion: Record<string, JugadorCompleto[]> = {}
+  // Agrupar jugadores por posición (los que aún no la tienen, al final)
+  const porPosicion: Record<string, PlantelJugador[]> = {}
   for (const j of jugadores) {
-    if (!porPosicion[j.posicion]) porPosicion[j.posicion] = []
-    porPosicion[j.posicion].push(j)
+    const clave = j.posicion ?? SIN_POSICION
+    if (!porPosicion[clave]) porPosicion[clave] = []
+    porPosicion[clave].push(j)
   }
 
   const ordenPosiciones = ['Arquero', 'Defensor', 'Mediocampista', 'Delantero']
   const posicionesOrdenadas = [
     ...ordenPosiciones.filter((p) => porPosicion[p]),
-    ...Object.keys(porPosicion).filter((p) => !ordenPosiciones.includes(p)),
+    ...Object.keys(porPosicion).filter((p) => !ordenPosiciones.includes(p) && p !== SIN_POSICION),
+    ...(porPosicion[SIN_POSICION] ? [SIN_POSICION] : []),
   ]
 
   const tieneCuerpoTecnico = equipo && (equipo.entrenador || equipo.asistente_tecnico || equipo.preparador_fisico)
@@ -146,7 +149,7 @@ export default async function SeriePage({ slug, categoriaNombre, titulo: tituloB
                   <div key={posicion}>
                     <div className="flex items-center gap-3 mb-6">
                       <div className={`w-3 h-8 rounded-sm ${getPosicionColor(posicion)}`} />
-                      <h3 className="text-xl font-bold text-gray-800">{posicion}s</h3>
+                      <h3 className="text-xl font-bold text-gray-800">{posicion === SIN_POSICION ? 'Plantel' : `${posicion}s`}</h3>
                       <span className="text-gray-400 text-sm">({porPosicion[posicion].length})</span>
                     </div>
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
@@ -180,7 +183,9 @@ export default async function SeriePage({ slug, categoriaNombre, titulo: tituloB
                             <div className="text-center">
                               <p className="font-bold text-sm leading-tight">{jugador.nombre}</p>
                               <p className="font-bold text-sm leading-tight text-gray-700">{jugador.apellidos}</p>
-                              <p className="text-xs text-azul-primario font-medium mt-1">{jugador.posicion_abr}</p>
+                              <p className="text-xs text-azul-primario font-medium mt-1">
+                                {(jugador.posiciones_abr?.length ? jugador.posiciones_abr : [jugador.posicion_abr]).filter(Boolean).join(' · ')}
+                              </p>
                               {jugador.estado !== 'Activo' && (
                                 <div className="mt-1">{getEstadoBadge(jugador.estado)}</div>
                               )}

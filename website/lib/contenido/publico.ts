@@ -208,6 +208,43 @@ export async function getSerieInfo(slug: string): Promise<SerieInfo | null> {
 }
 
 // ============================================================================
+// PLANTEL
+// ============================================================================
+
+/** Columnas de vista_plantel_publico: solo lo que se muestra en la web (migración 003) */
+export interface PlantelJugador {
+  id: number
+  nombre: string
+  apellidos: string
+  nombre_completo: string
+  foto_url: string | null
+  dorsal: number | null
+  estado: string
+  posicion: string | null
+  posicion_abr: string | null
+  posiciones: string[]
+  posiciones_abr: string[]
+}
+
+/** Jugadores activos de un equipo. Sin respaldo: si falla, la serie muestra el plantel vacío. */
+export async function getPlantelPublico(equipoId: number): Promise<PlantelJugador[]> {
+  const supabase = createPublicClient()
+  if (!supabase) return []
+
+  const { data, error } = await supabase
+    .from('vista_plantel_publico')
+    .select('id, nombre, apellidos, nombre_completo, foto_url, dorsal, estado, posicion, posicion_abr, posiciones, posiciones_abr')
+    .eq('equipo_id', equipoId)
+    .eq('activo', true)
+    .order('dorsal', { ascending: true, nullsFirst: false })
+  if (error) {
+    console.warn('[contenido] no se pudo leer el plantel:', error.message)
+    return []
+  }
+  return data as PlantelJugador[]
+}
+
+// ============================================================================
 // HERO
 // ============================================================================
 

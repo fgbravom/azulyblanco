@@ -4,24 +4,6 @@
 -- supabase/migrations. Nada de esto se ejecuta en producción.
 -- ============================================================================
 
--- La vista de database/schema.sql no expone equipo_id ni el resto de columnas
--- de jugadores, y lib/data/jugadores.ts filtra y lee esos campos
--- (JugadorCompleto extiende Jugador). En local se redefine completa.
-DROP VIEW IF EXISTS vista_jugadores_completa;
-CREATE VIEW vista_jugadores_completa AS
-SELECT
-  j.*,
-  j.nombre || ' ' || j.apellidos AS nombre_completo,
-  EXTRACT(YEAR FROM AGE(j.fecha_nacimiento))::INT AS edad,
-  p.nombre AS posicion,
-  p.abreviatura AS posicion_abr,
-  e.nombre AS equipo,
-  c.nombre AS categoria
-FROM jugadores j
-JOIN posiciones p ON j.posicion_id = p.id
-JOIN equipos e ON j.equipo_id = e.id
-JOIN categorias c ON e.categoria_id = c.id;
-
 -- Cuerpo técnico
 UPDATE equipos SET entrenador = 'Director Técnico Primera', asistente_tecnico = 'Asistente Primera'
   WHERE nombre = 'Azul y Blanco - Primera';
@@ -46,6 +28,15 @@ FROM (VALUES
   ('Defensa', 'Máster Uno', 'Azul y Blanco - 35', 'Defensa Central', 3, 'Activo'),
   ('Enganche', 'Máster Dos', 'Azul y Blanco - 35', 'Mediocampista Ofensivo', 10, 'Activo')
 ) AS j(nombre, apellidos, equipo, posicion, dorsal, estado);
+
+-- Posiciones: la principal de cada uno, y una segunda para probar varias posiciones
+INSERT INTO jugador_posiciones (jugador_id, posicion_id, orden)
+SELECT id, posicion_id, 0 FROM jugadores
+ON CONFLICT DO NOTHING;
+INSERT INTO jugador_posiciones (jugador_id, posicion_id, orden)
+SELECT j.id, (SELECT id FROM posiciones WHERE nombre = 'Lateral Izquierdo'), 1
+FROM jugadores j WHERE j.apellidos = 'Prueba Dos'
+ON CONFLICT DO NOTHING;
 
 -- Programación relativa a hoy, para que siempre haya actividades próximas
 INSERT INTO programacion (tipo, fecha, hora_inicio, rival, tipo_partido, actividad, titulo, descripcion, estadio, confirmado, llevar, series)

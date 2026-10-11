@@ -17,9 +17,13 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import type { JugadorCompleto, Equipo, Posicion } from '@/types/database';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Star } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import SelectorImagen from '@/components/admin/medios/SelectorImagen';
+
+/** Campo numérico opcional: vacío se guarda como null (valueAsNumber daba NaN y la validación fallaba) */
+const numeroOpcional = (valor: unknown) => (valor === '' || valor == null ? null : Number(valor));
 
 interface Props {
   jugador: JugadorCompleto | null;
@@ -46,10 +50,10 @@ export default function JugadorForm({ jugador, onSave, onCancel }: Props) {
           nombre: jugador.nombre,
           apellidos: jugador.apellidos,
           equipo_id: jugador.equipo_id,
-          posicion_id: jugador.posicion_id,
+          posiciones_ids: jugador.posiciones_ids ?? (jugador.posicion_id ? [jugador.posicion_id] : []),
           dorsal: jugador.dorsal,
           fecha_nacimiento: jugador.fecha_nacimiento,
-          nacionalidad: jugador.nacionalidad || 'España',
+          nacionalidad: jugador.nacionalidad || 'Chile',
           dni: jugador.dni,
           foto_url: jugador.foto_url,
           altura_cm: jugador.altura_cm,
@@ -67,11 +71,11 @@ export default function JugadorForm({ jugador, onSave, onCancel }: Props) {
           activo: jugador.activo,
         }
       : {
-          nacionalidad: 'España',
+          nacionalidad: 'Chile',
           estado: 'Activo',
           activo: true,
           equipo_id: undefined,
-          posicion_id: undefined,
+          posiciones_ids: [],
         },
   });
 
@@ -104,17 +108,19 @@ export default function JugadorForm({ jugador, onSave, onCancel }: Props) {
   }, []);
 
   const onSubmit = async (data: JugadorFormData) => {
-    console.log('Submitting form with data:', data);
     setLoading(true);
 
     try {
       const url = jugador ? `/api/jugadores/${jugador.id}` : '/api/jugadores';
       const method = jugador ? 'PATCH' : 'POST';
 
+      // Un campo vacío se guarda como null: Postgres rechaza '' en columnas de fecha
+      const datos = Object.fromEntries(Object.entries(data).map(([campo, valor]) => [campo, valor === '' ? null : valor]));
+
       const res = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
+        body: JSON.stringify(datos),
       });
 
       if (!res.ok) {
@@ -208,6 +214,54 @@ export default function JugadorForm({ jugador, onSave, onCancel }: Props) {
         {/* Tab Deportiva */}
         <TabsContent value="deportiva" className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
+            <div className="col-span-2">
+              <Label>Posiciones *</Label>
+              <p className="text-xs text-gray-500 mt-0.5">
+                Marca una o más. La primera es la principal: agrupa al jugador en la página de la serie. Usa la estrella para cambiarla.
+              </p>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {posiciones.length === 0 && <span className="text-sm text-gray-500">No hay posiciones disponibles</span>}
+                {posiciones.map((posicion) => {
+                  const seleccion = watch('posiciones_ids') ?? [];
+                  const indice = seleccion.indexOf(posicion.id);
+                  const activa = indice >= 0;
+                  const principal = indice === 0;
+                  const elegir = (ids: number[]) => setValue('posiciones_ids', ids, { shouldValidate: true, shouldDirty: true });
+                  return (
+                    <div
+                      key={posicion.id}
+                      className={cn(
+                        'inline-flex items-center rounded-full border text-sm transition-colors',
+                        activa ? 'border-azul-claro bg-azul-claro text-white' : 'border-gray-300 bg-white text-gray-700 hover:border-azul-claro'
+                      )}
+                    >
+                      <button
+                        type="button"
+                        aria-pressed={activa}
+                        onClick={() => elegir(activa ? seleccion.filter((id) => id !== posicion.id) : [...seleccion, posicion.id])}
+                        className="px-3 py-1"
+                      >
+                        {posicion.nombre} <span className="opacity-70">({posicion.abreviatura})</span>
+                      </button>
+                      {activa && (
+                        <button
+                          type="button"
+                          onClick={() => !principal && elegir([posicion.id, ...seleccion.filter((id) => id !== posicion.id)])}
+                          aria-label={principal ? 'Posición principal' : `Hacer ${posicion.nombre} la posición principal`}
+                          title={principal ? 'Posición principal' : 'Hacer principal'}
+                          className={cn('-ml-1 mr-1 rounded-full p-1', principal ? 'cursor-default' : 'opacity-60 hover:opacity-100')}
+                        >
+                          <Star className={cn('h-3.5 w-3.5', principal && 'fill-current')} />
+                        </button>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+              {errors.posiciones_ids && (
+                <p className="text-sm text-red-500 mt-1">{errors.posiciones_ids.message}</p>
+              )}
+            </div>
             <div>
               <Label htmlFor="equipo_id">Equipo *</Label>
               <Select
@@ -236,40 +290,13 @@ export default function JugadorForm({ jugador, onSave, onCancel }: Props) {
               )}
             </div>
             <div>
-              <Label htmlFor="posicion_id">Posición *</Label>
-              <Select
-                value={watch('posicion_id')?.toString() || ''}
-                onValueChange={(value) => {
-                  setValue('posicion_id', parseInt(value), { shouldValidate: true });
-                }}
-              >
-                <SelectTrigger className="bg-white">
-                  <SelectValue placeholder="Selecciona una posición" />
-                </SelectTrigger>
-                <SelectContent>
-                  {posiciones.length === 0 ? (
-                    <div className="px-2 py-1 text-sm text-gray-500">No hay posiciones disponibles</div>
-                  ) : (
-                    posiciones.map((posicion) => (
-                      <SelectItem key={posicion.id} value={posicion.id.toString()}>
-                        {posicion.nombre} ({posicion.abreviatura})
-                      </SelectItem>
-                    ))
-                  )}
-                </SelectContent>
-              </Select>
-              {errors.posicion_id && (
-                <p className="text-sm text-red-500 mt-1">{errors.posicion_id.message}</p>
-              )}
-            </div>
-            <div>
               <Label htmlFor="dorsal">Dorsal</Label>
               <Input
                 id="dorsal"
                 type="number"
                 min="1"
                 max="99"
-                {...register('dorsal', { valueAsNumber: true })}
+                {...register('dorsal', { setValueAs: numeroOpcional })}
               />
               {errors.dorsal && (
                 <p className="text-sm text-red-500 mt-1">{errors.dorsal.message}</p>
@@ -300,7 +327,7 @@ export default function JugadorForm({ jugador, onSave, onCancel }: Props) {
                 type="number"
                 min="100"
                 max="250"
-                {...register('altura_cm', { valueAsNumber: true })}
+                {...register('altura_cm', { setValueAs: numeroOpcional })}
               />
             </div>
             <div>
@@ -311,7 +338,7 @@ export default function JugadorForm({ jugador, onSave, onCancel }: Props) {
                 min="30"
                 max="200"
                 step="0.1"
-                {...register('peso_kg', { valueAsNumber: true })}
+                {...register('peso_kg', { setValueAs: numeroOpcional })}
               />
             </div>
             <div>

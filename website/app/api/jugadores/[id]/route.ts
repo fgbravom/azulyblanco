@@ -9,7 +9,9 @@ import {
   updateJugador,
   deleteJugador,
   deleteJugadorPermanente,
+  setPosicionesJugador,
 } from '@/lib/data/jugadores';
+import { parsePosiciones } from '@/lib/validations/jugador';
 import type { JugadorUpdate } from '@/types/database';
 
 /**
@@ -90,6 +92,13 @@ export async function PATCH(
     }
 
     const body = await request.json();
+    const posicionesIds = parsePosiciones(body.posiciones_ids);
+    if (posicionesIds && posicionesIds.length === 0) {
+      return NextResponse.json(
+        { success: false, data: null, error: 'El jugador necesita al menos una posición' },
+        { status: 400 }
+      );
+    }
 
     const updates: JugadorUpdate = {
       nombre: body.nombre,
@@ -99,7 +108,7 @@ export async function PATCH(
       dni: body.dni,
       foto_url: body.foto_url,
       equipo_id: body.equipo_id,
-      posicion_id: body.posicion_id,
+      posicion_id: posicionesIds?.[0] ?? body.posicion_id,
       dorsal: body.dorsal,
       altura_cm: body.altura_cm,
       peso_kg: body.peso_kg,
@@ -124,6 +133,7 @@ export async function PATCH(
     );
 
     const jugador = await updateJugador(jugadorId, updates);
+    if (posicionesIds) await setPosicionesJugador(jugadorId, posicionesIds);
 
     return NextResponse.json({
       success: true,

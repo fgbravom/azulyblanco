@@ -2,7 +2,9 @@
  * Funciones de acceso a datos para Estadísticas de Partidos
  */
 
-import { createClient } from '@/lib/supabase/server';
+// Solo lo usan las APIs del admin: lee con service_role porque los datos
+// de jugadores ya no son legibles con la clave pública (migración 003)
+import { createAdminClient } from '@/lib/supabase/admin';
 import type {
   EstadisticaPartido,
   EstadisticaPartidoInsert,
@@ -21,7 +23,7 @@ import type {
 export async function getEstadisticasPartido(
   partidoId: number
 ): Promise<EstadisticaPartido[]> {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   const { data, error } = await supabase
     .from('estadisticas_partido')
@@ -53,7 +55,7 @@ export async function getEstadisticaJugadorPartido(
   partidoId: number,
   jugadorId: number
 ): Promise<EstadisticaPartido | null> {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   const { data, error } = await supabase
     .from('estadisticas_partido')
@@ -76,7 +78,7 @@ export async function getEstadisticaJugadorPartido(
 export async function getEstadisticasJugador(
   jugadorId: number
 ): Promise<EstadisticasJugador | null> {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   const { data, error } = await supabase
     .from('vista_estadisticas_jugador')
@@ -96,7 +98,7 @@ export async function getEstadisticasJugador(
  * Obtiene estadísticas de todos los jugadores de un equipo
  */
 export async function getEstadisticasEquipo(equipoId: number): Promise<EstadisticasJugador[]> {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   // Primero obtenemos el equipo
   const { data: equipo, error: equipoError } = await supabase
@@ -132,7 +134,7 @@ export async function getHistoricoJugador(
   jugadorId: number,
   limit?: number
 ): Promise<any[]> {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   let query = supabase
     .from('estadisticas_partido')
@@ -174,7 +176,7 @@ export async function getHistoricoJugador(
 export async function createEstadisticaPartido(
   estadistica: EstadisticaPartidoInsert
 ): Promise<EstadisticaPartido> {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   const { data, error } = await supabase
     .from('estadisticas_partido')
@@ -196,7 +198,7 @@ export async function createEstadisticaPartido(
 export async function createEstadisticasPartido(
   estadisticas: EstadisticaPartidoInsert[]
 ): Promise<EstadisticaPartido[]> {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   const { data, error } = await supabase
     .from('estadisticas_partido')
@@ -222,7 +224,7 @@ export async function updateEstadisticaPartido(
   id: number,
   updates: EstadisticaPartidoUpdate
 ): Promise<EstadisticaPartido> {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   const { data, error } = await supabase
     .from('estadisticas_partido')
@@ -247,7 +249,7 @@ export async function updateEstadisticaJugadorPartido(
   jugadorId: number,
   updates: EstadisticaPartidoUpdate
 ): Promise<EstadisticaPartido> {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   const { data, error } = await supabase
     .from('estadisticas_partido')
@@ -273,7 +275,7 @@ export async function updateEstadisticaJugadorPartido(
  * Elimina estadísticas de un jugador en un partido
  */
 export async function deleteEstadisticaPartido(id: number): Promise<void> {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   const { error } = await supabase
     .from('estadisticas_partido')
@@ -290,7 +292,7 @@ export async function deleteEstadisticaPartido(id: number): Promise<void> {
  * Elimina todas las estadísticas de un partido
  */
 export async function deleteEstadisticasPartido(partidoId: number): Promise<void> {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   const { error } = await supabase
     .from('estadisticas_partido')
@@ -314,7 +316,7 @@ export async function getMaximosGoleadores(
   equipoId?: number,
   limit: number = 10
 ): Promise<EstadisticasJugador[]> {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   let query = supabase
     .from('vista_estadisticas_jugador')
@@ -351,7 +353,7 @@ export async function getMaximosAsistentes(
   equipoId?: number,
   limit: number = 10
 ): Promise<EstadisticasJugador[]> {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   let query = supabase
     .from('vista_estadisticas_jugador')
@@ -389,7 +391,7 @@ export async function getMejoresValorados(
   minPartidos: number = 3,
   limit: number = 10
 ): Promise<EstadisticasJugador[]> {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   let query = supabase
     .from('vista_estadisticas_jugador')
@@ -498,7 +500,7 @@ export async function registrarTarjeta(
  * Calcula estadísticas por posición en un equipo
  */
 export async function getEstadisticasPorPosicion(equipoId: number) {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   const { data, error } = await supabase
     .from('jugadores')
