@@ -4,6 +4,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { rechazarSinSesion } from '@/lib/auth/session';
 import { getPartidos, createPartido } from '@/lib/data/partidos';
 import type { PartidoInsert, PartidosFilter, QueryOptions } from '@/types/database';
 
@@ -12,6 +13,9 @@ import type { PartidoInsert, PartidosFilter, QueryOptions } from '@/types/databa
  * Obtiene lista de partidos con filtros opcionales
  */
 export async function GET(request: NextRequest) {
+  const denegado = await rechazarSinSesion();
+  if (denegado) return denegado;
+
   try {
     const searchParams = request.nextUrl.searchParams;
 
@@ -85,6 +89,9 @@ export async function GET(request: NextRequest) {
  * Crea un nuevo partido
  */
 export async function POST(request: NextRequest) {
+  const denegado = await rechazarSinSesion();
+  if (denegado) return denegado;
+
   try {
     const body = await request.json();
 

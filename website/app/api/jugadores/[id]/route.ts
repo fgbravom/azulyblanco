@@ -4,6 +4,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { rechazarSinSesion } from '@/lib/auth/session';
 import {
   getJugadorById,
   updateJugador,
@@ -22,6 +23,9 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const denegado = await rechazarSinSesion();
+  if (denegado) return denegado;
+
   try {
     const { id } = await params;
     const jugadorId = parseInt(id);
@@ -76,6 +80,9 @@ export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const denegado = await rechazarSinSesion();
+  if (denegado) return denegado;
+
   try {
     const { id } = await params;
     const jugadorId = parseInt(id);
@@ -161,6 +168,9 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const denegado = await rechazarSinSesion();
+  if (denegado) return denegado;
+
   try {
     const { id } = await params;
     const jugadorId = parseInt(id);

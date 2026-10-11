@@ -4,6 +4,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { rechazarSinSesion } from '@/lib/auth/session';
 import {
   updateEstadisticaPartido,
   deleteEstadisticaPartido,
@@ -18,6 +19,9 @@ export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const denegado = await rechazarSinSesion();
+  if (denegado) return denegado;
+
   try {
     const { id } = await params;
     const estadisticaId = parseInt(id);
@@ -97,6 +101,9 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const denegado = await rechazarSinSesion();
+  if (denegado) return denegado;
+
   try {
     const { id } = await params;
     const estadisticaId = parseInt(id);
