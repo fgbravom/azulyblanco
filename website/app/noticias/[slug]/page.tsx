@@ -8,6 +8,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { notFound } from 'next/navigation'
 import { ArrowLeft } from 'lucide-react'
+import { SITE_CONFIG } from '@/lib/constants'
 
 interface PageProps {
   params: Promise<{ slug: string }>
@@ -24,7 +25,21 @@ export async function generateMetadata({ params }: PageProps) {
   const { slug } = await params
   const noticia = await getNoticiaPublica(slug)
   if (!noticia) return { title: 'Noticia no encontrada' }
-  return { title: noticia.title, description: noticia.description }
+  return {
+    title: noticia.title,
+    description: noticia.description,
+    // openGraph reemplaza entero al del layout: se repiten url, sitio e idioma
+    openGraph: {
+      type: 'article',
+      url: './',
+      siteName: SITE_CONFIG.name,
+      locale: 'es_CL',
+      title: noticia.title,
+      description: noticia.description,
+      publishedTime: noticia.date,
+      images: [noticia.coverUrl || '/opengraph-image.png'],
+    },
+  }
 }
 
 const CATEGORY_COLORS: Record<string, string> = {

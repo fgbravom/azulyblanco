@@ -33,6 +33,17 @@ const nextConfig = {
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
     minimumCacheTTL: 60,
   },
+  async redirects() {
+    return [
+      {
+        // El alias de Vercel duplicaba el sitio en buscadores: todo al dominio oficial
+        source: '/:path*',
+        has: [{ type: 'host', value: 'azulyblanco.vercel.app' }],
+        destination: 'https://www.azulyblanco.cl/:path*',
+        permanent: true,
+      },
+    ]
+  },
   async headers() {
     return [
       {

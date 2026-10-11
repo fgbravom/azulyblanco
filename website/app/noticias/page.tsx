@@ -5,7 +5,7 @@ import { NoticiasClient } from './NoticiasClient'
 
 export const metadata = {
   title: 'Noticias',
-  description: 'Últimas noticias del Club deportivo Azul y Blanco',
+  description: 'Últimas noticias del Club Deportivo Azul y Blanco de Curicó: partidos, jugadores, torneos y vida del club.',
 }
 
 export const revalidate = 300 // respaldo; el admin regenera al guardar

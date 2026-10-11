@@ -25,12 +25,14 @@ const robotoMono = Roboto_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_CONFIG.url),
   title: {
-    default: `Club Deportivo ${SITE_CONFIG.name}`,
+    default: `Club Deportivo ${SITE_CONFIG.name} | Fútbol amateur en Curicó`,
     template: `%s | ${SITE_CONFIG.name}`,
   },
   description: SITE_CONFIG.description,
-  keywords: ['fútbol amateur', 'club deportivo', 'azul y blanco', 'fútbol'],
+  applicationName: SITE_CONFIG.name,
+  keywords: ['azul y blanco', 'club deportivo azul y blanco', 'azul y blanco curicó', 'fútbol amateur curicó', 'fútbol amateur'],
   authors: [{ name: SITE_CONFIG.name }],
   creator: SITE_CONFIG.name,
   icons: {
@@ -42,27 +44,24 @@ export const metadata: Metadata = {
     apple: '/icon.png',
     shortcut: '/icon.png',
   },
+  // './' se resuelve con la ruta de cada página: cada una apunta a sí misma
+  // en el dominio de producción (evita duplicados con *.vercel.app)
+  alternates: {
+    canonical: './',
+  },
+  // La imagen la pone app/opengraph-image.png
   openGraph: {
     type: 'website',
-    locale: 'es_ES',
-    url: SITE_CONFIG.url,
+    locale: 'es_CL',
+    url: './',
     siteName: SITE_CONFIG.name,
-    title: `${SITE_CONFIG.name} - Club de Fútbol Amateur`,
+    title: `Club Deportivo ${SITE_CONFIG.name} - Fútbol amateur en Curicó`,
     description: SITE_CONFIG.description,
-    images: [
-      {
-        url: SITE_CONFIG.ogImage,
-        width: 1200,
-        height: 630,
-        alt: SITE_CONFIG.name,
-      },
-    ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: `${SITE_CONFIG.name} - Club de Fútbol Amateur`,
+    title: `Club Deportivo ${SITE_CONFIG.name} - Fútbol amateur en Curicó`,
     description: SITE_CONFIG.description,
-    images: [SITE_CONFIG.ogImage],
   },
   robots: {
     index: true,

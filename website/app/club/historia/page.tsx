@@ -7,7 +7,7 @@ import Image from 'next/image'
 
 export const metadata = {
   title: 'Historia',
-  description: 'Historia del Club Azul y Blanco',
+  description: 'Historia del Club Deportivo Azul y Blanco de Curicó, nacido en 2006 como escuela de fútbol infantil sin fines de lucro.',
 }
 
 export default function HistoriaPage() {

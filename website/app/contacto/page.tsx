@@ -10,7 +10,7 @@ import { FaInstagram, FaFacebook } from 'react-icons/fa'
 
 export const metadata = {
   title: 'Contacto',
-  description: 'Contacta con el Club Azul y Blanco',
+  description: 'Contacta al Club Deportivo Azul y Blanco de Curicó: súmate al club o consulta por nuestras series.',
 }
 
 export default function ContactoPage() {

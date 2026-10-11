@@ -6,7 +6,7 @@ import { GaleriaClient } from './GaleriaClient'
 
 export const metadata = {
   title: 'Galería',
-  description: 'Fotos y momentos del Club deportivo Azul y Blanco',
+  description: 'Fotos de partidos, entrenamientos y eventos del Club Deportivo Azul y Blanco de Curicó.',
 }
 
 export const revalidate = 300 // respaldo; el admin regenera al guardar

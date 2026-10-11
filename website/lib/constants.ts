@@ -1,9 +1,11 @@
 export const SITE_CONFIG = {
   name: 'Azul y Blanco',
-  description: 'Club deportivo fútbol amateur apasionado por el deporte',
-  url: process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000',
-  ogImage: '/images/og-image.png',
-  founded: 2006, // Cambiar por el año real de fundación
+  description:
+    'Club Deportivo Azul y Blanco de Curicó: fútbol amateur desde 2006. Series Primera, Honor y 35, partidos, noticias y galería del club.',
+  // Dominio de producción: canonicals, Open Graph y sitemap se arman con esta URL
+  url: process.env.NEXT_PUBLIC_SITE_URL || 'https://www.azulyblanco.cl',
+  founded: 2006,
+  foundingDate: '2006-08-06',
   colors: {
     primary: '#0047AB',
     secondary: '#FFFFFF',

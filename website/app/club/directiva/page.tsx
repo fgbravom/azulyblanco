@@ -4,7 +4,7 @@ import { Card, CardContent } from '@/components/ui/card'
 
 export const metadata = {
   title: 'Directiva',
-  description: 'Directiva del Club Deportivo Azul y Blanco',
+  description: 'Directiva del Club Deportivo Azul y Blanco de Curicó.',
 }
 
 const DIRECTIVA = [

@@ -2,7 +2,7 @@ import SeriePage from '@/app/series/_components/SeriePage'
 
 export const metadata = {
   title: 'Serie Honor',
-  description: 'Plantel de la Serie Honor del Club Azul y Blanco',
+  description: 'Plantel de la Serie Honor del Club Deportivo Azul y Blanco de Curicó.',
 }
 
 export default function SerieHonorPage() {

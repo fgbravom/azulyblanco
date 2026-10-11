@@ -5,7 +5,7 @@ import { getEventosCalendario } from '@/lib/contenido/publico'
 
 export const metadata = {
   title: 'Partidos',
-  description: 'Calendario y resultados del Club Azul y Blanco',
+  description: 'Calendario, programación y resultados de los partidos del Club Deportivo Azul y Blanco de Curicó.',
 }
 
 export const revalidate = 300 // respaldo; el admin regenera al guardar

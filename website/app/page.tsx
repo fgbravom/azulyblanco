@@ -7,8 +7,44 @@ import { getEventosCalendario, getNoticiasPublicas } from '@/lib/contenido/publi
 import { HeroSection } from '@/components/hero/HeroSection'
 import { UltimasNoticias } from '@/components/noticias/UltimasNoticias'
 import { obtenerProximosEventos } from '@/lib/utils/calendario'
+import { SITE_CONFIG } from '@/lib/constants'
 
 export const revalidate = 300 // respaldo; el admin regenera al guardar
+
+// Datos estructurados: le dicen a Google quién es el club y cómo se llama el sitio
+const NOMBRE_COMPLETO = `Club Deportivo ${SITE_CONFIG.name}`
+const JSON_LD = JSON.stringify({
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'SportsOrganization',
+      '@id': `${SITE_CONFIG.url}/#club`,
+      name: NOMBRE_COMPLETO,
+      alternateName: [SITE_CONFIG.name, `${SITE_CONFIG.name} Curicó`, 'AyB'],
+      url: SITE_CONFIG.url,
+      logo: `${SITE_CONFIG.url}/images/escudoazulyblanco.png`,
+      description: SITE_CONFIG.description,
+      sport: 'Fútbol',
+      foundingDate: SITE_CONFIG.foundingDate,
+      address: {
+        '@type': 'PostalAddress',
+        addressLocality: 'Curicó',
+        addressRegion: 'Maule',
+        addressCountry: 'CL',
+      },
+      sameAs: [SITE_CONFIG.social.instagram, SITE_CONFIG.social.facebook],
+    },
+    {
+      '@type': 'WebSite',
+      '@id': `${SITE_CONFIG.url}/#sitio`,
+      name: SITE_CONFIG.name,
+      alternateName: NOMBRE_COMPLETO,
+      url: SITE_CONFIG.url,
+      inLanguage: 'es-CL',
+      publisher: { '@id': `${SITE_CONFIG.url}/#club` },
+    },
+  ],
+}).replace(/</g, '\\u003c')
 
 export default async function HomePage() {
   const [eventos, todasLasNoticias] = await Promise.all([getEventosCalendario(), getNoticiasPublicas()])
@@ -16,7 +52,11 @@ export default async function HomePage() {
   return (
     <>
       <Header isHome={true} hideInitially={true} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON_LD }} />
       <main className="flex flex-col min-h-screen bg-azul-primario">
+        {/* La portada es solo foto: el título principal queda para buscadores y lectores de pantalla */}
+        <h1 className="sr-only">{NOMBRE_COMPLETO}: fútbol amateur en Curicó</h1>
+
         {/* Hero Section */}
         <HeroSection />
 
