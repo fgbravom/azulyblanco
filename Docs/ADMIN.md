@@ -1,6 +1,6 @@
 # Panel de administración
 
-`/admin` permite editar el contenido del sitio sin tocar código: fotos de la portada, programación, noticias, galerías, biblioteca de imágenes, plantel e información de las series.
+`/admin` permite editar el contenido del sitio sin tocar código: fotos de la portada, programación, noticias, galerías, biblioteca de imágenes, plantel e información de las series. Hay además un sistema de cuotas de los jugadores, oculto por ahora ([CUOTAS.md](CUOTAS.md)).
 
 ## Dónde vive cada cosa
 
@@ -13,6 +13,7 @@
 | Imágenes | `medios`, archivos en `medios/biblioteca/` | Portadas, fotos de jugadores, series |
 | Plantel | `jugadores` (APIs `/api/jugadores`) | `/series/*` |
 | Series | columnas nuevas de `categorias` + cuerpo técnico en `equipos` | `/series/*` |
+| Cuotas (oculto, se activa con `CUOTAS_HABILITADAS=true`) | `cuotas`, `pagos`, configuración en `equipos` (ver [CUOTAS.md](CUOTAS.md)) | Link personal `/cuotas/<código>` |
 
 Las imágenes se suben desde el navegador directo a Supabase Storage (bucket público `medios`) con una URL firmada que entrega el servidor. Antes de subir se reducen a 2400 px y se pasan a WebP.
 
@@ -31,6 +32,7 @@ Al guardar, el admin regenera las páginas públicas afectadas (`revalidatePath`
      node -e "const b=require('bcryptjs');console.log(Buffer.from(b.hashSync(process.argv[1],10)).toString('base64'))" 'contraseña-nueva'
      ```
      Mientras no exista, rige la contraseña temporal de `lib/auth/password.ts`.
+   - `CUOTAS_HABILITADAS`: `true` muestra el sistema de cuotas. Sin la variable queda oculto ([CUOTAS.md](CUOTAS.md)).
 3. **Importar el contenido actual, antes de desplegar**: con `npm run dev` y `.env.local` apuntando a la base de producción, entrar a `/admin` y pulsar «Importar». Copia los eventos de `lib/data/eventos-enero.ts`, las noticias de `noticias/*.md` y los álbumes de `public/galeria`. Hay que hacerlo desde el equipo que tiene las fotos de la galería, porque no están en git.
 4. **Desplegar el código.**
 
@@ -101,4 +103,5 @@ Los datos (por ejemplo el script privado de la Serie 35) no son migraciones: se 
 
 - La sesión es una cookie `httpOnly` firmada con HMAC (`SESSION_SECRET`) que expira a las 8 horas.
 - El middleware protege `/admin/*` y todas las `/api/*` salvo login/logout: esas APIs devuelven datos personales del plantel.
+- `/cuotas/<código>` (solo con las cuotas activadas) es público a propósito: el código (128 bits aleatorios) es la llave. No se indexa ni manda referrer, y se puede regenerar desde el admin.
 - Las escrituras usan la `service_role` key solo en el servidor, siempre después de `requireAdmin()`. El sitio público lee con la anon key y RLS solo le muestra lo publicado.

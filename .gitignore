@@ -6,3 +6,6 @@ database/README-v2.md
 database/TESTING-GUIDE.md
 database/schema-v2.sql
 database/scripts/
+
+# Datos personales (nombres, deudas): el repo es público. Se corren a mano en Supabase.
+database/privado/

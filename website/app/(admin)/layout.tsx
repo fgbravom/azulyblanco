@@ -4,6 +4,7 @@ import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import { verifySession } from '@/lib/auth/session';
 import AdminSidebar from '@/components/admin/layout/AdminSidebar';
+import { cuotasHabilitadas } from '@/lib/cuotas/habilitado';
 
 export const metadata: Metadata = {
   title: 'Administración',
@@ -23,7 +24,7 @@ export default async function AdminLayout({
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <AdminSidebar />
+      <AdminSidebar cuotas={cuotasHabilitadas()} />
 
       {/* Área principal con margen para el sidebar */}
       <div className="lg:pl-64">

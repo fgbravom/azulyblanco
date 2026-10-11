@@ -70,6 +70,9 @@ export interface Equipo {
   entrenador: string | null;
   asistente_tecnico: string | null;
   preparador_fisico: string | null;
+  /** Cuota mensual y datos de transferencia (migración 004) */
+  cuota_monto: number;
+  cuota_datos_pago: string | null;
   activo: boolean;
   created_at: string;
   updated_at: string;
@@ -134,6 +137,11 @@ export interface Jugador {
   estado: EstadoJugador;
   fecha_alta: string;
   fecha_baja: string | null;
+
+  // Cuotas (migración 004)
+  cuota_condicion: 'regular' | 'refuerzo' | 'becado';
+  /** Llave del link personal /cuotas/<código> */
+  codigo_cuotas: string;
 
   // Metadata
   activo: boolean;

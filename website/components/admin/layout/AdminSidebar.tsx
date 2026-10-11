@@ -14,6 +14,7 @@ import {
   ImageIcon,
   Users,
   Shield,
+  Wallet,
   ExternalLink,
   LogOut,
   Menu,
@@ -40,6 +41,7 @@ const secciones = [
     items: [
       { name: 'Plantel', href: '/admin/jugadores', icon: Users },
       { name: 'Series', href: '/admin/series', icon: Shield },
+      { name: 'Cuotas', href: '/admin/cuotas', icon: Wallet },
     ],
   },
 ];
@@ -49,7 +51,7 @@ function estaActivo(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-function Navegacion({ onNavigate }: { onNavigate?: () => void }) {
+function Navegacion({ onNavigate, cuotas }: { onNavigate?: () => void; cuotas: boolean }) {
   const pathname = usePathname();
   const router = useRouter();
 
@@ -78,7 +80,7 @@ function Navegacion({ onNavigate }: { onNavigate?: () => void }) {
               </p>
             )}
             <ul role="list" className="space-y-1">
-              {seccion.items.map((item) => {
+              {seccion.items.filter((item) => cuotas || item.href !== '/admin/cuotas').map((item) => {
                 const activo = estaActivo(pathname, item.href);
                 return (
                   <li key={item.href}>
@@ -126,14 +128,14 @@ function Navegacion({ onNavigate }: { onNavigate?: () => void }) {
   );
 }
 
-export default function AdminSidebar() {
+export default function AdminSidebar({ cuotas }: { cuotas: boolean }) {
   const [abierto, setAbierto] = useState(false);
 
   return (
     <>
       {/* Escritorio: barra fija a la izquierda */}
       <aside className="hidden lg:fixed lg:inset-y-0 lg:z-40 lg:flex lg:w-64 lg:flex-col">
-        <Navegacion />
+        <Navegacion cuotas={cuotas} />
       </aside>
 
       {/* Móvil: barra superior + panel deslizable */}
@@ -155,7 +157,7 @@ export default function AdminSidebar() {
             >
               <X className="h-5 w-5" />
             </button>
-            <Navegacion onNavigate={() => setAbierto(false)} />
+            <Navegacion onNavigate={() => setAbierto(false)} cuotas={cuotas} />
           </div>
         </div>
       )}
