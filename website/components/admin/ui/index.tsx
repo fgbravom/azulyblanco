@@ -179,8 +179,7 @@ export function ErrorDatos({ mensaje }: { mensaje: string }) {
       <p className="font-semibold">No se pudo leer la base de datos</p>
       <p className="mt-1">{mensaje}</p>
       <p className="mt-2 text-red-700">
-        Si es la primera vez, ejecuta <code className="rounded bg-red-100 px-1">database/migrations/001_admin_contenido.sql</code> en
-        el SQL Editor de Supabase.
+        Puede faltar aplicar migraciones: <code className="rounded bg-red-100 px-1">npm run db:push</code> (ver docs/ADMIN.md).
       </p>
     </div>
   );

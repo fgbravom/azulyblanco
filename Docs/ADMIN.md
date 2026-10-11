@@ -22,7 +22,7 @@ Al guardar, el admin regenera las páginas públicas afectadas (`revalidatePath`
 
 ## Puesta en marcha
 
-1. **Migraciones**: ejecutar en orden, en el SQL Editor de Supabase, los archivos de [`database/migrations/`](../database/migrations/): `001_admin_contenido.sql` (tablas de contenido, RLS y bucket `medios`) y `002_hero.sql` (fotos de la portada). Se pueden volver a correr sin duplicar nada.
+1. **Migraciones**: `npm run db:push` desde `website/` (ver [Migraciones](#migraciones)). Después, cargar los datos de la Serie 35 con `database/privado/serie35_cuotas_2026.sql` en el SQL Editor (no está en git; ver [CUOTAS.md](CUOTAS.md)).
 2. **Variables de entorno** (Vercel y `.env.local`):
    - `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`
    - `SESSION_SECRET`: texto aleatorio largo (`node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`).
@@ -40,18 +40,62 @@ El inicio del admin muestra el aviso «Hay contenido anterior sin importar» mie
 
 ## Entorno local para probar antes de producción
 
-Supabase corre en Docker con la configuración de [`website/supabase/`](../website/supabase/config.toml). Al arrancar carga `database/schema.sql`, las migraciones de `database/migrations` y los datos de prueba de `website/supabase/seed.sql`.
+Supabase corre en Docker con la configuración de [`website/supabase/`](../website/supabase/config.toml). `npm run db:reset` aplica las migraciones de `website/supabase/migrations` y luego los datos de prueba de `website/supabase/seed.sql`.
 
 | Comando (desde `website/`) | Qué hace |
 |---|---|
 | `npm run db:start` | Levanta Supabase local (necesita Docker Desktop abierto) |
 | `npm run db:stop` | Lo apaga; los datos se conservan |
-| `npm run db:reset` | Borra todo y vuelve a cargar esquema, migraciones y datos de prueba |
+| `npm run db:reset` | Borra todo y vuelve a cargar migraciones y datos de prueba (después hay que volver a correr el script privado de la Serie 35) |
 | `npm run db:status` | Muestra URLs y claves |
 
 - API: http://127.0.0.1:54321 · Studio (ver y editar tablas): http://127.0.0.1:54323
 - `website/.env.local` apunta al Supabase local. Para probar contra producción, reemplaza las tres variables de Supabase por las reales.
-- Una migración nueva se agrega como `database/migrations/00N_*.sql` y a la lista `sql_paths` de `website/supabase/config.toml`; luego `npm run db:reset`.
+
+## Migraciones
+
+El esquema vive en [`website/supabase/migrations/`](../website/supabase/migrations/) y lo aplica la CLI de Supabase. Cada base (local y producción) guarda en `supabase_migrations.schema_migrations` qué migraciones ya tiene, así que `db:push` solo corre las que faltan. Ya no se pega SQL a mano en el SQL Editor.
+
+| Comando (desde `website/`) | Qué hace |
+|---|---|
+| `npm run db:nueva -- <nombre>` | Crea `supabase/migrations/<fecha>_<nombre>.sql` vacío |
+| `npm run db:reset` | Prueba todas las migraciones desde cero en local |
+| `npm run db:pendientes` | Compara lo que hay en el repo con lo aplicado en producción |
+| `npm run db:push` | Aplica en producción las migraciones pendientes (pide confirmación) |
+| `npm run db:reparar -- --status applied <versión>` | Marca una migración como aplicada sin correrla |
+
+**Flujo para un cambio de esquema**
+
+1. `npm run db:nueva -- agregar_algo` y escribir el SQL. Conviene que sea idempotente (`IF NOT EXISTS`, `DROP ... IF EXISTS`) y que no rompa el código que está desplegado: agregar columnas o tablas, no borrarlas en el mismo cambio.
+2. `npm run db:reset` y probar el sitio en local.
+3. `npm run db:pendientes` y `npm run db:push` **antes** de hacer push del código. Vercel despliega en cuanto llega el push; si la migración va primero, el código nuevo nunca corre sin sus tablas.
+4. Commit de la migración junto con el código que la usa.
+
+Nunca se edita una migración que ya está aplicada en producción: la CLI no la vuelve a correr. Los cambios van en una migración nueva.
+
+**Primera vez en un equipo**
+
+Los comandos contra producción (`db:pendientes`, `db:push`, `db:reparar`) pasan por [`scripts/db-remoto.mjs`](../website/scripts/db-remoto.mjs), que se conecta con `--db-url`. No se usa `supabase link`: en este proyecto falla al crear su usuario temporal (`cli_login_postgres`, «permission denied to alter role»).
+
+Agregar a `website/.env.produccion.local` (ignorado por git) la URL de Supabase → **Connect** → **Session pooler**, con la contraseña de la base en lugar de `[YOUR-PASSWORD]`:
+
+```
+SUPABASE_DB_URL=postgresql://postgres.<ref>:<contraseña>@aws-...pooler.supabase.com:5432/postgres
+```
+
+La contraseña se puede pegar tal cual: el script la codifica (sin eso, caracteres como `#` o `@` rompen la URL). También se puede pasar `SUPABASE_DB_URL` como variable de entorno en vez de guardarla en el archivo.
+
+**Registro inicial de producción (una sola vez, octubre 2026).** Antes de este sistema, el esquema base y las migraciones 001 a 003 se aplicaron a mano, así que producción no tiene historial. Hay que marcarlas como aplicadas para que `db:push` no intente correrlas de nuevo (el esquema base no es idempotente: fallaría al recrear triggers y políticas):
+
+```bash
+npm run db:reparar -- --status applied 20260101000000 20260101000001 20260101000002 20260101000003
+npm run db:pendientes   # debe mostrar solo 20260101000004 como pendiente
+npm run db:push
+```
+
+Se verificó en producción que existen las tablas de cada una (`jugadores`, `programacion`, `hero_fotos`, `jugador_posiciones`) y que falta `cuotas`.
+
+Los datos (por ejemplo el script privado de la Serie 35) no son migraciones: se siguen corriendo a mano.
 
 ## Seguridad
 

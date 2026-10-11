@@ -27,7 +27,7 @@ Bienvenido a la documentación completa del sitio web del Club Azul y Blanco.
 
 ### 🗄️ Base de Datos
 - **[supabase-schema-OLD.sql](./supabase-schema-OLD.sql)** - Schema original de Supabase (no utilizado)
-- **Schema actual**: Ver `/database/schema.sql` (en uso)
+- **Schema actual**: migraciones en `/website/supabase/migrations/` (ver [ADMIN.md](./ADMIN.md#migraciones))
 
 ---
 
@@ -41,7 +41,6 @@ azulyblanco/
 │   ├── SESION-31-DIC-2024.md # Log de la última sesión
 │   └── ...
 ├── database/                  # 🗄️ Esquemas de base de datos
-│   ├── schema.sql            # Schema principal PostgreSQL
 │   └── seeds-fixed.sql       # Datos de prueba
 ├── website/                   # 🌐 Aplicación Next.js
 │   ├── app/                  # App Router de Next.js
@@ -113,8 +112,7 @@ cp .env.example .env.local
 
 # 4. Ejecutar base de datos
 # Ir a Supabase Dashboard → SQL Editor
-# Ejecutar database/schema.sql
-# Ejecutar database/seeds-fixed.sql
+# Migraciones: npm run db:push (ver Docs/ADMIN.md)
 
 # 5. Iniciar servidor de desarrollo
 npm run dev

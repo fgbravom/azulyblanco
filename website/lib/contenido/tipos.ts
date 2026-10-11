@@ -1,5 +1,5 @@
 /**
- * Tipos de las tablas de contenido (database/migrations/001_admin_contenido.sql)
+ * Tipos de las tablas de contenido (supabase/migrations/20260101000001_admin_contenido.sql)
  */
 
 import type { TipoEvento, TipoPartido } from '@/lib/types/calendario'

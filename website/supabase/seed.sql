@@ -1,7 +1,7 @@
 -- ============================================================================
 -- DATOS DE PRUEBA - SOLO SUPABASE LOCAL
--- Se cargan con `npm run db:reset` después de database/schema.sql y las
--- migraciones. Nada de esto se ejecuta en producción.
+-- Se cargan con `npm run db:reset` después de las migraciones de
+-- supabase/migrations. Nada de esto se ejecuta en producción.
 -- ============================================================================
 
 -- La vista de database/schema.sql no expone equipo_id ni el resto de columnas

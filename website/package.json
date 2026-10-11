@@ -10,7 +10,11 @@
     "db:start": "npx -y supabase@2 start",
     "db:stop": "npx -y supabase@2 stop",
     "db:reset": "npx -y supabase@2 db reset",
-    "db:status": "npx -y supabase@2 status"
+    "db:status": "npx -y supabase@2 status",
+    "db:nueva": "npx -y supabase@2 migration new",
+    "db:pendientes": "node scripts/db-remoto.mjs migration list",
+    "db:push": "node scripts/db-remoto.mjs db push",
+    "db:reparar": "node scripts/db-remoto.mjs migration repair"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

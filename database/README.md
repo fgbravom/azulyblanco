@@ -18,7 +18,7 @@ Sistema completo de backend para la gestión de equipos, jugadores, partidos y e
 
 1. Ve a tu proyecto en [Supabase](https://supabase.com)
 2. Abre el SQL Editor
-3. Ejecuta el archivo `database/schema.sql`
+3. El esquema ahora vive en `website/supabase/migrations/` y se aplica con `npm run db:push` (ver `Docs/ADMIN.md`)
 
 ```sql
 -- Esto creará todas las tablas, vistas, funciones y datos iniciales

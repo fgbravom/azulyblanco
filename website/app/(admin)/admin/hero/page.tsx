@@ -18,7 +18,7 @@ export default async function HeroPage() {
     return (
       <>
         <PageHeader titulo="Portada" />
-        <ErrorDatos mensaje={`${error ?? ''} (¿falta ejecutar database/migrations/002_hero.sql?)`} />
+        <ErrorDatos mensaje={`${error ?? ''} (¿falta la migración 20260101000002_hero.sql?)`} />
       </>
     );
   }
