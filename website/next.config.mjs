@@ -2,6 +2,8 @@
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   ? new URL(process.env.NEXT_PUBLIC_SUPABASE_URL)
   : new URL('https://*.supabase.co')
+// Supabase local (npm run db:start) sirve las imágenes desde 127.0.0.1
+const supabaseLocal = ['127.0.0.1', 'localhost'].includes(supabaseUrl.hostname)
 
 const nextConfig = {
   pageExtensions: ['js', 'jsx', 'ts', 'tsx'],
@@ -24,6 +26,8 @@ const nextConfig = {
         pathname: '/storage/v1/object/public/**',
       },
     ],
+    // Next bloquea optimizar imágenes de IPs privadas; solo se permite con el Supabase local
+    dangerouslyAllowLocalIP: supabaseLocal,
     formats: ['image/webp', 'image/avif'],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],

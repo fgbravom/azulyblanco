@@ -6,7 +6,11 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "db:start": "npx -y supabase@2 start",
+    "db:stop": "npx -y supabase@2 stop",
+    "db:reset": "npx -y supabase@2 db reset",
+    "db:status": "npx -y supabase@2 status"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
