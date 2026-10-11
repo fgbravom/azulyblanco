@@ -2,13 +2,14 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Newspaper, ArrowRight } from 'lucide-react'
-import type { NoticiaMetadata } from '@/lib/news'
+import type { NoticiaPublica } from '@/lib/contenido/publico'
 
 interface NoticiasClientProps {
-  noticias: NoticiaMetadata[]
+  noticias: NoticiaPublica[]
   categorias: string[]
 }
 
@@ -37,19 +38,24 @@ function getCategoryBg(categoria: string) {
 }
 
 function formatFecha(date: string) {
-  return new Date(date).toLocaleDateString('es-CL', {
+  // Mediodía local: "2026-10-10" a secas se lee como UTC y en Chile cae el día anterior
+  return new Date(date + 'T12:00:00').toLocaleDateString('es-CL', {
     day: 'numeric',
     month: 'long',
     year: 'numeric',
   })
 }
 
-function NoticiaCard({ noticia }: { noticia: NoticiaMetadata }) {
+function NoticiaCard({ noticia }: { noticia: NoticiaPublica }) {
   return (
     <Link href={`/noticias/${noticia.slug}`} className="group">
       <Card className="h-full overflow-hidden border-gray-100 transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
-        <div className={`h-44 bg-gradient-to-br ${getCategoryBg(noticia.categoria)} flex items-center justify-center`}>
-          <Newspaper className="w-10 h-10 text-white/25" />
+        <div className={`relative h-44 bg-gradient-to-br ${getCategoryBg(noticia.categoria)} flex items-center justify-center`}>
+          {noticia.coverUrl ? (
+            <Image src={noticia.coverUrl} alt={noticia.title} fill sizes="(min-width: 768px) 33vw, 100vw" className="object-cover" />
+          ) : (
+            <Newspaper className="w-10 h-10 text-white/25" />
+          )}
         </div>
         <CardContent className="p-5">
           <div className="flex items-center gap-2 mb-3 flex-wrap">
@@ -70,14 +76,18 @@ function NoticiaCard({ noticia }: { noticia: NoticiaMetadata }) {
   )
 }
 
-function NoticiaDestacada({ noticia }: { noticia: NoticiaMetadata }) {
+function NoticiaDestacada({ noticia }: { noticia: NoticiaPublica }) {
   return (
     <Link href={`/noticias/${noticia.slug}`} className="group block mb-8">
       <Card className="overflow-hidden border-gray-100 transition-all duration-300 hover:shadow-2xl hover:-translate-y-1">
         <div className="md:flex">
           {/* Imagen grande */}
-          <div className={`md:w-1/2 h-56 md:h-auto bg-gradient-to-br ${getCategoryBg(noticia.categoria)} flex items-center justify-center min-h-[220px]`}>
-            <Newspaper className="w-16 h-16 text-white/20" />
+          <div className={`relative md:w-1/2 h-56 md:h-auto bg-gradient-to-br ${getCategoryBg(noticia.categoria)} flex items-center justify-center min-h-[220px]`}>
+            {noticia.coverUrl ? (
+              <Image src={noticia.coverUrl} alt={noticia.title} fill sizes="(min-width: 768px) 50vw, 100vw" className="object-cover" />
+            ) : (
+              <Newspaper className="w-16 h-16 text-white/20" />
+            )}
           </div>
           {/* Contenido */}
           <div className="md:w-1/2 p-8 flex flex-col justify-center">

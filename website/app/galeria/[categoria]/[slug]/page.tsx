@@ -1,6 +1,6 @@
 import { Header } from '@/components/layout/Header'
 import { Footer } from '@/components/layout/Footer'
-import { getAlbumBySlug, getAllAlbums } from '@/lib/gallery'
+import { getAlbumPublico, getAlbumesPublicos } from '@/lib/contenido/publico'
 import { Badge } from '@/components/ui/badge'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
@@ -11,8 +11,10 @@ interface PageProps {
   params: Promise<{ categoria: string; slug: string }>
 }
 
+export const revalidate = 300 // respaldo; el admin regenera al guardar
+
 export async function generateStaticParams() {
-  const albums = getAllAlbums()
+  const albums = await getAlbumesPublicos()
   return albums.map((album) => ({
     categoria: album.categoria,
     slug: album.slug,
@@ -21,7 +23,7 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: PageProps) {
   const { categoria, slug } = await params
-  const album = getAlbumBySlug(categoria, slug)
+  const album = await getAlbumPublico(categoria, slug)
 
   if (!album) {
     return {
@@ -57,13 +59,13 @@ const getCategoriaLabel = (categoria: string) => {
 
 export default async function AlbumPage({ params }: PageProps) {
   const { categoria, slug } = await params
-  const album = getAlbumBySlug(categoria, slug)
+  const album = await getAlbumPublico(categoria, slug)
 
   if (!album) {
     notFound()
   }
 
-  const fotosUrls = album.fotos.map(foto => `/galeria/${categoria}/${slug}/${foto}`)
+  const fotosUrls = album.fotoUrls
 
   return (
     <>
@@ -86,7 +88,7 @@ export default async function AlbumPage({ params }: PageProps) {
               {album.date && (
                 <div className="flex items-center gap-1.5 text-white/60 text-sm">
                   <Calendar className="w-3.5 h-3.5" />
-                  {new Date(album.date).toLocaleDateString('es-CL', {
+                  {new Date(album.date + 'T12:00:00').toLocaleDateString('es-CL', {
                     day: 'numeric',
                     month: 'long',
                     year: 'numeric',

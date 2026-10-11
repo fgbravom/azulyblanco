@@ -47,6 +47,11 @@ export function MDXRenderer({ content }: MDXRendererProps) {
             {children}
           </Link>
         ),
+        img: ({ src, alt }) => (
+          // Imágenes insertadas desde el editor de noticias del admin
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={typeof src === 'string' ? src : undefined} alt={alt ?? ''} loading="lazy" className="w-full rounded-lg my-6" />
+        ),
         blockquote: ({ children }) => (
           <blockquote className="border-l-4 border-azul-primario bg-blue-50 pl-5 py-3 my-6 text-gray-700 text-base leading-relaxed italic rounded-r-md">
             {children}

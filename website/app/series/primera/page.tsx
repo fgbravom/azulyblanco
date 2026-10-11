@@ -8,6 +8,7 @@ export const metadata = {
 export default function SeriePrimeraPage() {
   return (
     <SeriePage
+      slug="primera"
       categoriaNombre="Primera"
       titulo="Serie Primera"
       descripcion="El equipo principal del club, representando los colores azul y blanco."

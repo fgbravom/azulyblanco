@@ -1,16 +1,17 @@
 import { Header } from '@/components/layout/Header'
 import { Footer } from '@/components/layout/Footer'
 import { CalendarioGrid } from '@/components/calendario/CalendarioGrid'
-import { eventosEnero2026, eventosDiciembrePasados } from '@/lib/data/eventos-enero'
+import { getEventosCalendario } from '@/lib/contenido/publico'
 
 export const metadata = {
   title: 'Partidos',
   description: 'Calendario y resultados del Club Azul y Blanco',
 }
 
-export default function PartidosPage() {
-  // Combinar eventos pasados y futuros
-  const todosLosEventos = [...eventosDiciembrePasados, ...eventosEnero2026]
+export const revalidate = 300 // respaldo; el admin regenera al guardar
+
+export default async function PartidosPage() {
+  const todosLosEventos = await getEventosCalendario()
 
   return (
     <>

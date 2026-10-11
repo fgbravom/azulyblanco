@@ -1,6 +1,6 @@
 import { Header } from '@/components/layout/Header'
 import { Footer } from '@/components/layout/Footer'
-import { getAllNoticias, getAllCategorias } from '@/lib/news'
+import { getCategoriasNoticias, getNoticiasPublicas } from '@/lib/contenido/publico'
 import { NoticiasClient } from './NoticiasClient'
 
 export const metadata = {
@@ -8,9 +8,11 @@ export const metadata = {
   description: 'Últimas noticias del Club deportivo Azul y Blanco',
 }
 
-export default function NoticiasPage() {
-  const noticias = getAllNoticias()
-  const categorias = getAllCategorias()
+export const revalidate = 300 // respaldo; el admin regenera al guardar
+
+export default async function NoticiasPage() {
+  const noticias = await getNoticiasPublicas()
+  const categorias = getCategoriasNoticias(noticias)
 
   return (
     <>

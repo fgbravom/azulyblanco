@@ -1,10 +1,11 @@
 import { Header } from '@/components/layout/Header'
 import { Footer } from '@/components/layout/Footer'
-import { getNoticiaBySlug, getAllNoticiaSlugs } from '@/lib/news'
+import { getNoticiaPublica, getNoticiasPublicas } from '@/lib/contenido/publico'
 import { MDXRenderer } from '@/components/mdx/MDXRenderer'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import Link from 'next/link'
+import Image from 'next/image'
 import { notFound } from 'next/navigation'
 import { ArrowLeft } from 'lucide-react'
 
@@ -12,14 +13,16 @@ interface PageProps {
   params: Promise<{ slug: string }>
 }
 
+export const revalidate = 300 // respaldo; el admin regenera al guardar
+
 export async function generateStaticParams() {
-  const slugs = getAllNoticiaSlugs()
-  return slugs.map((slug) => ({ slug }))
+  const noticias = await getNoticiasPublicas()
+  return noticias.map(({ slug }) => ({ slug }))
 }
 
 export async function generateMetadata({ params }: PageProps) {
   const { slug } = await params
-  const noticia = getNoticiaBySlug(slug)
+  const noticia = await getNoticiaPublica(slug)
   if (!noticia) return { title: 'Noticia no encontrada' }
   return { title: noticia.title, description: noticia.description }
 }
@@ -38,12 +41,12 @@ function getCategoryColor(categoria: string) {
 
 export default async function NoticiaPage({ params }: PageProps) {
   const { slug } = await params
-  const noticia = getNoticiaBySlug(slug)
+  const noticia = await getNoticiaPublica(slug)
 
   if (!noticia) notFound()
 
   const fechaFormateada = noticia.date
-    ? new Date(noticia.date).toLocaleDateString('es-CL', {
+    ? new Date(noticia.date + 'T12:00:00').toLocaleDateString('es-CL', {
         day: 'numeric',
         month: 'long',
         year: 'numeric',
@@ -103,6 +106,11 @@ export default async function NoticiaPage({ params }: PageProps) {
         {/* Artículo */}
         <article className="px-4 pb-16">
           <div className="container mx-auto max-w-3xl">
+            {noticia.coverUrl && (
+              <div className="relative aspect-[16/9] -mt-6 mb-8 rounded-xl overflow-hidden shadow-lg">
+                <Image src={noticia.coverUrl} alt={noticia.title} fill priority sizes="(min-width: 768px) 768px, 100vw" className="object-cover" />
+              </div>
+            )}
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 px-6 py-10 md:px-12 md:py-14">
               <MDXRenderer content={noticia.content} />
             </div>

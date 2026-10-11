@@ -1,17 +1,20 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Header } from '@/components/layout/Header'
 import { Footer } from '@/components/layout/Footer'
 import { ProximosPartidos } from '@/components/calendario/ProximosPartidos'
-import { eventosEnero2026, eventosDiciembrePasados } from '@/lib/data/eventos-enero'
-import { getAllNoticias } from '@/lib/news'
+import { getEventosCalendario, getNoticiasPublicas } from '@/lib/contenido/publico'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { HeroSection } from '@/components/hero/HeroSection'
 
-export default function HomePage() {
-  const noticias = getAllNoticias().slice(0, 3) // Obtener las 3 noticias más recientes
+export const revalidate = 300 // respaldo; el admin regenera al guardar
+
+export default async function HomePage() {
+  const [eventos, todasLasNoticias] = await Promise.all([getEventosCalendario(), getNoticiasPublicas()])
+  const noticias = todasLasNoticias.slice(0, 3) // Obtener las 3 noticias más recientes
   return (
     <>
       <Header isHome={true} hideInitially={true} />
@@ -28,7 +31,7 @@ export default function HomePage() {
             </div>
           </div>
           <div className="w-full">
-            <ProximosPartidos eventos={eventosEnero2026} limite={4} />
+            <ProximosPartidos eventos={eventos} limite={4} />
           </div>
           <div className="mt-8 text-center px-4">
             <Button variant="outline" asChild className="bg-transparent border-2 border-white text-white hover:bg-white hover:text-azul-primario transition-colors">
@@ -52,10 +55,14 @@ export default function HomePage() {
                 noticias.map((noticia) => (
                   <Link key={noticia.slug} href={`/noticias/${noticia.slug}`}>
                     <Card className="hover:shadow-lg transition-shadow h-full">
-                      <div className="h-48 bg-gradient-to-br from-azul-primario to-azul-oscuro flex items-center justify-center">
-                        <div className="text-white text-center p-6">
-                          <h3 className="text-2xl font-bold mb-2">{noticia.categoria}</h3>
-                        </div>
+                      <div className="relative h-48 bg-gradient-to-br from-azul-primario to-azul-oscuro flex items-center justify-center overflow-hidden rounded-t-xl">
+                        {noticia.coverUrl ? (
+                          <Image src={noticia.coverUrl} alt={noticia.title} fill sizes="(min-width: 768px) 33vw, 100vw" className="object-cover" />
+                        ) : (
+                          <div className="text-white text-center p-6">
+                            <h3 className="text-2xl font-bold mb-2">{noticia.categoria}</h3>
+                          </div>
+                        )}
                       </div>
                       <CardHeader>
                         <div className="flex items-center gap-2 mb-2">

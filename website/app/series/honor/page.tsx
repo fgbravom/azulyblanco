@@ -8,6 +8,7 @@ export const metadata = {
 export default function SerieHonorPage() {
   return (
     <SeriePage
+      slug="honor"
       categoriaNombre="Honor"
       titulo="Serie Honor"
       descripcion="Pasión y experiencia al servicio del club."

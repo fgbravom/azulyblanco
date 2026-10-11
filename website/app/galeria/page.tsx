@@ -1,6 +1,7 @@
 import { Header } from '@/components/layout/Header'
 import { Footer } from '@/components/layout/Footer'
-import { getAllAlbums, getAllCategorias } from '@/lib/gallery'
+import { getAllCategorias } from '@/lib/gallery'
+import { getAlbumesPublicos } from '@/lib/contenido/publico'
 import { GaleriaClient } from './GaleriaClient'
 
 export const metadata = {
@@ -8,8 +9,10 @@ export const metadata = {
   description: 'Fotos y momentos del Club deportivo Azul y Blanco',
 }
 
-export default function GaleriaPage() {
-  const albums = getAllAlbums()
+export const revalidate = 300 // respaldo; el admin regenera al guardar
+
+export default async function GaleriaPage() {
+  const albums = await getAlbumesPublicos()
   const categorias = getAllCategorias()
 
   return (
