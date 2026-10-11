@@ -5,10 +5,11 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import Image from 'next/image';
-import { Lock, AlertCircle } from 'lucide-react';
+import { Lock, AlertCircle, Eye, EyeOff } from 'lucide-react';
 
 export default function LoginPage() {
   const [password, setPassword] = useState('');
+  const [mostrar, setMostrar] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -78,16 +79,28 @@ export default function LoginPage() {
                   <Lock className="w-4 h-4 text-azul-primario" />
                   Contraseña de acceso
                 </label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Ingresa tu contraseña"
-                  required
-                  autoComplete="current-password"
-                  className="h-12 border-2 border-gray-200 focus:border-azul-primario focus:ring-azul-primario transition-colors"
-                />
+                <div className="relative">
+                  <Input
+                    id="password"
+                    type={mostrar ? 'text' : 'password'}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Ingresa tu contraseña"
+                    required
+                    autoComplete="current-password"
+                    className="h-12 pr-12 border-2 border-gray-200 focus:border-azul-primario focus:ring-azul-primario transition-colors"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setMostrar((v) => !v)}
+                    aria-label={mostrar ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                    aria-pressed={mostrar}
+                    title={mostrar ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                    className="absolute inset-y-0 right-0 flex w-12 items-center justify-center rounded-r-md text-gray-400 hover:text-azul-primario focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-azul-primario"
+                  >
+                    {mostrar ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  </button>
+                </div>
               </div>
 
               {error && (
