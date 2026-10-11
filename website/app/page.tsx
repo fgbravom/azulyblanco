@@ -33,6 +33,11 @@ const JSON_LD = JSON.stringify({
         addressCountry: 'CL',
       },
       sameAs: [SITE_CONFIG.social.instagram, SITE_CONFIG.social.facebook],
+      memberOf: {
+        '@type': 'SportsOrganization',
+        name: SITE_CONFIG.association.name,
+        sameAs: [SITE_CONFIG.association.instagram],
+      },
     },
     {
       '@type': 'WebSite',

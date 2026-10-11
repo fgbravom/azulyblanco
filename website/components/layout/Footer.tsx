@@ -28,6 +28,17 @@ export function Footer() {
             <p className="text-sm text-gray-400">
               Más que un club.
             </p>
+            <p className="mt-4 text-sm text-gray-400">
+              Club afiliado a la{' '}
+              <a
+                href={SITE_CONFIG.association.instagram}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-gray-300 underline underline-offset-2 hover:text-white transition-colors"
+              >
+                {SITE_CONFIG.association.name}
+              </a>
+            </p>
           </div>
 
           {/* Column 2: Quick Links */}
