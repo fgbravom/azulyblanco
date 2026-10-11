@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Plus } from 'lucide-react';
@@ -9,6 +9,8 @@ import JugadorForm from '@/components/admin/jugadores/JugadorForm';
 import JugadorFicha from '@/components/admin/jugadores/JugadorFicha';
 import type { JugadorCompleto } from '@/types/database';
 import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
+import { PageHeader } from '@/components/admin/ui';
 
 export default function JugadoresPage() {
   const [jugadores, setJugadores] = useState<JugadorCompleto[]>([]);
@@ -17,6 +19,13 @@ export default function JugadoresPage() {
   const [fichaOpen, setFichaOpen] = useState(false);
   const [editingJugador, setEditingJugador] = useState<JugadorCompleto | null>(null);
   const [viewingJugador, setViewingJugador] = useState<JugadorCompleto | null>(null);
+  const [serie, setSerie] = useState('Todas');
+
+  const series = useMemo(
+    () => ['Todas', ...Array.from(new Set(jugadores.map((j) => j.categoria).filter(Boolean)))],
+    [jugadores]
+  );
+  const visibles = serie === 'Todas' ? jugadores : jugadores.filter((j) => j.categoria === serie);
 
   // Cargar jugadores
   useEffect(() => {
@@ -55,7 +64,6 @@ export default function JugadoresPage() {
   };
 
   const handleSave = async () => {
-    toast.success(editingJugador ? 'Jugador actualizado exitosamente' : 'Jugador creado exitosamente');
     await fetchJugadores(); // Recargar lista
     setDialogOpen(false);
     setEditingJugador(null);
@@ -81,21 +89,38 @@ export default function JugadoresPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-heading font-bold text-azul-primario">Gestión de Jugadores</h1>
-          <p className="text-gray-600 mt-2">
-            Administra la ficha completa de todos los jugadores del club
-          </p>
+      <PageHeader
+        titulo="Plantel"
+        descripcion="Ficha completa de los jugadores de cada serie. La foto, el dorsal y la posición se muestran en la página de la serie."
+        acciones={
+          <Button onClick={handleCreate}>
+            <Plus /> Nuevo jugador
+          </Button>
+        }
+      />
+
+      {series.length > 2 && (
+        <div className="flex flex-wrap gap-2">
+          {series.map((s) => (
+            <button
+              key={s}
+              onClick={() => setSerie(s)}
+              className={cn(
+                'rounded-full border px-3 py-1 text-sm',
+                serie === s ? 'border-azul-primario bg-azul-primario text-white' : 'border-gray-300 bg-white text-gray-700 hover:border-azul-claro'
+              )}
+            >
+              {s === 'Todas' ? 'Todas las series' : `Serie ${s}`}
+              <span className="ml-1 opacity-70">
+                ({s === 'Todas' ? jugadores.length : jugadores.filter((j) => j.categoria === s).length})
+              </span>
+            </button>
+          ))}
         </div>
-        <Button onClick={handleCreate} className="bg-azul-primario hover:bg-azul-oscuro">
-          <Plus className="mr-2 h-4 w-4" />
-          Nuevo Jugador
-        </Button>
-      </div>
+      )}
 
       <JugadoresTable
-        jugadores={jugadores}
+        jugadores={visibles}
         loading={loading}
         onView={handleView}
         onEdit={handleEdit}

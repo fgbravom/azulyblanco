@@ -19,6 +19,7 @@ import {
 import type { JugadorCompleto, Equipo, Posicion } from '@/types/database';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import SelectorImagen from '@/components/admin/medios/SelectorImagen';
 
 interface Props {
   jugador: JugadorCompleto | null;
@@ -190,12 +191,12 @@ export default function JugadorForm({ jugador, onSave, onCancel }: Props) {
               <Input id="dni" {...register('dni')} />
             </div>
             <div className="col-span-2">
-              <Label htmlFor="foto_url">URL de Foto</Label>
-              <Input
-                id="foto_url"
-                type="url"
-                placeholder="https://..."
-                {...register('foto_url')}
+              <Label>Foto</Label>
+              <SelectorImagen
+                aspecto="cuadrado"
+                className="mt-1.5"
+                value={watch('foto_url')}
+                onChange={(url) => setValue('foto_url', url ?? '', { shouldValidate: true, shouldDirty: true })}
               />
               {errors.foto_url && (
                 <p className="text-sm text-red-500 mt-1">{errors.foto_url.message}</p>
@@ -384,7 +385,7 @@ export default function JugadorForm({ jugador, onSave, onCancel }: Props) {
       </Tabs>
 
       {/* Botones */}
-      <div className="flex justify-end gap-4 pt-4 border-t">
+      <div className="flex justify-end gap-4 pt-4 border-t border-gray-200">
         <Button type="button" variant="outline" onClick={onCancel} disabled={loading}>
           Cancelar
         </Button>

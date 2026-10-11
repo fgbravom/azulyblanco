@@ -1,35 +1,33 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Newspaper } from 'lucide-react';
+import Link from 'next/link';
+import { Plus } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { ErrorDatos, PageHeader } from '@/components/admin/ui';
+import NoticiasAdmin from '@/components/admin/noticias/NoticiasAdmin';
+import { listarNoticias } from './actions';
 
-export default function NoticiasPage() {
+export default async function NoticiasPage() {
+  let noticias;
+  let error: string | null = null;
+  try {
+    noticias = await listarNoticias();
+  } catch (e) {
+    error = e instanceof Error ? e.message : 'Error desconocido';
+  }
+
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-heading font-bold">Gestión de Noticias</h1>
-        <p className="text-muted-foreground mt-2">
-          Crea y publica noticias del club
-        </p>
-      </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Newspaper className="h-5 w-5" />
-            Próximamente
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-muted-foreground">
-            Esta sección estará disponible próximamente. Aquí podrás:
-          </p>
-          <ul className="list-disc list-inside mt-4 space-y-2 text-sm">
-            <li>Crear nuevas noticias</li>
-            <li>Editar contenido en Markdown</li>
-            <li>Publicar/despublicar noticias</li>
-            <li>Gestionar categorías y tags</li>
-          </ul>
-        </CardContent>
-      </Card>
-    </div>
+    <>
+      <PageHeader
+        titulo="Noticias"
+        descripcion="Redacta, publica y edita las noticias del club."
+        acciones={
+          <Button asChild>
+            <Link href="/admin/noticias/nueva">
+              <Plus /> Nueva noticia
+            </Link>
+          </Button>
+        }
+      />
+      {error || !noticias ? <ErrorDatos mensaje={error ?? ''} /> : <NoticiasAdmin iniciales={noticias} />}
+    </>
   );
 }

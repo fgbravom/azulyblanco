@@ -1,0 +1,249 @@
+'use client';
+
+import { useState } from 'react';
+import { toast } from 'sonner';
+import { ArrowLeftRight, Loader2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
+import type { Actividad, ActividadInput } from '@/lib/contenido/tipos';
+import { TIPOS_PARTIDO } from '@/lib/contenido/tipos';
+import type { TipoEvento } from '@/lib/types/calendario';
+import { guardarActividad } from '@/app/(admin)/admin/programacion/actions';
+import { Campo, Interruptor, inputClass, textareaClass } from '@/components/admin/ui';
+
+export const SERIES_OPCIONES = ['Serie Primera', 'Serie Honor', 'Serie 35'];
+
+const TIPOS: { value: TipoEvento; label: string }[] = [
+  { value: 'partido', label: 'Partido' },
+  { value: 'entrenamiento', label: 'Entrenamiento' },
+  { value: 'evento', label: 'Evento' },
+];
+
+/** "AYB VS CLUB AMÉRICA" → ["AYB", "CLUB AMÉRICA"] */
+function separarEquipos(rival: string | null): [string, string] {
+  if (!rival) return ['AYB', ''];
+  const partes = rival.split(/\s+vs\.?\s+/i);
+  return partes.length === 2 ? [partes[0], partes[1]] : ['AYB', rival];
+}
+
+export function actividadVacia(): ActividadInput {
+  return {
+    tipo: 'partido',
+    fecha: new Date().toLocaleDateString('sv-SE'), // YYYY-MM-DD en hora local
+    hora_inicio: null,
+    hora_fin: null,
+    rival: null,
+    tipo_partido: 'Amistoso',
+    actividad: null,
+    titulo: null,
+    descripcion: null,
+    estadio: '',
+    confirmado: false,
+    llevar: null,
+    precio_entrada: null,
+    edad_gratis: null,
+    series: [],
+    publicado: true,
+  };
+}
+
+interface Props {
+  /** id null = actividad nueva (también al duplicar) */
+  id: string | null;
+  inicial: ActividadInput;
+  lugares: string[];
+  onGuardada: (actividad: Actividad) => void;
+  onCancelar: () => void;
+}
+
+export default function ActividadForm({ id, inicial, lugares, onGuardada, onCancelar }: Props) {
+  const [datos, setDatos] = useState<ActividadInput>(inicial);
+  const [[local, visita], setEquipos] = useState(() => separarEquipos(inicial.rival));
+  const [guardando, setGuardando] = useState(false);
+
+  const set = <K extends keyof ActividadInput>(campo: K, valor: ActividadInput[K]) =>
+    setDatos((d) => ({ ...d, [campo]: valor }));
+
+  const toggleSerie = (serie: string) =>
+    set('series', datos.series.includes(serie) ? datos.series.filter((s) => s !== serie) : [...datos.series, serie]);
+
+  const enviar = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setGuardando(true);
+    try {
+      const rival = local.trim() && visita.trim() ? `${local.trim().toUpperCase()} VS ${visita.trim().toUpperCase()}` : null;
+      const guardada = await guardarActividad(id, { ...datos, rival, estadio: datos.estadio.toUpperCase() });
+      toast.success(id ? 'Actividad actualizada' : 'Actividad creada');
+      onGuardada(guardada);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'No se pudo guardar');
+    } finally {
+      setGuardando(false);
+    }
+  };
+
+  return (
+    <form onSubmit={enviar} className="space-y-5">
+      {/* Tipo */}
+      <div className="grid grid-cols-3 gap-1 rounded-lg bg-gray-100 p-1">
+        {TIPOS.map((t) => (
+          <button
+            key={t.value}
+            type="button"
+            onClick={() => set('tipo', t.value)}
+            className={cn(
+              'rounded-md py-2 text-sm font-medium transition-colors',
+              datos.tipo === t.value ? 'bg-white text-azul-primario shadow-sm' : 'text-gray-600 hover:text-gray-900'
+            )}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <Campo label="Fecha *" htmlFor="fecha">
+          <input id="fecha" type="date" required value={datos.fecha} onChange={(e) => set('fecha', e.target.value)} className={inputClass} />
+        </Campo>
+        <Campo label="Hora de inicio" htmlFor="hora_inicio">
+          <input id="hora_inicio" type="time" value={datos.hora_inicio?.slice(0, 5) ?? ''} onChange={(e) => set('hora_inicio', e.target.value || null)} className={inputClass} />
+        </Campo>
+        <Campo label="Hora de término" htmlFor="hora_fin">
+          <input id="hora_fin" type="time" value={datos.hora_fin?.slice(0, 5) ?? ''} onChange={(e) => set('hora_fin', e.target.value || null)} className={inputClass} />
+        </Campo>
+      </div>
+
+      {datos.tipo === 'partido' && (
+        <>
+          <div className="grid grid-cols-[1fr_auto_1fr] items-end gap-2">
+            <Campo label="Local *" htmlFor="local">
+              <input id="local" required value={local} onChange={(e) => setEquipos([e.target.value, visita])} placeholder="AYB" className={inputClass} />
+            </Campo>
+            <button
+              type="button"
+              onClick={() => setEquipos([visita, local])}
+              title="Intercambiar local y visita"
+              className="mb-0.5 rounded-md border border-gray-300 p-2.5 text-gray-500 hover:border-azul-claro hover:text-azul-primario"
+            >
+              <ArrowLeftRight className="h-4 w-4" />
+            </button>
+            <Campo label="Visita *" htmlFor="visita">
+              <input id="visita" required value={visita} onChange={(e) => setEquipos([local, e.target.value])} placeholder="CLUB RIVAL" className={inputClass} />
+            </Campo>
+          </div>
+          <p className="-mt-3 text-xs text-gray-500">
+            Nuestros equipos (AYB, AYB35, SERIE HONOR…) se muestran con el escudo del club.
+          </p>
+          <Campo label="Tipo de partido" htmlFor="tipo_partido">
+            <select
+              id="tipo_partido"
+              value={datos.tipo_partido ?? ''}
+              onChange={(e) => set('tipo_partido', (e.target.value || null) as ActividadInput['tipo_partido'])}
+              className={inputClass}
+            >
+              <option value="">Sin especificar</option>
+              {TIPOS_PARTIDO.map((t) => (
+                <option key={t} value={t}>{t}</option>
+              ))}
+            </select>
+          </Campo>
+        </>
+      )}
+
+      {datos.tipo === 'entrenamiento' && (
+        <Campo label="Actividad" htmlFor="actividad" ayuda="Por defecto: ENTRENAMIENTO">
+          <input id="actividad" value={datos.actividad ?? ''} onChange={(e) => set('actividad', e.target.value)} placeholder="ENTRENAMIENTO" className={inputClass} />
+        </Campo>
+      )}
+
+      {datos.tipo === 'evento' && (
+        <>
+          <Campo label="Título *" htmlFor="titulo">
+            <input id="titulo" required value={datos.titulo ?? ''} onChange={(e) => set('titulo', e.target.value)} placeholder="Jornada Deportiva Azul y Blanco" className={inputClass} />
+          </Campo>
+          <Campo label="Descripción" htmlFor="descripcion">
+            <textarea id="descripcion" rows={3} value={datos.descripcion ?? ''} onChange={(e) => set('descripcion', e.target.value)} className={textareaClass} />
+          </Campo>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <Campo label="Precio de entrada" htmlFor="precio_entrada" ayuda="Ej: 2.000">
+              <input id="precio_entrada" value={datos.precio_entrada ?? ''} onChange={(e) => set('precio_entrada', e.target.value)} className={inputClass} />
+            </Campo>
+            <Campo label="Entrada liberada" htmlFor="edad_gratis" ayuda="Ej: Niños menores de 12 años">
+              <input id="edad_gratis" value={datos.edad_gratis ?? ''} onChange={(e) => set('edad_gratis', e.target.value)} className={inputClass} />
+            </Campo>
+          </div>
+        </>
+      )}
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <Campo label="Lugar" htmlFor="estadio">
+          <input
+            id="estadio"
+            list="lugares-conocidos"
+            value={datos.estadio}
+            onChange={(e) => set('estadio', e.target.value)}
+            placeholder="ESTADIO ANFA"
+            className={inputClass}
+          />
+          <datalist id="lugares-conocidos">
+            {lugares.map((l) => (
+              <option key={l} value={l} />
+            ))}
+          </datalist>
+        </Campo>
+        {datos.tipo !== 'evento' && (
+          <Campo label="Cuota a llevar" htmlFor="llevar" ayuda="Monto por jugador, ej: 2.000">
+            <input id="llevar" value={datos.llevar ?? ''} onChange={(e) => set('llevar', e.target.value)} className={inputClass} />
+          </Campo>
+        )}
+      </div>
+
+      <Campo label="Series que participan">
+        <div className="flex flex-wrap gap-2">
+          {SERIES_OPCIONES.map((serie) => {
+            const activa = datos.series.includes(serie);
+            return (
+              <button
+                key={serie}
+                type="button"
+                onClick={() => toggleSerie(serie)}
+                aria-pressed={activa}
+                className={cn(
+                  'rounded-full border px-3 py-1 text-sm transition-colors',
+                  activa ? 'border-azul-claro bg-azul-claro text-white' : 'border-gray-300 text-gray-700 hover:border-azul-claro'
+                )}
+              >
+                {serie}
+              </button>
+            );
+          })}
+        </div>
+      </Campo>
+
+      <div className="grid grid-cols-1 gap-4 rounded-lg bg-gray-50 p-4 sm:grid-cols-2">
+        <Interruptor
+          checked={datos.confirmado}
+          onChange={(v) => set('confirmado', v)}
+          label="Confirmado"
+          descripcion="Si no, se muestra como «por confirmar»"
+        />
+        <Interruptor
+          checked={datos.publicado}
+          onChange={(v) => set('publicado', v)}
+          label="Visible en el sitio"
+          descripcion="Desactívalo para guardarlo como borrador"
+        />
+      </div>
+
+      <div className="flex justify-end gap-2 border-t border-gray-200 pt-4">
+        <Button type="button" variant="outline" onClick={onCancelar} disabled={guardando}>
+          Cancelar
+        </Button>
+        <Button type="submit" disabled={guardando}>
+          {guardando && <Loader2 className="animate-spin" />}
+          {id ? 'Guardar cambios' : 'Crear actividad'}
+        </Button>
+      </div>
+    </form>
+  );
+}

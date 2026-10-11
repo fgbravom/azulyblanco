@@ -28,7 +28,7 @@ export default function JugadoresTable({ jugadores, loading, onView, onEdit, onD
       <div className="text-center py-12 bg-white rounded-lg border">
         <p className="text-muted-foreground">No hay jugadores registrados</p>
         <p className="text-sm text-muted-foreground mt-2">
-          Haz clic en "Nuevo Jugador" para agregar el primero
+          Haz clic en «Nuevo jugador» para agregar el primero
         </p>
       </div>
     );
