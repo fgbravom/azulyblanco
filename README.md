@@ -1,239 +1,64 @@
-# Sitio Web Azul y Blanco
+# Azul y Blanco
 
-Sitio web oficial del Club de Fútbol Amateur Azul y Blanco.
+Sitio web del Club de Fútbol Amateur Azul y Blanco: [www.azulyblanco.cl](https://www.azulyblanco.cl)
 
-> **📅 Última actualización:** 31 de Diciembre 2024
-> **🎯 Estado:** Panel Admin 44% completado - Módulo de Jugadores 100% funcional
-> **📚 Documentación completa:** Ver carpeta [Docs/](./Docs/)
+Muestra la programación y los resultados, las noticias, las galerías de fotos, el plantel de cada serie y la historia del club. Tiene un panel de administración (`/admin`) para editar todo ese contenido sin tocar código.
 
-## Stack Tecnológico
+¿Quieres colaborar? Lee [CONTRIBUTING.md](CONTRIBUTING.md): explica cómo levantar el proyecto en tu computador y cómo proponer cambios.
 
-- **Frontend:** Next.js 16.1.0 (App Router) + React 19.2.0
-- **Styling:** Tailwind CSS v4 + shadcn/ui
-- **Backend:** Supabase (PostgreSQL + Storage)
-- **Authentication:** bcryptjs + HTTP-only cookies
-- **Hosting:** Vercel
-- **TypeScript:** Para type safety
+## Tecnologías
 
-## Características
+- [Next.js 16](https://nextjs.org/docs) (App Router) con React 19 y TypeScript
+- [Tailwind CSS v4](https://tailwindcss.com/docs) y componentes de [shadcn/ui](https://ui.shadcn.com)
+- [Supabase](https://supabase.com/docs): base de datos PostgreSQL y almacenamiento de imágenes
+- [Vitest](https://vitest.dev) y Testing Library para las pruebas
+- Desplegado en [Vercel](https://vercel.com)
 
-- ✅ Diseño responsive (mobile-first)
-- ✅ Sistema de noticias dinámico
-- ✅ Gestión de partidos y resultados
-- ✅ Galería de fotos con álbumes
-- ✅ Panel de administración
-- ✅ SEO optimizado
-- ✅ Performance optimizado (Lighthouse >85)
-- ✅ Accesibilidad (WCAG AA)
-
-## Instalación Local
-
-### Prerrequisitos
-
-- Node.js 18+ instalado
-- npm o yarn
-- Cuenta en Supabase (gratis)
-
-### Pasos
-
-1. **Clonar el repositorio**
-```bash
-git clone https://github.com/tu-usuario/azulyblanco.git
-cd azulyblanco/website
-```
-
-2. **Instalar dependencias**
-```bash
-npm install
-```
-
-3. **Configurar variables de entorno**
-```bash
-# Copiar el archivo de ejemplo
-cp ../.env.example .env.local
-
-# Editar .env.local con tus credenciales de Supabase
-```
-
-4. **Configurar Supabase**
-- Crear proyecto en https://supabase.com
-- Ejecutar el script SQL de `propuesta-tecnica-nextjs.md` (sección 3.1)
-- Copiar URL y API Keys al .env.local
-
-5. **Iniciar servidor de desarrollo**
-```bash
-npm run dev
-```
-
-Abrir [http://localhost:3000](http://localhost:3000) en el navegador.
-
-## Scripts Disponibles
-
-```bash
-npm run dev          # Servidor de desarrollo
-npm run build        # Build de producción
-npm run start        # Servidor de producción
-npm run lint         # Linter ESLint
-npm run type-check   # Verificar tipos TypeScript
-```
-
-## Estructura del Proyecto
+## Estructura
 
 ```
-website/
-├── app/                    # App Router de Next.js
-│   ├── (pages)/           # Páginas públicas
-│   ├── (admin)/           # Panel admin (protegido)
-│   ├── api/               # API Routes
-│   └── layout.tsx         # Layout raíz
-├── components/            # Componentes React
-│   ├── ui/               # shadcn/ui components
-│   ├── layout/           # Header, Footer, Nav
-│   ├── home/             # Componentes de Home
-│   └── shared/           # Componentes compartidos
-├── lib/                   # Utilities y configuración
-│   ├── supabase/         # Clientes de Supabase
-│   ├── actions/          # Server Actions
-│   └── utils/            # Utilidades
-├── types/                 # TypeScript types
-├── public/               # Assets estáticos
-└── tailwind.config.ts    # Configuración Tailwind
+azulyblanco/
+├── website/                 # La aplicación (aquí se trabaja)
+│   ├── app/                 # Páginas y rutas /api
+│   │   ├── (pages)/  club/  galeria/  noticias/  partidos/  series/  contacto/ ...
+│   │   ├── (admin)/  admin/ # Panel de administración
+│   │   └── api/
+│   ├── components/          # Componentes por sección (admin, hero, calendario, ui...)
+│   ├── lib/                 # Acceso a datos, autenticación, validaciones
+│   ├── noticias/            # Noticias antiguas en Markdown (respaldo de la base)
+│   ├── public/              # Imágenes y escudos
+│   ├── supabase/            # Migraciones y datos de prueba para la base local
+│   ├── scripts/             # Utilidades (optimizar imágenes, migraciones, importar)
+│   └── tests/               # Pruebas unitarias
+├── Docs/                    # Documentación
+└── .env.example             # Variables de entorno de ejemplo
 ```
 
-## Deployment en Vercel
+## Comandos principales
 
-1. **Conectar repositorio**
-- Ir a https://vercel.com
-- Import Git Repository
-- Seleccionar este repositorio
+Desde `website/`:
 
-2. **Configurar variables de entorno**
-- Agregar todas las variables de `.env.local` en Vercel
-- Settings → Environment Variables
+| Comando | Qué hace |
+|---|---|
+| `npm run dev` | Servidor de desarrollo en http://localhost:3000 |
+| `npm test` | Corre las pruebas |
+| `npm run lint` | Revisa el código con ESLint |
+| `npm run build` | Compila como en producción |
+| `npm run db:start` / `db:stop` | Levanta o apaga Supabase local (necesita Docker) |
+| `npm run db:reset` | Recrea la base local con las migraciones y los datos de prueba |
 
-3. **Deploy**
-- Vercel despliega automáticamente en cada push a `main`
-- Preview deployments en cada PR
+## Documentación
 
-## Configurar Dominio Custom
+- [CONTRIBUTING.md](CONTRIBUTING.md): entorno local y cómo enviar cambios
+- [Docs/ADMIN.md](Docs/ADMIN.md): panel de administración, migraciones, pruebas y seguridad
+- [Docs/CUOTAS.md](Docs/CUOTAS.md): sistema de cuotas de los jugadores (oculto por ahora)
 
-1. En Vercel: Settings → Domains
-2. Agregar dominio: `azulyblanco.com`
-3. Configurar DNS según instrucciones de Vercel
-4. Esperar propagación (puede tomar hasta 48hs)
+El resto de `Docs/` son notas de etapas anteriores del proyecto y pueden estar desactualizadas.
 
-## Panel de Administración
+## Despliegue
 
-### Acceso
-- **URL Local:** `http://localhost:3000/admin`
-- **Contraseña:** la de `ADMIN_PASSWORD_HASH` (ver [Docs/ADMIN.md](Docs/ADMIN.md))
-- **Duración de sesión:** 8 horas
-
-### Estado de Implementación (44% completado)
-
-#### ✅ Completado
-- **Autenticación:** Sistema simple con bcrypt y cookies
-- **Layout:** Sidebar con navegación y header
-- **Dashboard:** Estadísticas básicas (pendiente datos reales)
-- **Gestión de Jugadores (100%):**
-  - ✅ CRUD completo (Crear, Leer, Actualizar, Eliminar)
-  - ✅ Formulario de 4 pestañas (Personal, Deportiva, Contacto, Médica)
-  - ✅ Validación con Zod + React Hook Form
-  - ✅ Visualización de ficha completa
-  - ✅ UI coherente con colores del club
-  - ✅ Notificaciones toast
-  - ✅ Tabla con búsqueda y filtros
-
-#### ⏳ Pendiente
-- **Gestión de Partidos:** Crear fixture, registrar resultados
-- **Gestión de Estadísticas:** Goles, asistencias, tarjetas por jugador/partido
-- **Gestión de Noticias:** Crear y publicar noticias
-- **Gestión de Galería:** Subir fotos y crear álbumes
-
-### Documentación del Admin
-- **Setup:** [Docs/SETUP_ADMIN.md](./Docs/SETUP_ADMIN.md)
-- **Estado:** [Docs/ADMIN_COMPLETADO.md](./Docs/ADMIN_COMPLETADO.md)
-- **Verificación:** [Docs/PASOS_VERIFICACION.md](./Docs/PASOS_VERIFICACION.md)
-- **Última sesión:** [Docs/SESION-31-DIC-2024.md](./Docs/SESION-31-DIC-2024.md)
-
-## Gestión de Contenido
-
-### Publicar una Noticia
-
-1. Login en `/dashboard`
-2. Ir a Noticias → Nueva Noticia
-3. Completar título, contenido y extracto
-4. Subir imagen destacada
-5. Click en "Publicar"
-
-### Subir Fotos a la Galería
-
-1. Dashboard → Galería → Nuevo Álbum
-2. Crear álbum con título, descripción y fecha
-3. Subir múltiples fotos
-4. Publicar álbum
-
-### Cargar Resultados de Partidos
-
-1. Dashboard → Partidos
-2. Buscar el partido programado
-3. Editar y agregar resultado
-4. Guardar
-
-## SEO
-
-### Metadata
-- Configurada automáticamente en cada página
-- Open Graph tags para redes sociales
-- Twitter Cards
-
-### Sitemap
-- Generado automáticamente: `/sitemap.xml`
-- Se actualiza con contenido dinámico
-
-### Robots.txt
-- Configurado en `/robots.txt`
-
-## Analytics
-
-### Google Analytics 4
-1. Crear propiedad en Google Analytics
-2. Obtener Measurement ID (G-XXXXXXXXXX)
-3. Agregar al `.env.local` como `NEXT_PUBLIC_GA_MEASUREMENT_ID`
-
-## Costos
-
-### Resumen
-- **Dominio:** ~$15 USD/año
-- **Hosting (Vercel):** $0 (plan Hobby)
-- **Base de datos (Supabase):** $0 (plan Free)
-- **Storage:** $0 (incluido en Supabase Free)
-- **Total:** ~$15 USD/año
-
-### Límites Free Tier
-- **Vercel:** 100 GB bandwidth/mes
-- **Supabase:** 500 MB DB + 1 GB Storage
-- Suficiente para 100,000+ visitas/mes
-
-## Soporte
-
-### Documentación
-- [Propuesta UX/UI](../propuesta-ux-ui-azulyblanco.md)
-- [Propuesta Técnica](../propuesta-tecnica-nextjs.md)
-
-### Enlaces Útiles
-- [Next.js Docs](https://nextjs.org/docs)
-- [Supabase Docs](https://supabase.com/docs)
-- [Tailwind CSS Docs](https://tailwindcss.com/docs)
-- [shadcn/ui Docs](https://ui.shadcn.com)
-
-### Issues
-Para reportar bugs o solicitar features, crear un issue en GitHub.
+Cada cambio que llega a la rama `Repositiorios` se publica solo en producción a través de Vercel. Por eso los cambios entran mediante pull request y alguien los revisa antes.
 
 ## Licencia
 
-© 2025 Club Azul y Blanco. Todos los derechos reservados.
-
----
-
-Desarrollado con ❤️ para el Club Azul y Blanco
+© Club Azul y Blanco. Todos los derechos reservados.
