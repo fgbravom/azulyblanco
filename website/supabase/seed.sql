@@ -17,13 +17,13 @@ SELECT j.nombre, j.apellidos, 'Chile',
   (SELECT id FROM posiciones WHERE nombre = j.posicion),
   j.dorsal, j.estado
 FROM (VALUES
-  ('Arquero', 'Prueba Uno', 'Azul y Blanco - Primera', 'Portero', 1, 'Activo'),
+  ('Arquero', 'Prueba Uno', 'Azul y Blanco - Primera', 'Arquero', 1, 'Activo'),
   ('Central', 'Prueba Dos', 'Azul y Blanco - Primera', 'Defensa Central', 4, 'Activo'),
   ('Lateral', 'Prueba Tres', 'Azul y Blanco - Primera', 'Lateral Derecho', 2, 'Lesionado'),
   ('Volante', 'Prueba Cuatro', 'Azul y Blanco - Primera', 'Mediocampista', 8, 'Activo'),
   ('Delantero', 'Prueba Cinco', 'Azul y Blanco - Primera', 'Delantero Centro', 9, 'Activo'),
-  ('Arquero', 'Honor Uno', 'Azul y Blanco - Honor', 'Portero', 1, 'Activo'),
-  ('Volante', 'Honor Dos', 'Azul y Blanco - Honor', 'Pivote', 5, 'Activo'),
+  ('Arquero', 'Honor Uno', 'Azul y Blanco - Honor', 'Arquero', 1, 'Activo'),
+  ('Volante', 'Honor Dos', 'Azul y Blanco - Honor', 'Mediocampista Defensivo', 5, 'Activo'),
   ('Puntero', 'Honor Tres', 'Azul y Blanco - Honor', 'Extremo Izquierdo', 11, 'Sancionado'),
   ('Defensa', 'Máster Uno', 'Azul y Blanco - 35', 'Defensa Central', 3, 'Activo'),
   ('Enganche', 'Máster Dos', 'Azul y Blanco - 35', 'Mediocampista Ofensivo', 10, 'Activo')
