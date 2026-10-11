@@ -1,6 +1,5 @@
 import { cookies } from 'next/headers';
-
-const SESSION_COOKIE = 'admin_session';
+import { SESSION_COOKIE, SESSION_MAX_AGE, firmarToken, verificarToken } from './token';
 
 /**
  * Crea una sesión de administrador
@@ -13,12 +12,13 @@ export async function createSession() {
   }
 
   const cookieStore = await cookies();
-  cookieStore.set(SESSION_COOKIE, sessionSecret, {
+  cookieStore.set(SESSION_COOKIE, await firmarToken(sessionSecret), {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'strict',
-    maxAge: 60 * 60 * 8, // 8 horas
-    path: '/admin',
+    maxAge: SESSION_MAX_AGE,
+    // Raíz: las APIs del admin (/api/*) también necesitan la cookie
+    path: '/',
   });
 }
 
@@ -26,16 +26,17 @@ export async function createSession() {
  * Verifica si existe una sesión válida de administrador
  */
 export async function verifySession(): Promise<boolean> {
-  const sessionSecret = process.env.SESSION_SECRET;
-
-  if (!sessionSecret) {
-    return false;
-  }
-
   const cookieStore = await cookies();
-  const session = cookieStore.get(SESSION_COOKIE);
+  return verificarToken(cookieStore.get(SESSION_COOKIE)?.value, process.env.SESSION_SECRET);
+}
 
-  return session?.value === sessionSecret;
+/**
+ * Corta la ejecución de una server action si no hay sesión de administrador
+ */
+export async function requireAdmin() {
+  if (!(await verifySession())) {
+    throw new Error('No autorizado');
+  }
 }
 
 /**
@@ -43,5 +44,7 @@ export async function verifySession(): Promise<boolean> {
  */
 export async function destroySession() {
   const cookieStore = await cookies();
-  cookieStore.delete(SESSION_COOKIE);
+  cookieStore.delete({ name: SESSION_COOKIE, path: '/' });
+  // Cookie de la versión anterior, que vivía bajo /admin
+  cookieStore.delete({ name: SESSION_COOKIE, path: '/admin' });
 }
