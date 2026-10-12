@@ -11,7 +11,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { ChevronDown } from 'lucide-react'
+import { ChevronDown, LogIn } from 'lucide-react'
 import { FaInstagram, FaFacebook } from 'react-icons/fa'
 
 interface HeaderProps {
@@ -159,8 +159,14 @@ export function Header({ isHome = false, hideInitially = false }: HeaderProps) {
               </Link>*/}
             </div>
 
-            {/* CTA Button - Right side, visible from 1536px */}
-            <div className="hidden 2xl:block flex-shrink-0 order-4 2xl:pt-3">
+            {/* CTA Buttons - Right side, visible from 1536px */}
+            <div className="hidden 2xl:flex items-center gap-2 flex-shrink-0 order-4 2xl:pt-3">
+              <Button asChild variant="ghost" className="text-white hover:bg-white hover:text-azul-primario text-sm px-3 h-10 transition-colors">
+                <Link href="/admin/login">
+                  <LogIn aria-hidden="true" />
+                  Intranet
+                </Link>
+              </Button>
               <Button asChild className="bg-white hover:bg-azul-claro text-azul-primario hover:text-white text-sm px-4 h-10 transition-colors">
                 <Link href="/contacto">Únete al Club</Link>
               </Button>
@@ -253,6 +259,12 @@ export function Header({ isHome = false, hideInitially = false }: HeaderProps) {
           <Button asChild className="bg-azul-primario hover:bg-azul-oscuro text-white mt-4 transition-colors w-[60%] h-12 text-lg">
             <Link href="/contacto" onClick={() => setMobileMenuOpen(false)}>
               Únete al Club
+            </Link>
+          </Button>
+          <Button asChild variant="outline" className="w-[60%] h-12 text-lg [&_svg]:size-5">
+            <Link href="/admin/login" onClick={() => setMobileMenuOpen(false)}>
+              <LogIn aria-hidden="true" />
+              Intranet
             </Link>
           </Button>
 
