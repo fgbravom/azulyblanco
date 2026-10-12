@@ -240,7 +240,7 @@ Para contribuir al proyecto:
 ## 📧 Contacto
 
 Para preguntas sobre el proyecto:
-- Email del club: contacto@azulyblanco.com
+- Email del club: contacto@azulyblanco.cl
 - Repositorio: [URL del repositorio]
 
 ---
