@@ -21,6 +21,7 @@ import {
   type Album,
 } from '@/lib/gallery'
 import { createPublicClient } from '@/lib/supabase/public'
+import { codigoPais, PAISES, type CodigoPais } from '@/lib/jugadores/paises'
 import { HERO_FOTOS_REPO, type HeroFotos } from '@/components/hero/hero-boot'
 import { actividadAEvento } from './calendario'
 import type { Actividad, AlbumDB, Foto, HeroFoto, NoticiaDB, SerieInfo } from './tipos'
@@ -243,6 +244,24 @@ export async function getPlantelPublico(equipoId: number): Promise<PlantelJugado
     return []
   }
   return data as PlantelJugador[]
+}
+
+/** Nacionalidades presentes en el plantel activo, sin repetir, en el orden de PAISES. Sin respaldo: si falla, el home no muestra la sección. */
+export async function getNacionalidadesPlantel(): Promise<CodigoPais[]> {
+  const supabase = createPublicClient()
+  if (!supabase) return []
+
+  const { data, error } = await supabase.from('vista_plantel_publico').select('nacionalidad')
+  if (error) {
+    console.warn('[contenido] no se pudieron leer las nacionalidades del plantel:', error.message)
+    return []
+  }
+  const presentes = new Set<CodigoPais>()
+  for (const fila of data as { nacionalidad: string | null }[]) {
+    const codigo = codigoPais(fila.nacionalidad)
+    if (codigo) presentes.add(codigo)
+  }
+  return (Object.keys(PAISES) as CodigoPais[]).filter((codigo) => presentes.has(codigo))
 }
 
 // ============================================================================

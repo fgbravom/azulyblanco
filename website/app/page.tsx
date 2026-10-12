@@ -3,11 +3,13 @@ import { Button } from '@/components/ui/button'
 import { Header } from '@/components/layout/Header'
 import { Footer } from '@/components/layout/Footer'
 import { ProximosPartidos } from '@/components/calendario/ProximosPartidos'
-import { getEventosCalendario, getNoticiasPublicas } from '@/lib/contenido/publico'
+import { getEventosCalendario, getNacionalidadesPlantel, getNoticiasPublicas } from '@/lib/contenido/publico'
 import { HeroSection } from '@/components/hero/HeroSection'
 import { UltimasNoticias } from '@/components/noticias/UltimasNoticias'
 import { obtenerProximosEventos } from '@/lib/utils/calendario'
 import { SITE_CONFIG } from '@/lib/constants'
+import Bandera from '@/components/ui/bandera'
+import { PAISES } from '@/lib/jugadores/paises'
 
 export const revalidate = 300 // respaldo; el admin regenera al guardar
 
@@ -52,7 +54,11 @@ const JSON_LD = JSON.stringify({
 }).replace(/</g, '\\u003c')
 
 export default async function HomePage() {
-  const [eventos, todasLasNoticias] = await Promise.all([getEventosCalendario(), getNoticiasPublicas()])
+  const [eventos, todasLasNoticias, paisesPlantel] = await Promise.all([
+    getEventosCalendario(),
+    getNoticiasPublicas(),
+    getNacionalidadesPlantel(),
+  ])
   const [proximoEvento] = obtenerProximosEventos(eventos, 1)
   return (
     <>
@@ -82,6 +88,24 @@ export default async function HomePage() {
             </Button>
           </div>
         </section>
+
+        {/* Las nacionalidades del plantel */}
+        {paisesPlantel.length > 0 && (
+          <section className="py-16 px-4 bg-azul-primario text-white">
+            <div className="container mx-auto max-w-4xl text-center">
+              <h2 className="text-3xl md:text-4xl font-bold mb-2">UN CLUB, MUCHAS BANDERAS</h2>
+              <p className="mb-10 text-gray-100">Las nacionalidades que visten nuestra camiseta</p>
+              <div className="flex flex-wrap items-center justify-center gap-8 md:gap-12">
+                {paisesPlantel.map((codigo) => (
+                  <div key={codigo} className="flex flex-col items-center gap-2">
+                    <Bandera codigo={codigo} className="h-10 w-[60px] md:h-12 md:w-[72px] rounded-sm" />
+                    <span className="text-sm text-gray-100">{PAISES[codigo]}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* Últimas noticias */}
         <UltimasNoticias
