@@ -48,6 +48,10 @@ describe('descubrimiento de server actions', () => {
 // Argumentos plausibles: lo que importa es que se corte antes de usarlos
 const ARGS = [1, { path: 'biblioteca/x.webp', nombre: 'x', mime: 'image/webp', bytes: 1, ancho: 1, alto: 1 }, ['a'], 'x']
 
+// Acciones públicas: no tocan la base ni el storage y no exigen sesión.
+// Si aparece una acá, el cambio debe justificarse en la revisión del PR.
+const ACCIONES_PUBLICAS = new Set(['contacto → enviarMensajeContacto'])
+
 describe('server actions del admin sin sesión', () => {
   beforeEach(async () => {
     vi.clearAllMocks()
@@ -56,11 +60,18 @@ describe('server actions del admin sin sesión', () => {
 
   it('se revisan todas las acciones exportadas', () => {
     expect(acciones.length).toBeGreaterThanOrEqual(40)
+    // La lista de públicas no puede quedarse con nombres que ya no existen
+    for (const publica of ACCIONES_PUBLICAS) {
+      expect(acciones.some((a) => a.accion === publica)).toBe(true)
+    }
   })
 
-  it.each(acciones)('$accion se rechaza sin tocar la base', async ({ fn }) => {
-    await expect(fn(...ARGS)).rejects.toThrow('No autorizado')
-    expect(createAdminClient).not.toHaveBeenCalled()
-    expect(cargarSharp).not.toHaveBeenCalled()
-  })
+  it.each(acciones.filter((a) => !ACCIONES_PUBLICAS.has(a.accion)))(
+    '$accion se rechaza sin tocar la base',
+    async ({ fn }) => {
+      await expect(fn(...ARGS)).rejects.toThrow('No autorizado')
+      expect(createAdminClient).not.toHaveBeenCalled()
+      expect(cargarSharp).not.toHaveBeenCalled()
+    }
+  )
 })

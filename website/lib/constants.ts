@@ -20,12 +20,13 @@ export const SITE_CONFIG = {
   social: {
     instagram: 'https://www.instagram.com/azulyblancocurico/',
     facebook: 'https://www.facebook.com/nuevoazulyblanco.curico',
-    twitter: 'https://twitter.com/azulyblanco',
   },
   contact: {
     email: 'contacto@azulyblanco.cl',
-    phone: '+54 9 11 1234-5678',
-    whatsapp: '+56912345678', // Número de WhatsApp del club
+    // Dejar vacío para ocultar el dato en el sitio (contacto y footer lo omiten)
+    phone: '',
+    // Mismo criterio: si está vacío, el botón de WhatsApp del calendario no se muestra
+    whatsapp: '',
     address: 'Curicó, Chile',
   },
 }
@@ -36,7 +37,8 @@ export const NAVIGATION_ITEMS = [
     href: '/club/historia',
     submenu: [
       { title: 'HISTORIA', href: '/club/historia' },
-      { title: 'DIRECTIVA', href: '/club/directiva' },
+      // Directiva oculta hasta tener los nombres reales (la ruta sigue viva,
+      // pero con noindex en app/club/directiva/page.tsx)
     ],
   },
   {

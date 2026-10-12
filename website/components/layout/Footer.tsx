@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { SITE_CONFIG, NAVIGATION_ITEMS } from '@/lib/constants'
-import { Instagram } from 'lucide-react'
+import { FaInstagram, FaFacebook } from 'react-icons/fa'
 
 export function Footer() {
   return (
@@ -45,7 +45,7 @@ export function Footer() {
           <div>
             <h3 className="text-white font-semibold mb-4">Enlaces Rápidos</h3>
             <ul className="space-y-2">
-              {NAVIGATION_ITEMS.slice(0, 4).map((item) => (
+              {NAVIGATION_ITEMS.map((item) => (
                 <li key={item.href}>
                   <Link
                     href={item.href}
@@ -70,6 +70,16 @@ export function Footer() {
                   {SITE_CONFIG.contact.email}
                 </a>
               </li>
+              {SITE_CONFIG.contact.phone && (
+                <li>
+                  <a
+                    href={`tel:${SITE_CONFIG.contact.phone}`}
+                    className="hover:text-white transition-colors"
+                  >
+                    {SITE_CONFIG.contact.phone}
+                  </a>
+                </li>
+              )}
             </ul>
           </div>
 
@@ -84,7 +94,16 @@ export function Footer() {
                 className="hover:text-white transition-colors"
                 aria-label="Instagram"
               >
-                <Instagram className="w-6 h-6" />
+                <FaInstagram className="w-6 h-6" />
+              </a>
+              <a
+                href={SITE_CONFIG.social.facebook}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-white transition-colors"
+                aria-label="Facebook"
+              >
+                <FaFacebook className="w-6 h-6" />
               </a>
             </div>
           </div>

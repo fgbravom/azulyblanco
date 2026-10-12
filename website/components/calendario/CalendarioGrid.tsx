@@ -357,7 +357,7 @@ export function CalendarioGrid({ eventos }: CalendarioGridProps) {
               </div>
 
               {/* Botón WhatsApp solo para partidos */}
-              {eventoSeleccionado.tipo === 'partido' && (
+              {eventoSeleccionado.tipo === 'partido' && SITE_CONFIG.contact.whatsapp && (
                 <div className="pt-2">
                   <Button
                     asChild

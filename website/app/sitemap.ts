@@ -10,7 +10,6 @@ const PAGINAS: { ruta: string; prioridad: number; frecuencia: MetadataRoute.Site
   { ruta: '/partidos', prioridad: 0.8, frecuencia: 'weekly' },
   { ruta: '/galeria', prioridad: 0.7, frecuencia: 'weekly' },
   { ruta: '/club/historia', prioridad: 0.7, frecuencia: 'yearly' },
-  { ruta: '/club/directiva', prioridad: 0.5, frecuencia: 'yearly' },
   { ruta: '/series/primera', prioridad: 0.6, frecuencia: 'monthly' },
   { ruta: '/series/honor', prioridad: 0.6, frecuencia: 'monthly' },
   { ruta: '/series/35', prioridad: 0.6, frecuencia: 'monthly' },

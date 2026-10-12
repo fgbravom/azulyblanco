@@ -12,7 +12,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { ChevronDown, LogIn } from 'lucide-react'
-import { FaInstagram, FaFacebook } from 'react-icons/fa'
+import { FaInstagram } from 'react-icons/fa'
 
 interface HeaderProps {
   isHome?: boolean
@@ -148,15 +148,7 @@ export function Header({ isHome = false, hideInitially = false }: HeaderProps) {
               >
                 <FaInstagram className="w-6 h-6" />
               </Link>
-              {/*<Link
-                href={SITE_CONFIG.social.facebook}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-white hover:text-azul-claro transition-colors"
-                aria-label="Facebook"
-              >
-                <FaFacebook className="w-6 h-6" />
-              </Link>*/}
+              {/* Facebook vive en el footer y en /contacto: el header queda solo con Instagram */}
             </div>
 
             {/* CTA Buttons - Right side, visible from 1536px */}

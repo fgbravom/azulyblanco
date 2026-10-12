@@ -388,7 +388,7 @@ export function ProximosPartidos({ eventos, limite = 3 }: ProximosPartidosProps)
               </div>
 
               {/* Botón WhatsApp solo para partidos */}
-              {eventoSeleccionado.tipo === 'partido' && (
+              {eventoSeleccionado.tipo === 'partido' && SITE_CONFIG.contact.whatsapp && (
                 <div className="pt-2">
                   <Button
                     asChild

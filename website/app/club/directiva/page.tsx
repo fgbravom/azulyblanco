@@ -5,6 +5,8 @@ import { Card, CardContent } from '@/components/ui/card'
 export const metadata = {
   title: 'Directiva',
   description: 'Directiva del Club Deportivo Azul y Blanco de Curicó.',
+  // Oculta de los buscadores hasta que los cargos estén completos
+  robots: { index: false, follow: false },
 }
 
 const DIRECTIVA = [

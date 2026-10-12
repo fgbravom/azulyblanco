@@ -101,7 +101,7 @@ export function CalendarioMensual({ eventos, mes, año }: CalendarioMensualProps
                   </div>
 
                   {/* Botón WhatsApp solo para partidos */}
-                  {evento.tipo === 'partido' && (
+                  {evento.tipo === 'partido' && SITE_CONFIG.contact.whatsapp && (
                     <div className="mt-3">
                       <Button
                         asChild
