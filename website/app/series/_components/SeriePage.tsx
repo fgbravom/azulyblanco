@@ -6,9 +6,19 @@ import { getEquiposByCategoria } from '@/lib/data/equipos'
 import { getPlantelPublico, getSerieInfo, type PlantelJugador } from '@/lib/contenido/publico'
 import { MDXRenderer } from '@/components/mdx/MDXRenderer'
 import { PlantelGrid } from './PlantelGrid'
+import { FichaPersona } from './FichaPersona'
 import type { EquipoPublico } from '@/types/database'
 import Image from 'next/image'
 import { CalendarClock, MapPin, Trophy } from 'lucide-react'
+
+// El cuerpo técnico se guarda como nombre completo en un solo campo:
+// con tres o más palabras, las dos últimas son los apellidos
+function separarNombre(completo: string): { nombre: string; apellidos: string } {
+  const palabras = completo.trim().split(/\s+/)
+  if (palabras.length === 1) return { nombre: '', apellidos: palabras[0] }
+  const corte = palabras.length >= 3 ? palabras.length - 2 : 1
+  return { nombre: palabras.slice(0, corte).join(' '), apellidos: palabras.slice(corte).join(' ') }
+}
 
 interface SeriePageProps {
   slug: string
@@ -119,28 +129,19 @@ export default async function SeriePage({ slug, categoriaNombre, titulo: tituloB
           <section className="py-16 px-4 bg-gray-50">
             <div className="container mx-auto max-w-6xl">
               <h2 className="text-3xl font-bold mb-10 text-center text-azul-primario">Cuerpo Técnico</h2>
-              <div className="flex flex-wrap justify-center gap-6 max-w-3xl mx-auto">
-                {cuerpoTecnico.map(({ nombre, foto, cargo }) => (
-                  <Card key={cargo} className="text-center w-full sm:w-[calc((100%-3rem)/3)]">
-                    <CardContent className="p-6">
-                      {foto ? (
-                        <Image
-                          src={foto}
-                          alt={nombre}
-                          width={112}
-                          height={112}
-                          className="w-28 h-28 rounded-full mx-auto mb-4 object-cover object-top ring-4 ring-azul-claro/30"
-                        />
-                      ) : (
-                        <div className="w-28 h-28 bg-azul-primario rounded-full mx-auto mb-4 flex items-center justify-center text-white text-4xl font-bold">
-                          {nombre[0]}
-                        </div>
-                      )}
-                      <h3 className="font-bold">{nombre}</h3>
-                      <p className="text-sm text-gray-500 mt-1">{cargo}</p>
-                    </CardContent>
-                  </Card>
-                ))}
+              {/* Mismo ancho que las columnas del plantel, pero centradas */}
+              <div className="flex flex-wrap justify-center gap-4 md:gap-6">
+                {cuerpoTecnico.map(({ nombre, foto, cargo }) => {
+                  const partes = separarNombre(nombre)
+                  return (
+                    <div
+                      key={cargo}
+                      className="w-[calc(50%-0.5rem)] sm:w-[calc((100%-2rem)/3)] md:w-[calc((100%-3rem)/3)] lg:w-[calc((100%-4.5rem)/4)]"
+                    >
+                      <FichaPersona foto={foto} alt={nombre} {...partes} detalle={cargo} />
+                    </div>
+                  )
+                })}
               </div>
             </div>
           </section>

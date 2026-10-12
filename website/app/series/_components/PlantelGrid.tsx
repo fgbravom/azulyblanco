@@ -1,8 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import Image from 'next/image'
 import type { PlantelJugador } from '@/lib/contenido/publico'
+import { FichaPersona } from './FichaPersona'
 
 const TODOS = 'Todos'
 
@@ -79,28 +79,14 @@ export function PlantelGrid({ jugadores }: PlantelGridProps) {
             .slice(0, MAX_POSICIONES_PUBLICAS)
 
           return (
-            <article
+            <FichaPersona
               key={jugador.id}
-              className="group relative aspect-[3/4] rounded-2xl overflow-hidden bg-gradient-to-b from-azul-claro to-azul-primario shadow-sm hover:shadow-xl transition-shadow"
+              foto={jugador.foto_url}
+              alt={jugador.nombre_completo}
+              nombre={primerNombre(jugador.nombre)}
+              apellidos={jugador.apellidos}
+              detalle={posicionesAbr.join(' · ')}
             >
-              {jugador.foto_url ? (
-                <Image
-                  src={jugador.foto_url}
-                  alt={jugador.nombre_completo}
-                  fill
-                  sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw"
-                  className="object-cover object-top transition-transform duration-500 group-hover:scale-105"
-                />
-              ) : (
-                <Image
-                  src="/images/escudoazulyblanco.png"
-                  alt=""
-                  width={160}
-                  height={160}
-                  className="absolute left-1/2 top-[38%] -translate-x-1/2 -translate-y-1/2 w-1/2 h-auto opacity-15 transition-transform duration-500 group-hover:scale-110"
-                />
-              )}
-
               {/* Dorsal */}
               {jugador.dorsal != null && (
                 <span className="absolute top-3 left-4 font-heading font-black text-5xl md:text-6xl leading-none text-white/90 drop-shadow">
@@ -115,20 +101,7 @@ export function PlantelGrid({ jugadores }: PlantelGridProps) {
                   {jugador.estado}
                 </span>
               )}
-
-              {/* Nombre */}
-              <div className="absolute inset-x-0 bottom-0 pt-16 pb-4 px-4 bg-gradient-to-t from-azul-profundo/95 via-azul-profundo/60 to-transparent text-white">
-                <p className="text-sm md:text-base leading-tight text-white/85">{primerNombre(jugador.nombre)}</p>
-                <p className="font-heading font-extrabold uppercase text-base md:text-xl leading-tight tracking-tight">
-                  {jugador.apellidos}
-                </p>
-                {posicionesAbr.length > 0 && (
-                  <p className="mt-1.5 text-[11px] md:text-xs font-semibold uppercase tracking-wider text-azul-cielo">
-                    {posicionesAbr.join(' · ')}
-                  </p>
-                )}
-              </div>
-            </article>
+            </FichaPersona>
           )
         })}
       </div>
