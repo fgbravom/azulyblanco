@@ -1,40 +1,14 @@
 import { Header } from '@/components/layout/Header'
 import { Footer } from '@/components/layout/Footer'
 import { Card, CardContent } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 import { getCategoriaByNombre } from '@/lib/data/equipos'
 import { getEquiposByCategoria } from '@/lib/data/equipos'
 import { getPlantelPublico, getSerieInfo, type PlantelJugador } from '@/lib/contenido/publico'
 import { MDXRenderer } from '@/components/mdx/MDXRenderer'
+import { PlantelGrid } from './PlantelGrid'
 import type { EquipoPublico } from '@/types/database'
 import Image from 'next/image'
 import { CalendarClock, MapPin, Trophy } from 'lucide-react'
-
-const SIN_POSICION = 'sin-posicion'
-
-const POSICION_COLORS: Record<string, string> = {
-  Arquero: 'bg-yellow-500',
-  Defensor: 'bg-blue-600',
-  Mediocampista: 'bg-green-600',
-  Delantero: 'bg-red-600',
-}
-
-function getPosicionColor(posicion: string | null): string {
-  return (posicion && POSICION_COLORS[posicion]) ?? 'bg-gray-500'
-}
-
-function getEstadoBadge(estado: string) {
-  switch (estado) {
-    case 'Activo':
-      return <Badge className="bg-green-100 text-green-800 border-green-200">Activo</Badge>
-    case 'Lesionado':
-      return <Badge className="bg-orange-100 text-orange-800 border-orange-200">Lesionado</Badge>
-    case 'Sancionado':
-      return <Badge className="bg-red-100 text-red-800 border-red-200">Sancionado</Badge>
-    default:
-      return null
-  }
-}
 
 interface SeriePageProps {
   slug: string
@@ -71,21 +45,6 @@ export default async function SeriePage({ slug, categoriaNombre, titulo: tituloB
   } catch {
     // Si hay error de conexión, mostrar estado vacío
   }
-
-  // Agrupar jugadores por posición (los que aún no la tienen, al final)
-  const porPosicion: Record<string, PlantelJugador[]> = {}
-  for (const j of jugadores) {
-    const clave = j.posicion ?? SIN_POSICION
-    if (!porPosicion[clave]) porPosicion[clave] = []
-    porPosicion[clave].push(j)
-  }
-
-  const ordenPosiciones = ['Arquero', 'Defensor', 'Mediocampista', 'Delantero']
-  const posicionesOrdenadas = [
-    ...ordenPosiciones.filter((p) => porPosicion[p]),
-    ...Object.keys(porPosicion).filter((p) => !ordenPosiciones.includes(p) && p !== SIN_POSICION),
-    ...(porPosicion[SIN_POSICION] ? [SIN_POSICION] : []),
-  ]
 
   const tieneCuerpoTecnico = equipo && (equipo.entrenador || equipo.asistente_tecnico || equipo.preparador_fisico)
 
@@ -144,59 +103,7 @@ export default async function SeriePage({ slug, categoriaNombre, titulo: tituloB
                 </CardContent>
               </Card>
             ) : (
-              <div className="space-y-10">
-                {posicionesOrdenadas.map((posicion) => (
-                  <div key={posicion}>
-                    <div className="flex items-center gap-3 mb-6">
-                      <div className={`w-3 h-8 rounded-sm ${getPosicionColor(posicion)}`} />
-                      <h3 className="text-xl font-bold text-gray-800">{posicion === SIN_POSICION ? 'Plantel' : `${posicion}s`}</h3>
-                      <span className="text-gray-400 text-sm">({porPosicion[posicion].length})</span>
-                    </div>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                      {porPosicion[posicion].map((jugador) => (
-                        <Card key={jugador.id} className="hover:shadow-lg transition-shadow border-gray-100">
-                          <CardContent className="p-4">
-                            {/* Foto o placeholder */}
-                            <div className="relative mb-3">
-                              {jugador.foto_url ? (
-                                <div className="w-full aspect-square rounded-lg overflow-hidden">
-                                  <Image
-                                    src={jugador.foto_url}
-                                    alt={jugador.nombre_completo}
-                                    width={200}
-                                    height={200}
-                                    className="w-full h-full object-cover"
-                                  />
-                                </div>
-                              ) : (
-                                <div className={`w-full aspect-square rounded-lg ${getPosicionColor(jugador.posicion)} flex items-center justify-center text-white`}>
-                                  <span className="text-4xl font-bold">{jugador.dorsal ?? '?'}</span>
-                                </div>
-                              )}
-                              {jugador.dorsal && jugador.foto_url && (
-                                <div className="absolute -top-2 -right-2 w-7 h-7 bg-azul-primario rounded-full flex items-center justify-center text-white text-xs font-bold">
-                                  {jugador.dorsal}
-                                </div>
-                              )}
-                            </div>
-
-                            <div className="text-center">
-                              <p className="font-bold text-sm leading-tight">{jugador.nombre}</p>
-                              <p className="font-bold text-sm leading-tight text-gray-700">{jugador.apellidos}</p>
-                              <p className="text-xs text-azul-primario font-medium mt-1">
-                                {(jugador.posiciones_abr?.length ? jugador.posiciones_abr : [jugador.posicion_abr]).filter(Boolean).join(' · ')}
-                              </p>
-                              {jugador.estado !== 'Activo' && (
-                                <div className="mt-1">{getEstadoBadge(jugador.estado)}</div>
-                              )}
-                            </div>
-                          </CardContent>
-                        </Card>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
+              <PlantelGrid jugadores={jugadores} />
             )}
           </div>
         </section>
