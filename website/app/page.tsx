@@ -9,7 +9,6 @@ import { UltimasNoticias } from '@/components/noticias/UltimasNoticias'
 import { obtenerProximosEventos } from '@/lib/utils/calendario'
 import { SITE_CONFIG } from '@/lib/constants'
 import Bandera from '@/components/ui/bandera'
-import { PAISES } from '@/lib/jugadores/paises'
 
 export const revalidate = 300 // respaldo; el admin regenera al guardar
 
@@ -89,24 +88,6 @@ export default async function HomePage() {
           </div>
         </section>
 
-        {/* Las nacionalidades del plantel */}
-        {paisesPlantel.length > 0 && (
-          <section className="py-16 px-4 bg-azul-primario text-white">
-            <div className="container mx-auto max-w-4xl text-center">
-              <h2 className="text-3xl md:text-4xl font-bold mb-2">UN CLUB, MUCHAS BANDERAS</h2>
-              <p className="mb-10 text-gray-100">Las nacionalidades que visten nuestra camiseta</p>
-              <div className="flex flex-wrap items-center justify-center gap-8 md:gap-12">
-                {paisesPlantel.map((codigo) => (
-                  <div key={codigo} className="flex flex-col items-center gap-2">
-                    <Bandera codigo={codigo} className="h-10 w-[60px] md:h-12 md:w-[72px] rounded-sm" />
-                    <span className="text-sm text-gray-100">{PAISES[codigo]}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </section>
-        )}
-
         {/* Últimas noticias */}
         <UltimasNoticias
           noticias={todasLasNoticias.slice(0, proximoEvento ? 3 : 4)}
@@ -122,6 +103,14 @@ export default async function HomePage() {
             <p className="text-xl mb-8 text-gray-100">
               Súmate a nuestra familia.
             </p>
+            {/* Las nacionalidades del plantel: una familia de muchos países */}
+            {paisesPlantel.length > 0 && (
+              <div className="mb-8 flex flex-wrap items-center justify-center gap-4 md:gap-6">
+                {paisesPlantel.map((codigo) => (
+                  <Bandera key={codigo} codigo={codigo} className="h-8 w-12 md:h-10 md:w-[60px] rounded-sm" />
+                ))}
+              </div>
+            )}
             <Button size="lg" asChild className="bg-white text-azul-primario hover:bg-gray-100">
               <Link href="/contacto">Contáctanos</Link>
             </Button>
