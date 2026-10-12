@@ -27,7 +27,7 @@ if (!archivo || !existsSync(archivo)) {
 }
 
 // Siglas del formulario que en la base se llaman distinto
-const ALIAS_POSICION = { MCD: 'MDC', PT: 'POR' }
+const ALIAS_POSICION = { MCD: 'MDC', MCO: 'MO', PT: 'POR' }
 
 const PIE = { derecha: 'Derecho', izquierda: 'Izquierdo' }
 
