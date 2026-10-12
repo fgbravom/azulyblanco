@@ -16,6 +16,12 @@ import { Campo, PageHeader, Panel, inputClass, textareaClass } from '@/component
 import SelectorImagen from '@/components/admin/medios/SelectorImagen';
 import EditorMarkdown from '@/components/admin/editor/EditorMarkdown';
 
+const MIEMBROS_STAFF = [
+  { campo: 'entrenador', foto: 'entrenador_foto_url', label: 'Director técnico' },
+  { campo: 'asistente_tecnico', foto: 'asistente_tecnico_foto_url', label: 'Asistente técnico' },
+  { campo: 'preparador_fisico', foto: 'preparador_fisico_foto_url', label: 'Preparador físico' },
+] as const;
+
 export default function SerieEditor({ serie }: { serie: SerieAdmin }) {
   const [datos, setDatos] = useState<SerieInput>({
     titulo: serie.titulo,
@@ -31,6 +37,9 @@ export default function SerieEditor({ serie }: { serie: SerieAdmin }) {
     entrenador: serie.equipo?.entrenador ?? null,
     asistente_tecnico: serie.equipo?.asistente_tecnico ?? null,
     preparador_fisico: serie.equipo?.preparador_fisico ?? null,
+    entrenador_foto_url: serie.equipo?.entrenador_foto_url ?? null,
+    asistente_tecnico_foto_url: serie.equipo?.asistente_tecnico_foto_url ?? null,
+    preparador_fisico_foto_url: serie.equipo?.preparador_fisico_foto_url ?? null,
   });
   const [guardando, setGuardando] = useState<'serie' | 'staff' | null>(null);
 
@@ -144,15 +153,12 @@ export default function SerieEditor({ serie }: { serie: SerieAdmin }) {
                   <Campo label="Temporada" htmlFor="temporada">
                     <input id="temporada" required value={staff.temporada} onChange={(e) => setS('temporada', e.target.value)} className={inputClass} />
                   </Campo>
-                  <Campo label="Director técnico" htmlFor="entrenador">
-                    <input id="entrenador" value={staff.entrenador ?? ''} onChange={(e) => setS('entrenador', e.target.value)} className={inputClass} />
-                  </Campo>
-                  <Campo label="Asistente técnico" htmlFor="asistente">
-                    <input id="asistente" value={staff.asistente_tecnico ?? ''} onChange={(e) => setS('asistente_tecnico', e.target.value)} className={inputClass} />
-                  </Campo>
-                  <Campo label="Preparador físico" htmlFor="preparador">
-                    <input id="preparador" value={staff.preparador_fisico ?? ''} onChange={(e) => setS('preparador_fisico', e.target.value)} className={inputClass} />
-                  </Campo>
+                  {MIEMBROS_STAFF.map(({ campo, foto, label }) => (
+                    <Campo key={campo} label={label} htmlFor={campo}>
+                      <input id={campo} value={staff[campo] ?? ''} onChange={(e) => setS(campo, e.target.value)} className={inputClass} />
+                      <SelectorImagen aspecto="cuadrado" className="mt-2" value={staff[foto]} onChange={(url) => setS(foto, url)} />
+                    </Campo>
+                  ))}
                   <Button type="submit" className="w-full" disabled={guardando === 'staff'}>
                     {guardando === 'staff' && <Loader2 className="animate-spin" />} Guardar cuerpo técnico
                   </Button>

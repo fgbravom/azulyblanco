@@ -19,7 +19,7 @@ import type {
  * serie (cuota_*) solo los lee el servidor con la service_role (migración 005).
  */
 export const COLUMNAS_EQUIPO =
-  'id, categoria_id, nombre, temporada, entrenador, asistente_tecnico, preparador_fisico, activo, created_at, updated_at';
+  'id, categoria_id, nombre, temporada, entrenador, asistente_tecnico, preparador_fisico, entrenador_foto_url, asistente_tecnico_foto_url, preparador_fisico_foto_url, activo, created_at, updated_at';
 
 // ============================================================================
 // CATEGORÍAS

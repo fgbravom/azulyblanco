@@ -21,11 +21,13 @@ const opcional = z
   .nullable()
   .transform((v) => v || null)
 
+const urlImagen = z.url({ protocol: /^https?$/ }).nullable()
+
 const serieSchema = z.object({
   titulo: opcional,
   descripcion: opcional,
   contenido: opcional,
-  imagen_url: z.url({ protocol: /^https?$/ }).nullable(),
+  imagen_url: urlImagen,
   horario_entrenamiento: opcional,
   lugar_entrenamiento: opcional,
   competencia: opcional,
@@ -36,6 +38,9 @@ const equipoSchema = z.object({
   entrenador: opcional,
   asistente_tecnico: opcional,
   preparador_fisico: opcional,
+  entrenador_foto_url: urlImagen,
+  asistente_tecnico_foto_url: urlImagen,
+  preparador_fisico_foto_url: urlImagen,
 })
 
 export type SerieInput = z.input<typeof serieSchema>

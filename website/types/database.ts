@@ -73,6 +73,10 @@ export interface Equipo {
   entrenador: string | null;
   asistente_tecnico: string | null;
   preparador_fisico: string | null;
+  /** Fotos del cuerpo técnico (migración 007) */
+  entrenador_foto_url: string | null;
+  asistente_tecnico_foto_url: string | null;
+  preparador_fisico_foto_url: string | null;
   /** Cuota mensual y datos de transferencia (migración 004) */
   cuota_monto: number;
   cuota_datos_pago: string | null;

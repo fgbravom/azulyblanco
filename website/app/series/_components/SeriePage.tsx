@@ -46,7 +46,13 @@ export default async function SeriePage({ slug, categoriaNombre, titulo: tituloB
     // Si hay error de conexión, mostrar estado vacío
   }
 
-  const tieneCuerpoTecnico = equipo && (equipo.entrenador || equipo.asistente_tecnico || equipo.preparador_fisico)
+  const cuerpoTecnico = equipo
+    ? [
+        { nombre: equipo.entrenador, foto: equipo.entrenador_foto_url, cargo: 'Director Técnico' },
+        { nombre: equipo.asistente_tecnico, foto: equipo.asistente_tecnico_foto_url, cargo: 'Asistente Técnico' },
+        { nombre: equipo.preparador_fisico, foto: equipo.preparador_fisico_foto_url, cargo: 'Preparador Físico' },
+      ].filter((m): m is { nombre: string; foto: string | null; cargo: string } => !!m.nombre)
+    : []
 
   return (
     <>
@@ -109,44 +115,32 @@ export default async function SeriePage({ slug, categoriaNombre, titulo: tituloB
         </section>
 
         {/* Cuerpo Técnico */}
-        {tieneCuerpoTecnico && (
+        {cuerpoTecnico.length > 0 && (
           <section className="py-16 px-4 bg-gray-50">
             <div className="container mx-auto max-w-6xl">
               <h2 className="text-3xl font-bold mb-10 text-center text-azul-primario">Cuerpo Técnico</h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-3xl mx-auto">
-                {equipo!.entrenador && (
-                  <Card className="text-center">
+              <div className="flex flex-wrap justify-center gap-6 max-w-3xl mx-auto">
+                {cuerpoTecnico.map(({ nombre, foto, cargo }) => (
+                  <Card key={cargo} className="text-center w-full sm:w-[calc((100%-3rem)/3)]">
                     <CardContent className="p-6">
-                      <div className="w-16 h-16 bg-azul-primario rounded-full mx-auto mb-3 flex items-center justify-center text-white text-2xl font-bold">
-                        {equipo!.entrenador[0]}
-                      </div>
-                      <h3 className="font-bold">{equipo!.entrenador}</h3>
-                      <p className="text-sm text-gray-500 mt-1">Director Técnico</p>
+                      {foto ? (
+                        <Image
+                          src={foto}
+                          alt={nombre}
+                          width={112}
+                          height={112}
+                          className="w-28 h-28 rounded-full mx-auto mb-4 object-cover object-top ring-4 ring-azul-claro/30"
+                        />
+                      ) : (
+                        <div className="w-28 h-28 bg-azul-primario rounded-full mx-auto mb-4 flex items-center justify-center text-white text-4xl font-bold">
+                          {nombre[0]}
+                        </div>
+                      )}
+                      <h3 className="font-bold">{nombre}</h3>
+                      <p className="text-sm text-gray-500 mt-1">{cargo}</p>
                     </CardContent>
                   </Card>
-                )}
-                {equipo!.asistente_tecnico && (
-                  <Card className="text-center">
-                    <CardContent className="p-6">
-                      <div className="w-16 h-16 bg-azul-primario rounded-full mx-auto mb-3 flex items-center justify-center text-white text-2xl font-bold">
-                        {equipo!.asistente_tecnico[0]}
-                      </div>
-                      <h3 className="font-bold">{equipo!.asistente_tecnico}</h3>
-                      <p className="text-sm text-gray-500 mt-1">Asistente Técnico</p>
-                    </CardContent>
-                  </Card>
-                )}
-                {equipo!.preparador_fisico && (
-                  <Card className="text-center">
-                    <CardContent className="p-6">
-                      <div className="w-16 h-16 bg-azul-primario rounded-full mx-auto mb-3 flex items-center justify-center text-white text-2xl font-bold">
-                        {equipo!.preparador_fisico[0]}
-                      </div>
-                      <h3 className="font-bold">{equipo!.preparador_fisico}</h3>
-                      <p className="text-sm text-gray-500 mt-1">Preparador Físico</p>
-                    </CardContent>
-                  </Card>
-                )}
+                ))}
               </div>
             </div>
           </section>
