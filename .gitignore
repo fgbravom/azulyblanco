@@ -13,3 +13,6 @@ database/privado/
 # Configuración local del editor y de Claude Code
 .claude/settings.local.json
 .vscode/
+
+# Notas de sesiones de la agente: local, no se versiona
+.opencode/
