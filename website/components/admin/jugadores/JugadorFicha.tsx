@@ -4,6 +4,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import type { JugadorCompleto } from '@/types/database';
+import { codigoPais } from '@/lib/jugadores/paises';
+import Bandera from '@/components/ui/bandera';
 import { User, Shield, Mail, Heart, Calendar, MapPin, Phone } from 'lucide-react';
 
 interface Props {
@@ -14,6 +16,8 @@ interface Props {
 
 export default function JugadorFicha({ jugador, open, onClose }: Props) {
   if (!jugador) return null;
+
+  const pais = codigoPais(jugador.nacionalidad);
 
   const formatDate = (date: string | null) => {
     if (!date) return '-';
@@ -42,8 +46,9 @@ export default function JugadorFicha({ jugador, open, onClose }: Props) {
         <DialogHeader>
           <div className="flex items-start justify-between">
             <div className="flex-1">
-              <DialogTitle className="text-3xl text-azul-primario mb-2">
+              <DialogTitle className="flex items-center gap-3 text-3xl text-azul-primario mb-2">
                 {jugador.nombre_completo}
+                {pais && <Bandera codigo={pais} className="h-6 w-9" />}
               </DialogTitle>
               <div className="flex items-center gap-3 flex-wrap">
                 <Badge
@@ -115,6 +120,7 @@ export default function JugadorFicha({ jugador, open, onClose }: Props) {
                 label="Nacionalidad"
                 value={jugador.nacionalidad || '-'}
                 icon={<MapPin className="h-4 w-4" />}
+                adorno={pais && <Bandera codigo={pais} />}
               />
               <InfoField label="DNI/NIE" value={jugador.dni || '-'} />
             </div>
@@ -212,11 +218,13 @@ function InfoField({
   value,
   icon,
   sublabel,
+  adorno,
 }: {
   label: string;
   value: string;
   icon?: React.ReactNode;
   sublabel?: string;
+  adorno?: React.ReactNode;
 }) {
   return (
     <div className="space-y-1">
@@ -224,7 +232,10 @@ function InfoField({
         {icon}
         <span>{label}</span>
       </div>
-      <p className="text-base text-gray-900 pl-6">{value}</p>
+      <p className="flex items-center gap-2 text-base text-gray-900 pl-6">
+        {adorno}
+        {value}
+      </p>
       {sublabel && <p className="text-sm text-gray-500 pl-6">{sublabel}</p>}
     </div>
   );
