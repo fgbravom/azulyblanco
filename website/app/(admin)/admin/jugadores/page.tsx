@@ -3,10 +3,11 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Plus } from 'lucide-react';
+import { FileUp, Plus } from 'lucide-react';
 import JugadoresTable from '@/components/admin/jugadores/JugadoresTable';
 import JugadorForm from '@/components/admin/jugadores/JugadorForm';
 import JugadorFicha from '@/components/admin/jugadores/JugadorFicha';
+import ImportarJugadoresDialog from '@/components/admin/jugadores/ImportarJugadoresDialog';
 import type { JugadorCompleto } from '@/types/database';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
@@ -17,6 +18,7 @@ export default function JugadoresPage() {
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [fichaOpen, setFichaOpen] = useState(false);
+  const [importarOpen, setImportarOpen] = useState(false);
   const [editingJugador, setEditingJugador] = useState<JugadorCompleto | null>(null);
   const [viewingJugador, setViewingJugador] = useState<JugadorCompleto | null>(null);
   const [serie, setSerie] = useState('Todas');
@@ -93,9 +95,14 @@ export default function JugadoresPage() {
         titulo="Plantel"
         descripcion="Ficha completa de los jugadores de cada serie. La foto, el dorsal y la posición se muestran en la página de la serie."
         acciones={
-          <Button onClick={handleCreate}>
-            <Plus /> Nuevo jugador
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button variant="outline" onClick={() => setImportarOpen(true)}>
+              <FileUp /> Importar CSV
+            </Button>
+            <Button onClick={handleCreate}>
+              <Plus /> Nuevo jugador
+            </Button>
+          </div>
         }
       />
 
@@ -136,6 +143,8 @@ export default function JugadoresPage() {
           setViewingJugador(null);
         }}
       />
+
+      <ImportarJugadoresDialog open={importarOpen} onOpenChange={setImportarOpen} onImportado={fetchJugadores} />
 
       {/* Modal de formulario */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
