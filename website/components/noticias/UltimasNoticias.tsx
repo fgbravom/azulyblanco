@@ -115,10 +115,11 @@ export function UltimasNoticias({ noticias, proximoEvento }: UltimasNoticiasProp
           <p className="py-12 text-center text-white/60">No hay noticias disponibles en este momento.</p>
         ) : (
           <div className="-mx-4 md:-mx-8 px-4 md:px-8 scroll-px-4 md:scroll-px-8 flex gap-0.5 overflow-x-auto snap-x snap-mandatory [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:mx-0 lg:px-0 lg:grid lg:grid-cols-4 lg:overflow-visible">
+            {/* El próximo evento siempre es futuro: va antes que la noticia más nueva */}
+            {proximoEvento && <EventoTile evento={proximoEvento} />}
             {noticias.map((noticia) => (
               <NoticiaTile key={noticia.slug} noticia={noticia} />
             ))}
-            {proximoEvento && <EventoTile evento={proximoEvento} />}
           </div>
         )}
       </div>
