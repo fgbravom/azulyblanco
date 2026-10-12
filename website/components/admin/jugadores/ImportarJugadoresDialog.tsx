@@ -11,13 +11,15 @@ import { cn } from '@/lib/utils';
 interface Resultado {
   filas: FilaImportacion[];
   importados: number;
+  actualizados: number;
   fallidos: { linea: number; error: string }[];
 }
 
 const ESTILO_ESTADO: Record<EstadoFila, string> = {
   nuevo: 'bg-green-100 text-green-800',
+  actualizar: 'bg-amber-100 text-amber-800',
   error: 'bg-red-100 text-red-800',
-  'ya existe': 'bg-gray-100 text-gray-600',
+  'sin cambios': 'bg-gray-100 text-gray-600',
   'repetido en el CSV': 'bg-gray-100 text-gray-600',
 };
 
@@ -42,6 +44,12 @@ function FilaPlan({ fila }: { fila: FilaImportacion }) {
         </p>
         {fila.detalle ? (
           <p className="text-xs text-red-700">{fila.detalle}</p>
+        ) : fila.cambios.length ? (
+          fila.cambios.map((c) => (
+            <p key={c} className="text-xs text-amber-800">
+              {c.replace(/Azul y Blanco - /g, '')}
+            </p>
+          ))
         ) : (
           <p className="text-xs text-gray-500">
             {fila.serie?.replace(/^Azul y Blanco - /, 'Serie ')} · {fila.posiciones.join(', ')}
@@ -105,10 +113,12 @@ export default function ImportarJugadoresDialog({
     if (!archivo) return;
     setCargando(true);
     try {
-      const { importados, fallidos } = await enviar(archivo.csv, true);
-      if (importados) {
-        toast.success(`${importados} ${importados === 1 ? 'jugador importado' : 'jugadores importados'}`);
-      }
+      const { importados, actualizados, fallidos } = await enviar(archivo.csv, true);
+      const hecho = [
+        importados && `${importados} ${importados === 1 ? 'jugador importado' : 'jugadores importados'}`,
+        actualizados && `${actualizados} ${actualizados === 1 ? 'actualizado' : 'actualizados'}`,
+      ].filter(Boolean);
+      if (hecho.length) toast.success(hecho.join(' y '));
       for (const f of fallidos) toast.error(`Fila ${f.linea}: ${f.error}`, { duration: 20000 });
       onImportado();
       reiniciar();
@@ -121,9 +131,16 @@ export default function ImportarJugadoresDialog({
   };
 
   const nuevos = plan?.filter((f) => f.estado === 'nuevo') ?? [];
+  const actualizar = plan?.filter((f) => f.estado === 'actualizar') ?? [];
   const errores = plan?.filter((f) => f.estado === 'error') ?? [];
-  const saltados = plan?.filter((f) => f.estado === 'ya existe' || f.estado === 'repetido en el CSV') ?? [];
-  const visibles = [...errores, ...nuevos, ...(verSaltados ? saltados : [])].sort((a, b) => a.linea - b.linea);
+  const saltados = plan?.filter((f) => f.estado === 'sin cambios' || f.estado === 'repetido en el CSV') ?? [];
+  const visibles = [...errores, ...nuevos, ...actualizar, ...(verSaltados ? saltados : [])].sort(
+    (a, b) => a.linea - b.linea
+  );
+  const accion = [
+    nuevos.length && `importar ${nuevos.length} ${nuevos.length === 1 ? 'nuevo' : 'nuevos'}`,
+    actualizar.length && `actualizar ${actualizar.length}`,
+  ].filter(Boolean);
 
   return (
     <Dialog open={open} onOpenChange={cambiarAbierto}>
@@ -132,7 +149,8 @@ export default function ImportarJugadoresDialog({
           <DialogTitle className="text-2xl text-azul-primario">Importar jugadores</DialogTitle>
           <DialogDescription className="text-gray-600">
             Sube el CSV que exporta la base de Notion del formulario de inscripción. Los jugadores que ya están en el
-            plantel se saltan, así que puedes subir el archivo completo cada vez que lleguen respuestas nuevas.
+            plantel no se duplican: se les actualiza la serie, las posiciones y el pie hábil si cambiaron. Puedes subir
+            el archivo completo cada vez que lleguen respuestas nuevas.
           </DialogDescription>
         </DialogHeader>
 
@@ -156,14 +174,20 @@ export default function ImportarJugadoresDialog({
               {plan.length === 1 ? 'fila' : 'filas'}
             </p>
 
-            <div className="grid grid-cols-3 gap-2 text-center">
+            <div className="grid grid-cols-2 gap-2 text-center sm:grid-cols-4">
               <div className="rounded-lg bg-green-50 p-3">
                 <p className="text-2xl font-bold text-green-700">{nuevos.length}</p>
                 <p className="text-xs text-green-800">{nuevos.length === 1 ? 'nuevo' : 'nuevos'}</p>
               </div>
+              <div className={cn('rounded-lg p-3', actualizar.length ? 'bg-amber-50' : 'bg-gray-50')}>
+                <p className={cn('text-2xl font-bold', actualizar.length ? 'text-amber-700' : 'text-gray-400')}>
+                  {actualizar.length}
+                </p>
+                <p className={cn('text-xs', actualizar.length ? 'text-amber-800' : 'text-gray-500')}>con cambios</p>
+              </div>
               <div className="rounded-lg bg-gray-50 p-3">
                 <p className="text-2xl font-bold text-gray-600">{saltados.length}</p>
-                <p className="text-xs text-gray-600">ya {saltados.length === 1 ? 'está' : 'están'}</p>
+                <p className="text-xs text-gray-600">sin cambios</p>
               </div>
               <div className={cn('rounded-lg p-3', errores.length ? 'bg-red-50' : 'bg-gray-50')}>
                 <p className={cn('text-2xl font-bold', errores.length ? 'text-red-700' : 'text-gray-400')}>{errores.length}</p>
@@ -200,11 +224,11 @@ export default function ImportarJugadoresDialog({
               <Button variant="outline" onClick={reiniciar} disabled={cargando}>
                 Elegir otro archivo
               </Button>
-              <Button onClick={importar} disabled={cargando || nuevos.length === 0}>
+              <Button onClick={importar} disabled={cargando || accion.length === 0}>
                 {cargando && <Loader2 className="animate-spin" />}
-                {nuevos.length === 0
-                  ? 'No hay jugadores nuevos'
-                  : `Importar ${nuevos.length} ${nuevos.length === 1 ? 'jugador' : 'jugadores'}`}
+                {accion.length === 0
+                  ? 'No hay nada que importar'
+                  : accion.join(' y ').replace(/^./, (c) => c.toUpperCase())}
               </Button>
             </div>
           </div>

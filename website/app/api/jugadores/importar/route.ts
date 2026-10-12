@@ -6,7 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { rechazarSinSesion } from '@/lib/auth/session';
 import { createAdminClient } from '@/lib/supabase/admin';
-import { createJugador, setPosicionesJugador } from '@/lib/data/jugadores';
+import { createJugador, setPosicionesJugador, updateJugador } from '@/lib/data/jugadores';
 import { cargarDatosReferencia, planificarImportacion } from '@/lib/jugadores/importar-csv';
 
 // El formulario completo pesa unos pocos KB: esto deja margen de sobra
@@ -17,8 +17,8 @@ const TAMANO_MAXIMO = 1024 * 1024;
  * Body: { csv: string, aplicar?: boolean }
  *
  * Sin aplicar devuelve qué pasaría con cada fila. Con aplicar vuelve a
- * planificar contra la base (no confía en la vista previa del navegador) y
- * crea los nuevos.
+ * planificar contra la base (no confía en la vista previa del navegador),
+ * crea los nuevos y actualiza los que cambiaron.
  */
 export async function POST(request: NextRequest) {
   const denegado = await rechazarSinSesion();
@@ -44,10 +44,19 @@ export async function POST(request: NextRequest) {
 
     const fallidos: { linea: number; error: string }[] = [];
     let importados = 0;
+    let actualizados = 0;
 
     if (body.aplicar === true) {
-      for (const fila of filas.filter((f) => f.estado === 'nuevo')) {
+      for (const fila of filas.filter((f) => f.estado === 'nuevo' || f.estado === 'actualizar')) {
         try {
+          if (fila.estado === 'actualizar') {
+            const { campos, posicionesIds } = fila.actualizacion!;
+            if (Object.keys(campos).length) await updateJugador(fila.jugadorId!, campos);
+            if (posicionesIds) await setPosicionesJugador(fila.jugadorId!, posicionesIds);
+            actualizados++;
+            continue;
+          }
+
           // Una fila 'nuevo' siempre trae equipo y al menos una posición
           const { equipo_id, posicion_id, pie_preferido, ...resto } = fila.jugador;
           const jugador = await createJugador({
@@ -59,14 +68,14 @@ export async function POST(request: NextRequest) {
           await setPosicionesJugador(jugador.id, fila.posicionesIds);
           importados++;
         } catch (error) {
-          fallidos.push({ linea: fila.linea, error: error instanceof Error ? error.message : 'Error al crear jugador' });
+          fallidos.push({ linea: fila.linea, error: error instanceof Error ? error.message : 'Error al guardar jugador' });
         }
       }
     }
 
     return NextResponse.json({
       success: true,
-      data: { filas, importados, fallidos },
+      data: { filas, importados, actualizados, fallidos },
       error: null,
     });
   } catch (error) {

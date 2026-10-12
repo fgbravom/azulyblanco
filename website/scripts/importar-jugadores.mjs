@@ -63,20 +63,48 @@ console.table(
     serie: p.serie ?? '',
     posiciones: p.posiciones.join(', '),
     pie: p.jugador.pie_preferido ?? '',
-    detalle: p.detalle,
+    detalle: p.detalle || p.cambios.join('; '),
   }))
 )
 
 const nuevos = plan.filter((p) => p.estado === 'nuevo')
+const cambiados = plan.filter((p) => p.estado === 'actualizar')
 const conError = plan.filter((p) => p.estado === 'error')
-console.log(`${nuevos.length} nuevos, ${plan.length - nuevos.length - conError.length} saltados, ${conError.length} con error`)
+const sinCambios = plan.length - nuevos.length - cambiados.length - conError.length
+console.log(`${nuevos.length} nuevos, ${cambiados.length} con cambios, ${sinCambios} sin cambios, ${conError.length} con error`)
 
-if (!aplicar && nuevos.length) console.log(`\nPara importarlos: agregar --aplicar${prod ? '' : ' (y --prod para producción)'}`)
+if (!aplicar && nuevos.length + cambiados.length) {
+  console.log(`\nPara aplicarlo: agregar --aplicar${prod ? '' : ' (y --prod para producción)'}`)
+}
+
+/** Reemplaza las posiciones; la primera se copia a jugadores.posicion_id */
+async function guardarPosiciones(id, ids) {
+  const borrado = await supabase.from('jugador_posiciones').delete().eq('jugador_id', id)
+  if (borrado.error) return borrado.error
+  const alta = await supabase
+    .from('jugador_posiciones')
+    .insert(ids.map((posicion_id, orden) => ({ jugador_id: id, posicion_id, orden })))
+  if (alta.error) return alta.error
+  return (await supabase.from('jugadores').update({ posicion_id: ids[0] }).eq('id', id)).error
+}
 
 // --- Importación --------------------------------------------------------------
 // process.exitCode en vez de process.exit: en Windows, salir con las
 // conexiones de supabase abiertas revienta node (assertion en libuv)
 let fallos = 0
+for (const p of aplicar ? cambiados : []) {
+  const nombre = `${p.jugador.nombre} ${p.jugador.apellidos}`
+  const { campos, posicionesIds } = p.actualizacion
+  const error =
+    (Object.keys(campos).length && (await supabase.from('jugadores').update(campos).eq('id', p.jugadorId)).error) ||
+    (posicionesIds && (await guardarPosiciones(p.jugadorId, posicionesIds)))
+  if (error) {
+    fallos++
+    console.error(`✗ ${nombre}: ${error.message}`)
+    continue
+  }
+  console.log(`↻ ${nombre}`)
+}
 for (const p of aplicar ? nuevos : []) {
   const nombre = `${p.jugador.nombre} ${p.jugador.apellidos}`
   const { data, error } = await supabase.from('jugadores').insert(p.jugador).select('id').single()
@@ -96,5 +124,5 @@ for (const p of aplicar ? nuevos : []) {
   console.log(`✓ ${nombre}`)
 }
 
-if (aplicar) console.log(`\n${nuevos.length - fallos} importados, ${fallos} fallidos`)
+if (aplicar) console.log(`\n${nuevos.length + cambiados.length - fallos} guardados, ${fallos} fallidos`)
 process.exitCode = fallos || conError.length ? 1 : 0
