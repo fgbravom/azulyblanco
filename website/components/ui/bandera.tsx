@@ -18,12 +18,25 @@ const ESTRELLAS_VE = [
 
 // Banderas en SVG: los emoji de banderas no se dibujan en Windows
 const DIBUJOS: Record<CodigoPais, React.ReactNode> = {
+  AR: (
+    <>
+      <rect width="30" height="20" fill="#74ACDF" />
+      <rect y="6.67" width="30" height="6.67" fill="#FFFFFF" />
+    </>
+  ),
   CL: (
     <>
       <rect width="30" height="20" fill="#D52B1E" />
       <rect width="30" height="10" fill="#FFFFFF" />
       <rect width="10" height="10" fill="#0039A6" />
       <polygon points={ESTRELLA} fill="#FFFFFF" transform="translate(5 5) scale(2.5)" />
+    </>
+  ),
+  CO: (
+    <>
+      <rect width="30" height="20" fill="#CE1126" />
+      <rect width="30" height="15" fill="#003893" />
+      <rect width="30" height="10" fill="#FCD116" />
     </>
   ),
   HT: (

@@ -54,6 +54,7 @@ describe('jugadorSchema', () => {
     ['email inválido', { email: 'no-es-email' }],
     ['foto que no es URL', { foto_url: 'javascript:alert(1)' }],
     ['estado desconocido', { estado: 'Retirado' }],
+    ['nacionalidad fuera del listado', { nacionalidad: 'España' }],
   ])('rechaza %s', (_caso, cambio) => {
     expect(jugadorSchema.safeParse({ ...VALIDO, ...cambio }).success).toBe(false)
   })

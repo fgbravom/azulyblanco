@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { NACIONALIDADES } from '@/lib/jugadores/paises';
 
 export const jugadorSchema = z.object({
   // Información personal (requerida)
@@ -10,7 +11,8 @@ export const jugadorSchema = z.object({
 
   // Información personal (opcional)
   fecha_nacimiento: z.string().optional().nullable(),
-  nacionalidad: z.string().optional().nullable(),
+  // Listado cerrado: el formulario ofrece solo estas opciones
+  nacionalidad: z.enum(NACIONALIDADES).optional().nullable(),
   dni: z.string().optional().nullable(),
   foto_url: z.url({ protocol: /^https?$/, error: 'Debe ser una URL válida' }).optional().nullable().or(z.literal('')),
 

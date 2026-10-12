@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { jugadorSchema, type JugadorFormData } from '@/lib/validations/jugador';
+import { NACIONALIDADES, nombrePais, type Nacionalidad } from '@/lib/jugadores/paises';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -53,7 +54,8 @@ export default function JugadorForm({ jugador, onSave, onCancel }: Props) {
           posiciones_ids: jugador.posiciones_ids ?? (jugador.posicion_id ? [jugador.posicion_id] : []),
           dorsal: jugador.dorsal,
           fecha_nacimiento: jugador.fecha_nacimiento,
-          nacionalidad: jugador.nacionalidad || 'Chile',
+          // Lo guardado antes del listado ("chilena", "peruano"...) se muestra como el país canónico
+          nacionalidad: nombrePais(jugador.nacionalidad) ?? 'Chile',
           dni: jugador.dni,
           foto_url: jugador.foto_url,
           altura_cm: jugador.altura_cm,
@@ -190,7 +192,26 @@ export default function JugadorForm({ jugador, onSave, onCancel }: Props) {
             </div>
             <div>
               <Label htmlFor="nacionalidad">Nacionalidad</Label>
-              <Input id="nacionalidad" {...register('nacionalidad')} />
+              <Select
+                value={watch('nacionalidad') || ''}
+                onValueChange={(value) =>
+                  setValue('nacionalidad', value as Nacionalidad, { shouldValidate: true })
+                }
+              >
+                <SelectTrigger className="bg-white">
+                  <SelectValue placeholder="Selecciona" />
+                </SelectTrigger>
+                <SelectContent>
+                  {NACIONALIDADES.map((pais) => (
+                    <SelectItem key={pais} value={pais}>
+                      {pais}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors.nacionalidad && (
+                <p className="text-sm text-red-500 mt-1">{errors.nacionalidad.message}</p>
+              )}
             </div>
             <div>
               <Label htmlFor="dni">DNI/NIE</Label>
