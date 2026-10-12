@@ -2,6 +2,8 @@
 
 import { useState } from 'react'
 import type { PlantelJugador } from '@/lib/contenido/publico'
+import { codigoPais } from '@/lib/jugadores/paises'
+import Bandera from '@/components/ui/bandera'
 import { FichaPersona } from './FichaPersona'
 
 const TODOS = 'Todos'
@@ -77,6 +79,7 @@ export function PlantelGrid({ jugadores }: PlantelGridProps) {
           const posicionesAbr = (jugador.posiciones_abr?.length ? jugador.posiciones_abr : [jugador.posicion_abr])
             .filter(Boolean)
             .slice(0, MAX_POSICIONES_PUBLICAS)
+          const pais = codigoPais(jugador.nacionalidad)
 
           return (
             <FichaPersona
@@ -86,6 +89,7 @@ export function PlantelGrid({ jugadores }: PlantelGridProps) {
               nombre={primerNombre(jugador.nombre)}
               apellidos={jugador.apellidos}
               detalle={posicionesAbr.join(' · ')}
+              marca={pais && <Bandera codigo={pais} className="h-3 w-[18px] md:h-3.5 md:w-[21px]" />}
             >
               {/* Dorsal */}
               {jugador.dorsal != null && (

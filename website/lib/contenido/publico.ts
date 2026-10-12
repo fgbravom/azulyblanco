@@ -211,7 +211,7 @@ export async function getSerieInfo(slug: string): Promise<SerieInfo | null> {
 // PLANTEL
 // ============================================================================
 
-/** Columnas de vista_plantel_publico: solo lo que se muestra en la web (migración 003) */
+/** Columnas de vista_plantel_publico: solo lo que se muestra en la web (migraciones 003 y 008) */
 export interface PlantelJugador {
   id: number
   nombre: string
@@ -224,6 +224,7 @@ export interface PlantelJugador {
   posicion_abr: string | null
   posiciones: string[]
   posiciones_abr: string[]
+  nacionalidad: string | null
 }
 
 /** Jugadores activos de un equipo. Sin respaldo: si falla, la serie muestra el plantel vacío. */
@@ -233,7 +234,7 @@ export async function getPlantelPublico(equipoId: number): Promise<PlantelJugado
 
   const { data, error } = await supabase
     .from('vista_plantel_publico')
-    .select('id, nombre, apellidos, nombre_completo, foto_url, dorsal, estado, posicion, posicion_abr, posiciones, posiciones_abr')
+    .select('id, nombre, apellidos, nombre_completo, foto_url, dorsal, estado, posicion, posicion_abr, posiciones, posiciones_abr, nacionalidad')
     .eq('equipo_id', equipoId)
     .eq('activo', true)
     .order('dorsal', { ascending: true, nullsFirst: false })

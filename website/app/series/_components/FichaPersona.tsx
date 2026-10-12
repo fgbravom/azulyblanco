@@ -8,11 +8,13 @@ interface FichaPersonaProps {
   apellidos: string
   // Línea azul bajo el nombre: posiciones del jugador o cargo del técnico
   detalle?: string
+  // Va a la derecha del detalle (la bandera del jugador)
+  marca?: ReactNode
   // Insignias sobre la foto (dorsal, estado)
   children?: ReactNode
 }
 
-export function FichaPersona({ foto, alt, nombre, apellidos, detalle, children }: FichaPersonaProps) {
+export function FichaPersona({ foto, alt, nombre, apellidos, detalle, marca, children }: FichaPersonaProps) {
   return (
     <article className="group relative aspect-[3/4] rounded-2xl overflow-hidden bg-gradient-to-b from-azul-claro to-azul-primario shadow-sm hover:shadow-xl transition-shadow">
       {foto ? (
@@ -41,9 +43,10 @@ export function FichaPersona({ foto, alt, nombre, apellidos, detalle, children }
         <p className="font-heading font-extrabold uppercase text-base md:text-xl leading-tight tracking-tight">
           {apellidos}
         </p>
-        {detalle && (
-          <p className="mt-1.5 text-[11px] md:text-xs font-semibold uppercase tracking-wider text-azul-cielo">
+        {(detalle || marca) && (
+          <p className="mt-1.5 flex items-center gap-2 text-[11px] md:text-xs font-semibold uppercase tracking-wider text-azul-cielo">
             {detalle}
+            {marca}
           </p>
         )}
       </div>
