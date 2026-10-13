@@ -39,7 +39,7 @@ export default function JugadoresTable({ jugadores, loading, onView, onEdit, onD
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="w-20">Dorsal</TableHead>
+            <TableHead className="w-20">Foto</TableHead>
             <TableHead>Nombre</TableHead>
             <TableHead>Posición</TableHead>
             <TableHead>Equipo</TableHead>
@@ -54,8 +54,16 @@ export default function JugadoresTable({ jugadores, loading, onView, onEdit, onD
               className="cursor-pointer hover:bg-azul-claro/5"
               onClick={() => onView(jugador)}
             >
-              <TableCell className="font-mono font-bold text-center">
-                {jugador.dorsal || '-'}
+              <TableCell className="text-center">
+                {jugador.foto_url ? (
+                  <img
+                    src={jugador.foto_url}
+                    alt={jugador.nombre_completo}
+                    className="w-10 h-10 rounded-full object-cover border-2 border-azul-primario/20 mx-auto"
+                  />
+                ) : (
+                  <span className="font-mono font-bold">{jugador.dorsal || '-'}</span>
+                )}
               </TableCell>
               <TableCell className="font-medium">
                 {jugador.nombre_completo}
