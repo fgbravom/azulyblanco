@@ -11,8 +11,10 @@ type Dispositivo = HeroFoto['dispositivo']
 
 // Mismos parámetros que scripts/optimize-hero-images.mjs, para que las fotos
 // subidas desde el admin pesen y se vean igual que las del repositorio.
-const AVIF_OPTIONS = { quality: 45, effort: 4 }
-const WEBP_OPTIONS = { quality: 72, effort: 6 }
+// AVIF q60 4:2:0 se ve nítido al 100% y pesa ~60 veces menos que el original;
+// con q45 se notaba la pérdida de textura en telas y rostros.
+const AVIF_OPTIONS = { quality: 60, effort: 4, chromaSubsampling: '4:2:0' as const }
+const WEBP_OPTIONS = { quality: 80, effort: 6 }
 // En móvil el hero es más alto que ancho (60vh): la imagen debe cubrir una
 // caja de ancho × ancho*1.3 para no verse estirada en fotos apaisadas.
 const MOBILE_BOX_RATIO = 1.3

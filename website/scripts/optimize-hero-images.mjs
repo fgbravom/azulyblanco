@@ -36,9 +36,10 @@ const SETS = {
   mobile: { prefix: 'portadamovil', widths: [640, 828, 1080] },
 }
 
-// AVIF 45 no se distingue a simple vista de 55 y pesa casi la mitad
-const AVIF_OPTIONS = { quality: 45, effort: 4 }
-const WEBP_OPTIONS = { quality: 72, effort: 6 }
+// AVIF q60 4:2:0 se ve nítido al 100% y pesa ~60 veces menos que el original;
+// con q45 se notaba la pérdida de textura en telas y rostros.
+const AVIF_OPTIONS = { quality: 60, effort: 4, chromaSubsampling: '4:2:0' }
+const WEBP_OPTIONS = { quality: 80, effort: 6 }
 
 function formatMB(bytes) {
   return (bytes / 1024 / 1024).toFixed(1) + ' MB'
