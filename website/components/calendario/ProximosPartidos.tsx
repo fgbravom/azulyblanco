@@ -26,22 +26,21 @@ function EscudoAYB({ alt }: { alt: string }) {
   )
 }
 
-// Logo del rival dentro de un círculo blanco: la imagen nunca se sale del círculo
-// El círculo mide 4/5 de la caja (el escudo AYB ocupa 80% de la suya), así ambos se ven del mismo tamaño
+// Logo del rival recortado en círculo, sin fondo blanco, y del mismo tamaño visible que el escudo AYB
 function CirculoRival({ logo, alt }: { logo?: string; alt: string }) {
   return (
     <div className="w-12 h-12 md:w-20 md:h-20 flex-shrink-0 flex items-center justify-center">
-      <div className="w-4/5 h-4/5 bg-white rounded-full overflow-hidden p-1">
-        {logo ? (
+      {logo ? (
+        <div className="w-4/5 h-4/5 rounded-full overflow-hidden">
           <Image src={logo} alt={alt} width={64} height={64} sizes="64px" className="h-full w-full object-contain" />
-        ) : (
-          <div className="h-full w-full bg-gray-200 rounded-full flex items-center justify-center">
-            <span className="text-gray-400 text-[10px] md:text-sm font-bold">
-              {alt.substring(0, 3).toUpperCase()}
-            </span>
-          </div>
-        )}
-      </div>
+        </div>
+      ) : (
+        <div className="w-4/5 h-4/5 bg-gray-200 rounded-full flex items-center justify-center">
+          <span className="text-gray-400 text-[10px] md:text-sm font-bold">
+            {alt.substring(0, 3).toUpperCase()}
+          </span>
+        </div>
+      )}
     </div>
   )
 }
