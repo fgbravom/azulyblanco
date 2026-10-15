@@ -14,6 +14,7 @@ import {
   ImageIcon,
   Users,
   Shield,
+  Swords,
   Wallet,
   ExternalLink,
   LogOut,
@@ -31,6 +32,7 @@ const secciones = [
     items: [
       { name: 'Portada', href: '/admin/hero', icon: MonitorSmartphone },
       { name: 'Programación', href: '/admin/programacion', icon: CalendarDays },
+      { name: 'Rivales', href: '/admin/rivales', icon: Swords },
       { name: 'Noticias', href: '/admin/noticias', icon: Newspaper },
       { name: 'Galerías', href: '/admin/galeria', icon: Images },
       { name: 'Imágenes', href: '/admin/medios', icon: ImageIcon },

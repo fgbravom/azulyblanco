@@ -11,6 +11,7 @@ export interface Actividad {
   hora_inicio: string | null // HH:MM:SS
   hora_fin: string | null
   rival: string | null
+  rival_id: string | null // rival del catálogo (tabla rivales)
   tipo_partido: TipoPartido | null
   actividad: string | null
   titulo: string | null
@@ -28,6 +29,19 @@ export interface Actividad {
 }
 
 export type ActividadInput = Omit<Actividad, 'id' | 'legacy_id' | 'created_at' | 'updated_at'>
+
+/** Equipo rival del catálogo (supabase/migrations/20260101000010_rivales.sql) */
+export interface Rival {
+  id: string
+  nombre: string
+  sigla: string
+  logo_url: string | null
+  sitio_web: string | null
+  created_at: string
+  updated_at: string
+}
+
+export type RivalInput = Omit<Rival, 'id' | 'created_at' | 'updated_at'>
 
 export interface NoticiaDB {
   id: string
