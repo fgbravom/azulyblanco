@@ -24,7 +24,7 @@ import { createPublicClient } from '@/lib/supabase/public'
 import { codigoPais, PAISES, type CodigoPais } from '@/lib/jugadores/paises'
 import { HERO_FOTOS_REPO, type HeroFotos } from '@/components/hero/hero-boot'
 import { actividadAEvento } from './calendario'
-import type { Actividad, AlbumDB, Foto, HeroFoto, NoticiaDB, SerieInfo } from './tipos'
+import type { Actividad, AlbumDB, Foto, HeroFoto, NoticiaDB, Rival, SerieInfo } from './tipos'
 
 export type NoticiaPublica = NoticiaMetadata & { coverUrl?: string }
 export type NoticiaCompleta = Noticia & { coverUrl?: string }
@@ -53,16 +53,32 @@ function cliente() {
 // PROGRAMACIÓN
 // ============================================================================
 
+/** Catálogo de rivales. Si la migración 010 aún no se aplica, los partidos se muestran sin logo. */
+async function getRivales(): Promise<Rival[]> {
+  try {
+    const { data, error } = await cliente().from('rivales').select('*')
+    if (error) throw error
+    return data as Rival[]
+  } catch {
+    return []
+  }
+}
+
 export async function getEventosCalendario(): Promise<EventoCalendario[]> {
   return conRespaldo(
     async () => {
-      const { data, error } = await cliente()
-        .from('programacion')
-        .select('*')
-        .order('fecha', { ascending: true })
-        .order('hora_inicio', { ascending: true, nullsFirst: true })
+      const supabase = cliente()
+      const [{ data, error }, rivales] = await Promise.all([
+        supabase
+          .from('programacion')
+          .select('*')
+          .order('fecha', { ascending: true })
+          .order('hora_inicio', { ascending: true, nullsFirst: true }),
+        getRivales(),
+      ])
       if (error) throw error
-      return (data as Actividad[]).map(actividadAEvento)
+      const porId = new Map(rivales.map((r) => [r.id, r]))
+      return (data as Actividad[]).map((a) => actividadAEvento(a, a.rival_id ? porId.get(a.rival_id) : undefined))
     },
     () => [...eventosDiciembrePasados, ...eventosEnero2026]
   )

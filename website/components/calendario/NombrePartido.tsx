@@ -3,13 +3,23 @@ import { formatearNombrePartido } from '@/lib/utils/calendario'
 
 interface NombrePartidoProps {
   rivalText: string
+  rivalLogo?: string
   className?: string
   mostrarVS?: boolean
   tamañoEscudo?: number
 }
 
+function LogoRival({ src, alt, tamaño }: { src: string; alt: string; tamaño: number }) {
+  return (
+    <div className="relative flex-shrink-0" style={{ width: tamaño, height: tamaño }}>
+      <Image src={src} alt={alt} fill sizes={`${tamaño}px`} className="object-contain" />
+    </div>
+  )
+}
+
 export function NombrePartido({
   rivalText,
+  rivalLogo,
   className = '',
   mostrarVS = true,
   tamañoEscudo = 24
@@ -58,6 +68,7 @@ export function NombrePartido({
         <span className="font-bold">{equipoLocal}</span>
         {mostrarVS && <span className="text-white/70 font-normal">VS</span>}
         <span>{equipoVisitante}</span>
+        {rivalLogo && <LogoRival src={rivalLogo} alt={equipoVisitante} tamaño={tamañoEscudo} />}
       </div>
     )
   }
@@ -66,6 +77,7 @@ export function NombrePartido({
   if (esAyBVisitante) {
     return (
       <div className={`flex items-center gap-2 ${className}`}>
+        {rivalLogo && <LogoRival src={rivalLogo} alt={equipoLocal} tamaño={tamañoEscudo} />}
         <span>{equipoLocal}</span>
         {mostrarVS && <span className="text-white/70 font-normal">VS</span>}
         <span className="font-bold">{equipoVisitante}</span>

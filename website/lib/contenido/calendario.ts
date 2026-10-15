@@ -1,5 +1,5 @@
 import type { EventoCalendario } from '@/lib/types/calendario'
-import type { Actividad } from './tipos'
+import type { Actividad, Rival } from './tipos'
 
 const DIAS = ['DOMINGO', 'LUNES', 'MARTES', 'MIÉRCOLES', 'JUEVES', 'VIERNES', 'SÁBADO']
 const MESES = [
@@ -15,8 +15,9 @@ export function horaCorta(hora: string | null): string | undefined {
 /**
  * Convierte una fila de la tabla programacion al formato que consumen los componentes
  * de components/calendario (el mismo de los antiguos lib/data/eventos-*.ts).
+ * `rival` es el equipo del catálogo (tabla rivales) al que apunta rival_id, si existe.
  */
-export function actividadAEvento(a: Actividad): EventoCalendario {
+export function actividadAEvento(a: Actividad, rival?: Rival): EventoCalendario {
   const [anio, mes, dia] = a.fecha.split('-').map(Number)
   const fecha = new Date(Date.UTC(anio, mes - 1, dia))
 
@@ -28,6 +29,9 @@ export function actividadAEvento(a: Actividad): EventoCalendario {
     mes: MESES[mes - 1],
     tipo: a.tipo,
     rival: a.rival ?? undefined,
+    rivalLogo: rival?.logo_url ?? undefined,
+    rivalNombre: rival?.nombre ?? undefined,
+    rivalSitioWeb: rival?.sitio_web ?? undefined,
     actividad: a.actividad ?? undefined,
     titulo: a.titulo ?? undefined,
     descripcion: a.descripcion ?? undefined,

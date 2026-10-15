@@ -262,6 +262,7 @@ export function CalendarioGrid({ eventos }: CalendarioGridProps) {
                 {eventoSeleccionado.tipo === 'partido' ? (
                   <NombrePartido
                     rivalText={eventoSeleccionado.rival || 'Por confirmar'}
+                    rivalLogo={eventoSeleccionado.rivalLogo}
                     className="text-2xl font-bold mb-2"
                     mostrarVS={true}
                     tamañoEscudo={32}

@@ -78,6 +78,7 @@ export function CalendarioResumido({ eventos, limite = 3 }: CalendarioResumidoPr
                       {evento.tipo === 'partido' ? (
                         <NombrePartido
                           rivalText={evento.rival || 'Por confirmar'}
+                          rivalLogo={evento.rivalLogo}
                           className="text-sm md:text-base text-azul-oscuro"
                           mostrarVS={true}
                           tamañoEscudo={20}

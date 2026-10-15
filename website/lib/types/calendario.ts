@@ -9,6 +9,9 @@ export interface EventoCalendario {
   mes: string // "DICIEMBRE"
   tipo: TipoEvento
   rival?: string // para partidos
+  rivalLogo?: string // logo del rival del catálogo (tabla rivales)
+  rivalNombre?: string // nombre completo del rival del catálogo
+  rivalSitioWeb?: string // sitio web del rival del catálogo
   actividad?: string // para entrenamientos u otros
   estadio: string
   confirmado: boolean

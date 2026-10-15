@@ -173,11 +173,15 @@ export function ProximosPartidos({ eventos, limite = 3 }: ProximosPartidosProps)
                     </div>
                   ) : (
                     <div className="relative w-10 h-10 md:w-16 md:h-16 flex-shrink-0 bg-white rounded-full p-2">
-                      <div className="w-full h-full bg-gray-200 rounded-full flex items-center justify-center">
-                        <span className="text-gray-400 text-[10px] md:text-sm font-bold">
-                          {equipos.local.substring(0, 3).toUpperCase()}
-                        </span>
-                      </div>
+                      {evento.rivalLogo ? (
+                        <Image src={evento.rivalLogo} alt={equipos.local} fill sizes="64px" className="object-contain p-1" />
+                      ) : (
+                        <div className="w-full h-full bg-gray-200 rounded-full flex items-center justify-center">
+                          <span className="text-gray-400 text-[10px] md:text-sm font-bold">
+                            {equipos.local.substring(0, 3).toUpperCase()}
+                          </span>
+                        </div>
+                      )}
                     </div>
                   )}
                   <h3 className="text-white font-bold text-sm md:text-2xl truncate">
@@ -215,11 +219,15 @@ export function ProximosPartidos({ eventos, limite = 3 }: ProximosPartidosProps)
                     </div>
                   ) : !esEntrenamiento ? (
                     <div className="relative w-10 h-10 md:w-16 md:h-16 flex-shrink-0 bg-white rounded-full p-2">
-                      <div className="w-full h-full bg-gray-200 rounded-full flex items-center justify-center">
-                        <span className="text-gray-400 text-[10px] md:text-sm font-bold">
-                          {equipos.visitante.substring(0, 3).toUpperCase()}
-                        </span>
-                      </div>
+                      {evento.rivalLogo ? (
+                        <Image src={evento.rivalLogo} alt={equipos.visitante} fill sizes="64px" className="object-contain p-1" />
+                      ) : (
+                        <div className="w-full h-full bg-gray-200 rounded-full flex items-center justify-center">
+                          <span className="text-gray-400 text-[10px] md:text-sm font-bold">
+                            {equipos.visitante.substring(0, 3).toUpperCase()}
+                          </span>
+                        </div>
+                      )}
                     </div>
                   ) : null}
                 </div>
@@ -293,6 +301,7 @@ export function ProximosPartidos({ eventos, limite = 3 }: ProximosPartidosProps)
                 {eventoSeleccionado.tipo === 'partido' ? (
                   <NombrePartido
                     rivalText={eventoSeleccionado.rival || 'Por confirmar'}
+                    rivalLogo={eventoSeleccionado.rivalLogo}
                     className="text-2xl font-bold mb-2"
                     mostrarVS={true}
                     tamañoEscudo={32}
