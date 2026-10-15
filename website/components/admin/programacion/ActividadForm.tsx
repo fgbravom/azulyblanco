@@ -5,9 +5,10 @@ import { toast } from 'sonner';
 import { ArrowLeftRight, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import type { Actividad, ActividadInput } from '@/lib/contenido/tipos';
+import type { Actividad, ActividadInput, Rival } from '@/lib/contenido/tipos';
 import { TIPOS_PARTIDO } from '@/lib/contenido/tipos';
 import type { TipoEvento } from '@/lib/types/calendario';
+import { esEquipoAYB } from '@/lib/utils/calendario';
 import { guardarActividad } from '@/app/(admin)/admin/programacion/actions';
 import { Campo, Interruptor, inputClass, textareaClass } from '@/components/admin/ui';
 
@@ -33,6 +34,7 @@ export function actividadVacia(): ActividadInput {
     hora_inicio: null,
     hora_fin: null,
     rival: null,
+    rival_id: null,
     tipo_partido: 'Amistoso',
     actividad: null,
     titulo: null,
@@ -52,11 +54,12 @@ interface Props {
   id: string | null;
   inicial: ActividadInput;
   lugares: string[];
+  rivales: Rival[];
   onGuardada: (actividad: Actividad) => void;
   onCancelar: () => void;
 }
 
-export default function ActividadForm({ id, inicial, lugares, onGuardada, onCancelar }: Props) {
+export default function ActividadForm({ id, inicial, lugares, rivales, onGuardada, onCancelar }: Props) {
   const [datos, setDatos] = useState<ActividadInput>(inicial);
   const [[local, visita], setEquipos] = useState(() => separarEquipos(inicial.rival));
   const [guardando, setGuardando] = useState(false);
@@ -67,12 +70,26 @@ export default function ActividadForm({ id, inicial, lugares, onGuardada, onCanc
   const toggleSerie = (serie: string) =>
     set('series', datos.series.includes(serie) ? datos.series.filter((s) => s !== serie) : [...datos.series, serie]);
 
+  // El rival del catálogo es el lado que no es de AYB (la visita por defecto)
+  const ladoRival = esEquipoAYB(visita) && !esEquipoAYB(local) ? 'local' : 'visita';
+
+  const elegirRival = (rivalId: string) => {
+    const r = rivales.find((x) => x.id === rivalId);
+    set('rival_id', r?.id ?? null);
+    if (!r) return;
+    setEquipos(ladoRival === 'local' ? [r.sigla, visita] : [local, r.sigla]);
+  };
+
   const enviar = async (e: React.FormEvent) => {
     e.preventDefault();
     setGuardando(true);
     try {
       const rival = local.trim() && visita.trim() ? `${local.trim().toUpperCase()} VS ${visita.trim().toUpperCase()}` : null;
-      const guardada = await guardarActividad(id, { ...datos, rival, estadio: datos.estadio.toUpperCase() });
+      // Si se editó la sigla a mano y ya no coincide con el rival elegido, se suelta el vínculo
+      const elegido = rivales.find((r) => r.id === datos.rival_id);
+      const siglaRival = (ladoRival === 'local' ? local : visita).trim().toUpperCase();
+      const rival_id = elegido && elegido.sigla.toUpperCase() === siglaRival ? elegido.id : null;
+      const guardada = await guardarActividad(id, { ...datos, rival, rival_id, estadio: datos.estadio.toUpperCase() });
       toast.success(id ? 'Actividad actualizada' : 'Actividad creada');
       onGuardada(guardada);
     } catch (error) {
@@ -115,6 +132,16 @@ export default function ActividadForm({ id, inicial, lugares, onGuardada, onCanc
 
       {datos.tipo === 'partido' && (
         <>
+          {rivales.length > 0 && (
+            <Campo label="Rival guardado" htmlFor="rival_id" ayuda="Rellena la sigla y muestra su logo en el sitio. Administra la lista en Rivales.">
+              <select id="rival_id" value={datos.rival_id ?? ''} onChange={(e) => elegirRival(e.target.value)} className={inputClass}>
+                <option value="">Otro (escribir a mano)</option>
+                {rivales.map((r) => (
+                  <option key={r.id} value={r.id}>{r.nombre} ({r.sigla})</option>
+                ))}
+              </select>
+            </Campo>
+          )}
           <div className="grid grid-cols-[1fr_auto_1fr] items-end gap-2">
             <Campo label="Local *" htmlFor="local">
               <input id="local" required value={local} onChange={(e) => setEquipos([e.target.value, visita])} placeholder="AYB" className={inputClass} />

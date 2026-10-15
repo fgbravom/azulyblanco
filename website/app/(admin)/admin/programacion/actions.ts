@@ -25,6 +25,7 @@ const actividadSchema = z.object({
   hora_inicio: horaOpcional,
   hora_fin: horaOpcional,
   rival: textoOpcional,
+  rival_id: z.string().uuid().nullable(),
   tipo_partido: z.enum(['Amistoso', 'Oficial', 'Torneo', 'Copa']).nullable(),
   actividad: textoOpcional,
   titulo: textoOpcional,
@@ -69,6 +70,7 @@ export async function guardarActividad(id: string | null, input: ActividadInput)
   const fila = {
     ...datos,
     rival: datos.tipo === 'partido' ? datos.rival : null,
+    rival_id: datos.tipo === 'partido' ? datos.rival_id : null,
     tipo_partido: datos.tipo === 'partido' ? datos.tipo_partido : null,
     actividad: datos.tipo === 'entrenamiento' ? datos.actividad || 'ENTRENAMIENTO' : null,
     titulo: datos.tipo === 'evento' ? datos.titulo : null,
