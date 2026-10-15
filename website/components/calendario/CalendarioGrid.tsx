@@ -325,8 +325,8 @@ export function CalendarioGrid({ eventos }: CalendarioGridProps) {
                   </div>
                 )}
 
-                {/* Series participantes (solo para eventos) */}
-                {eventoSeleccionado.tipo === 'evento' && eventoSeleccionado.series && eventoSeleccionado.series.length > 0 && (
+                {/* Series participantes */}
+                {eventoSeleccionado.series && eventoSeleccionado.series.length > 0 && (
                   <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
                     <div className="text-xs text-gray-500 uppercase tracking-wide mb-2">Series Participantes</div>
                     <div className="flex flex-wrap gap-2">
