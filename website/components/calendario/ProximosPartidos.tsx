@@ -32,7 +32,7 @@ function CirculoRival({ logo, alt }: { logo?: string; alt: string }) {
     <div className="w-12 h-12 md:w-20 md:h-20 flex-shrink-0 flex items-center justify-center">
       {logo ? (
         <div className="w-4/5 h-4/5 rounded-full overflow-hidden">
-          <Image src={logo} alt={alt} width={64} height={64} sizes="64px" className="h-full w-full object-contain" />
+          <Image src={logo} alt={alt} width={64} height={64} sizes="64px" className="h-full w-full object-cover" />
         </div>
       ) : (
         <div className="w-4/5 h-4/5 bg-gray-200 rounded-full flex items-center justify-center">
