@@ -115,6 +115,17 @@ export function Footer() {
             © {new Date().getFullYear()} {SITE_CONFIG.name}. Todos los derechos
             reservados.
           </p>
+          <p className="mt-2">
+            Desarrollado por{' '}
+            <a
+              href="https://fgbravom.github.io"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-gray-300 underline underline-offset-2 hover:text-white transition-colors"
+            >
+              fgbravom
+            </a>
+          </p>
         </div>
       </div>
     </footer>
