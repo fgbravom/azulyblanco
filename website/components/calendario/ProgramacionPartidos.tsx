@@ -41,7 +41,7 @@ export function ProgramacionPartidos({ eventos, hoy: hoyServidor }: Programacion
     <>
       {/* Pestañas — continúan el fondo azul del hero */}
       <div className="bg-azul-primario px-4 pb-10">
-        <div className="container mx-auto flex max-w-6xl flex-wrap justify-center gap-2">
+        <div className="container mx-auto flex max-w-6xl flex-wrap justify-center gap-1.5 sm:gap-2">
           {pestanas.map((p) => (
             <button
               key={p.id}
@@ -49,7 +49,7 @@ export function ProgramacionPartidos({ eventos, hoy: hoyServidor }: Programacion
               aria-pressed={vista === p.id}
               onClick={() => setVista(p.id)}
               className={cn(
-                'flex items-center gap-2 rounded-full px-5 py-2 text-sm font-medium transition-all',
+                'flex items-center gap-1.5 rounded-full px-3.5 py-2 text-sm font-medium transition-all sm:gap-2 sm:px-5',
                 vista === p.id ? 'bg-white text-azul-primario shadow' : 'bg-white/15 text-white hover:bg-white/25'
               )}
             >
