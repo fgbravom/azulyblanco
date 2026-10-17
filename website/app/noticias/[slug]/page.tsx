@@ -73,7 +73,7 @@ export default async function NoticiaPage({ params }: PageProps) {
       <Header />
       <main className="min-h-screen bg-white">
         {/* Hero compacto */}
-        <section className="bg-azul-primario text-white pt-20 pb-12 px-4">
+        <section className="bg-azul-primario text-white pt-32 2xl:pt-44 pb-12 px-4">
           <div className="container mx-auto max-w-3xl">
             <Link
               href="/noticias"
