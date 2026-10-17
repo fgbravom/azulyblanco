@@ -6,7 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { rechazarSinSesion } from '@/lib/auth/session';
 import { getPartidos, createPartido } from '@/lib/data/partidos';
-import type { PartidoInsert, PartidosFilter, QueryOptions } from '@/types/database';
+import type { EstadoPartido, PartidoInsert, PartidosFilter, QueryOptions, UbicacionPartido } from '@/types/database';
 
 /**
  * GET /api/partidos
@@ -26,13 +26,13 @@ export async function GET(request: NextRequest) {
     if (equipoId) filter.equipo_id = parseInt(equipoId);
 
     const estado = searchParams.get('estado');
-    if (estado) filter.estado = estado as any;
+    if (estado) filter.estado = estado as EstadoPartido;
 
     const competicion = searchParams.get('competicion');
     if (competicion) filter.competicion = competicion;
 
     const ubicacion = searchParams.get('ubicacion');
-    if (ubicacion) filter.ubicacion = ubicacion as any;
+    if (ubicacion) filter.ubicacion = ubicacion as UbicacionPartido;
 
     const fechaDesde = searchParams.get('fecha_desde');
     if (fechaDesde) filter.fecha_desde = fechaDesde;

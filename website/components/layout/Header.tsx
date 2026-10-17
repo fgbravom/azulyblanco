@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useSyncExternalStore } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { SITE_CONFIG, NAVIGATION_ITEMS } from '@/lib/constants'
@@ -19,16 +19,15 @@ interface HeaderProps {
   hideInitially?: boolean
 }
 
+const suscribirNada = () => () => {}
+
 export function Header({ isHome = false, hideInitially = false }: HeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [openSubmenu, setOpenSubmenu] = useState<string | null>(null)
   const [openDesktopMenu, setOpenDesktopMenu] = useState<string | null>(null)
-  const [mounted, setMounted] = useState(false)
+  // false en el servidor y en la hidratación, true ya montado en el cliente
+  const mounted = useSyncExternalStore(suscribirNada, () => true, () => false)
   const [scrolled, setScrolled] = useState(false)
-
-  useEffect(() => {
-    setMounted(true)
-  }, [])
 
   useEffect(() => {
     if (isHome) {

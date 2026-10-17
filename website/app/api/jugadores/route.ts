@@ -7,7 +7,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { rechazarSinSesion } from '@/lib/auth/session';
 import { getJugadores, createJugador, setPosicionesJugador } from '@/lib/data/jugadores';
 import { parsePosiciones } from '@/lib/validations/jugador';
-import type { JugadorInsert, JugadoresFilter, QueryOptions } from '@/types/database';
+import type { EstadoJugador, JugadorInsert, JugadoresFilter, QueryOptions } from '@/types/database';
 
 /**
  * GET /api/jugadores
@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
     if (posicionId) filter.posicion_id = parseInt(posicionId);
 
     const estado = searchParams.get('estado');
-    if (estado) filter.estado = estado as any;
+    if (estado) filter.estado = estado as EstadoJugador;
 
     const activo = searchParams.get('activo');
     if (activo !== null) filter.activo = activo === 'true';

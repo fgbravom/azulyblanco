@@ -5,6 +5,9 @@
 import { createAdminClient } from '@/lib/supabase/admin';
 import type {
   Jugador,
+  Posicion,
+  Equipo,
+  Categoria,
   JugadorInsert,
   JugadorUpdate,
   JugadorCompleto,
@@ -12,6 +15,14 @@ import type {
   QueryOptions,
   PaginatedResponse,
 } from '@/types/database';
+
+/** Fila de estadisticas_partido con el jugador y sus relaciones embebidas */
+interface FilaConvocado {
+  jugadores: Jugador & {
+    posiciones: Posicion;
+    equipos: Equipo & { categorias: Categoria };
+  };
+}
 
 // ============================================================================
 // OBTENER JUGADORES
@@ -358,7 +369,7 @@ export async function getJugadoresConvocados(partidoId: number): Promise<Jugador
   }
 
   // Transformar los datos al formato esperado
-  return data.map((item: any) => {
+  const convocados = (data as unknown as FilaConvocado[]).map((item) => {
     const jugador = item.jugadores;
     const posicion = jugador.posiciones;
     const equipo = jugador.equipos;
@@ -376,4 +387,8 @@ export async function getJugadoresConvocados(partidoId: number): Promise<Jugador
       categoria: categoria.nombre,
     };
   });
+
+  // El objeto armado no trae posiciones_ids ni posiciones_abr: se mantiene el
+  // comportamiento previo (antes el any ocultaba la diferencia con JugadorCompleto)
+  return convocados as unknown as JugadorCompleto[];
 }

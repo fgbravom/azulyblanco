@@ -9,9 +9,31 @@ import type {
   EstadisticaPartido,
   EstadisticaPartidoInsert,
   EstadisticaPartidoUpdate,
+  Partido,
   EstadisticasJugador,
   EstadisticasFilter,
 } from '@/types/database';
+
+/** Datos del partido que acompañan a cada fila del histórico de un jugador */
+type PartidoResumenHistorico = Pick<
+  Partido,
+  'fecha' | 'equipo_local' | 'equipo_visitante' | 'goles_local' | 'goles_visitante' | 'competicion'
+>;
+
+/** Fila de jugadores con sus estadísticas, tal como la devuelve getEstadisticasPorPosicion */
+interface FilaPosicion {
+  posicion: { nombre: string };
+  estadisticas: Pick<EstadisticaPartido, 'goles' | 'asistencias' | 'minutos_jugados' | 'valoracion'>[];
+}
+
+interface EstadisticasPosicion {
+  goles: number;
+  asistencias: number;
+  minutos: number;
+  partidos: number;
+  valoraciones?: number[];
+  valoracion_promedio?: string | null;
+}
 
 // ============================================================================
 // OBTENER ESTADÍSTICAS
@@ -133,7 +155,7 @@ export async function getEstadisticasEquipo(equipoId: number): Promise<Estadisti
 export async function getHistoricoJugador(
   jugadorId: number,
   limit?: number
-): Promise<any[]> {
+): Promise<(EstadisticaPartido & { partido: PartidoResumenHistorico })[]> {
   const supabase = createAdminClient();
 
   let query = supabase
@@ -522,9 +544,9 @@ export async function getEstadisticasPorPosicion(equipoId: number) {
   }
 
   // Agrupar por posición
-  const agrupado: Record<string, any> = {};
+  const agrupado: Record<string, EstadisticasPosicion> = {};
 
-  data?.forEach((item: any) => {
+  (data as unknown as FilaPosicion[] | null)?.forEach((item) => {
     const posicion = item.posicion.nombre;
     if (!agrupado[posicion]) {
       agrupado[posicion] = {
@@ -536,13 +558,13 @@ export async function getEstadisticasPorPosicion(equipoId: number) {
       };
     }
 
-    item.estadisticas.forEach((est: any) => {
+    item.estadisticas.forEach((est) => {
       agrupado[posicion].goles += est.goles || 0;
       agrupado[posicion].asistencias += est.asistencias || 0;
       agrupado[posicion].minutos += est.minutos_jugados || 0;
       agrupado[posicion].partidos += 1;
       if (est.valoracion) {
-        agrupado[posicion].valoraciones.push(est.valoracion);
+        agrupado[posicion].valoraciones!.push(est.valoracion);
       }
     });
   });
@@ -550,8 +572,8 @@ export async function getEstadisticasPorPosicion(equipoId: number) {
   // Calcular promedios
   Object.keys(agrupado).forEach((posicion) => {
     const stats = agrupado[posicion];
-    stats.valoracion_promedio = stats.valoraciones.length > 0
-      ? (stats.valoraciones.reduce((a: number, b: number) => a + b, 0) / stats.valoraciones.length).toFixed(2)
+    stats.valoracion_promedio = stats.valoraciones!.length > 0
+      ? (stats.valoraciones!.reduce((a: number, b: number) => a + b, 0) / stats.valoraciones!.length).toFixed(2)
       : null;
     delete stats.valoraciones;
   });

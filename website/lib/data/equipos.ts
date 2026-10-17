@@ -412,7 +412,7 @@ export async function getResumenEquipos() {
     return [];
   }
 
-  return data?.map((equipo: any) => ({
+  return data?.map((equipo: EquipoPublico & { jugadores: { count: number }[] }) => ({
     ...equipo,
     total_jugadores: equipo.jugadores[0]?.count || 0,
   })) || [];
