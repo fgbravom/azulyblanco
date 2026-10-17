@@ -1,25 +1,13 @@
 import type { Metadata } from "next";
-import { Montserrat, Open_Sans, Roboto_Mono } from "next/font/google";
+import { Open_Sans } from "next/font/google";
 import "./globals.css";
 import { SITE_CONFIG } from "@/lib/constants";
 import { Toaster } from "@/components/ui/sonner";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { ScrollToTop } from "@/components/layout/ScrollToTop";
 
-const montserrat = Montserrat({
-  variable: "--font-montserrat",
-  subsets: ["latin"],
-  display: "swap",
-});
-
 const openSans = Open_Sans({
   variable: "--font-open-sans",
-  subsets: ["latin"],
-  display: "swap",
-});
-
-const robotoMono = Roboto_Mono({
-  variable: "--font-roboto-mono",
   subsets: ["latin"],
   display: "swap",
 });
@@ -75,7 +63,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es" className={`${montserrat.variable} ${openSans.variable} ${robotoMono.variable}`} suppressHydrationWarning>
+    <html lang="es" className={openSans.variable} suppressHydrationWarning>
       <body className="font-sans antialiased">
         <ScrollToTop />
         {children}

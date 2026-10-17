@@ -27,8 +27,8 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-open-sans);
-  --font-heading: var(--font-montserrat);
-  --font-mono: var(--font-roboto-mono);
+  --font-heading: var(--font-open-sans);
+  --font-mono: ui-monospace, monospace;
 
   /* Paleta oficial del club - Combinación y contraste */
   --color-azul-primario: #020280;      /* Azul principal oscuro */

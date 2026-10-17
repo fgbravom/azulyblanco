@@ -56,8 +56,8 @@ const config: Config = {
       },
       fontFamily: {
         sans: ['var(--font-open-sans)', 'system-ui', 'sans-serif'],
-        heading: ['var(--font-montserrat)', 'system-ui', 'sans-serif'],
-        mono: ['var(--font-roboto-mono)', 'monospace'],
+        heading: ['var(--font-open-sans)', 'system-ui', 'sans-serif'],
+        mono: ['ui-monospace', 'monospace'],
       },
       borderRadius: {
         lg: 'var(--radius)',
