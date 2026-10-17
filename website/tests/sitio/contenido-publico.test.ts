@@ -118,6 +118,27 @@ describe('noticias', () => {
     })
   })
 
+  it('la noticia trae el avatar de su redactor', async () => {
+    const falso = conBase((c) =>
+      c.tabla === 'redactores'
+        ? { data: { avatar_url: 'https://x/felipe.webp' } }
+        : { data: { ...FILA, autor: 'Felipe Bravo', redactor_id: 'r1' } }
+    )
+    const noticia = await publico.getNoticiaPublica('gran-final')
+    expect(argsDe(falso.a('redactores')[0], 'eq')).toEqual(['id', 'r1'])
+    expect(noticia).toMatchObject({ author: 'Felipe Bravo', authorAvatar: 'https://x/felipe.webp', content: '# Hola' })
+  })
+
+  it('sin la tabla de redactores la noticia se muestra igual, sin avatar', async () => {
+    conBase((c) =>
+      c.tabla === 'redactores'
+        ? { error: { message: 'relation "redactores" does not exist' } }
+        : { data: { ...FILA, autor: 'Felipe Bravo', redactor_id: 'r1' } }
+    )
+    const noticia = await publico.getNoticiaPublica('gran-final')
+    expect(noticia).toMatchObject({ author: 'Felipe Bravo', authorAvatar: undefined })
+  })
+
   it('una noticia inexistente devuelve null', async () => {
     conBase(() => ({ data: null }))
     expect(await publico.getNoticiaPublica('no-existe')).toBeNull()

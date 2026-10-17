@@ -104,10 +104,7 @@ export default async function NoticiaPage({ params }: PageProps) {
             {noticia.author && (
               <div className="flex items-center gap-2 mt-6 pt-6 border-t border-white/15">
                 <Avatar className="h-8 w-8">
-                  <AvatarImage
-                    src={`/images/authors/${noticia.author.toLowerCase().replace(/\s+/g, '-')}.jpg`}
-                    alt={noticia.author}
-                  />
+                  <AvatarImage src={noticia.authorAvatar} alt={noticia.author} className="object-cover" />
                   <AvatarFallback className="bg-azul-claro text-white text-xs">
                     {noticia.author.split(' ').map((n) => n[0]).join('')}
                   </AvatarFallback>

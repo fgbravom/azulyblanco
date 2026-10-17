@@ -43,6 +43,15 @@ export interface Rival {
 
 export type RivalInput = Omit<Rival, 'id' | 'created_at' | 'updated_at'>
 
+/** Quien escribe las noticias (supabase/migrations/20260101000011_redactores.sql) */
+export interface Redactor {
+  id: string
+  nombre: string
+  avatar_url: string | null
+  created_at: string
+  updated_at: string
+}
+
 export interface NoticiaDB {
   id: string
   slug: string
@@ -52,6 +61,7 @@ export interface NoticiaDB {
   categoria: string
   tags: string[]
   autor: string | null
+  redactor_id: string | null // redactor del catálogo (tabla redactores)
   fecha: string
   portada_url: string | null
   publicado: boolean

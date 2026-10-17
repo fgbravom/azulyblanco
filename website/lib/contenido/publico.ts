@@ -27,7 +27,7 @@ import { actividadAEvento } from './calendario'
 import type { Actividad, AlbumDB, Foto, HeroFoto, NoticiaDB, Rival, SerieInfo } from './tipos'
 
 export type NoticiaPublica = NoticiaMetadata & { coverUrl?: string }
-export type NoticiaCompleta = Noticia & { coverUrl?: string }
+export type NoticiaCompleta = Noticia & { coverUrl?: string; authorAvatar?: string }
 export type AlbumPublico = Album & { fotoUrls: string[] }
 
 class SinBaseDeDatos extends Error {}
@@ -101,6 +101,17 @@ function noticiaAMetadata(n: NoticiaDB): NoticiaPublica {
   }
 }
 
+/** Avatar del redactor. Si la migración 011 aún no se aplica, la noticia se muestra con iniciales. */
+async function getAvatarRedactor(id: string): Promise<string | undefined> {
+  try {
+    const { data, error } = await cliente().from('redactores').select('avatar_url').eq('id', id).maybeSingle()
+    if (error) throw error
+    return data?.avatar_url ?? undefined
+  } catch {
+    return undefined
+  }
+}
+
 export async function getNoticiasPublicas(): Promise<NoticiaPublica[]> {
   return conRespaldo(
     async () => {
@@ -127,7 +138,11 @@ export async function getNoticiaPublica(slug: string): Promise<NoticiaCompleta |
       if (error) throw error
       if (!data) return null
       const noticia = data as NoticiaDB
-      return { ...noticiaAMetadata(noticia), content: noticia.contenido }
+      return {
+        ...noticiaAMetadata(noticia),
+        content: noticia.contenido,
+        authorAvatar: noticia.redactor_id ? await getAvatarRedactor(noticia.redactor_id) : undefined,
+      }
     },
     () => getNoticiaArchivo(slug)
   )

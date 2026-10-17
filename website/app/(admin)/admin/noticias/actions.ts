@@ -16,6 +16,7 @@ const noticiaSchema = z.object({
   categoria: z.string().trim().min(1, 'Elige una categoría'),
   tags: z.array(z.string()),
   autor: z.string().trim().nullable().transform((v) => v || null),
+  redactor_id: z.string().uuid().nullable(),
   fecha: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Fecha inválida'),
   portada_url: z.url({ protocol: /^https?$/ }).nullable(),
   publicado: z.boolean(),
@@ -32,7 +33,7 @@ export async function listarNoticias(): Promise<NoticiaDB[]> {
   await requireAdmin()
   const { data, error } = await createAdminClient()
     .from('noticias')
-    .select('id, slug, titulo, bajada, categoria, tags, autor, fecha, portada_url, publicado, created_at, updated_at')
+    .select('id, slug, titulo, bajada, categoria, tags, autor, redactor_id, fecha, portada_url, publicado, created_at, updated_at')
     .order('fecha', { ascending: false })
     .order('created_at', { ascending: false })
   if (error) throw new Error(error.message)
@@ -66,6 +67,13 @@ export async function guardarNoticia(id: string | null, input: NoticiaInput): Pr
   const slug = parsed.data.slug === slugAnterior ? slugAnterior : slugify(parsed.data.slug || parsed.data.titulo)
   const fila = { ...parsed.data, slug }
   if (!fila.slug) throw new Error('La dirección (slug) no puede quedar vacía')
+
+  // Con un redactor del catálogo, el autor en texto es su nombre
+  if (fila.redactor_id) {
+    const { data: redactor } = await supabase.from('redactores').select('nombre').eq('id', fila.redactor_id).maybeSingle()
+    if (!redactor) throw new Error('El redactor elegido ya no existe')
+    fila.autor = redactor.nombre
+  }
 
   const consulta = id
     ? supabase.from('noticias').update(fila).eq('id', id)

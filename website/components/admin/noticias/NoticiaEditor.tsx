@@ -4,9 +4,9 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import { ArrowLeft, ExternalLink, Loader2, Trash2 } from 'lucide-react';
+import { ArrowLeft, ExternalLink, Loader2, Trash2, UserRound } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { CATEGORIAS_NOTICIA, type NoticiaDB, type NoticiaInput } from '@/lib/contenido/tipos';
+import { CATEGORIAS_NOTICIA, type NoticiaDB, type NoticiaInput, type Redactor } from '@/lib/contenido/tipos';
 import { parseTags, slugify } from '@/lib/admin/slug';
 import { eliminarNoticia, guardarNoticia } from '@/app/(admin)/admin/noticias/actions';
 import { Campo, EstadoBadge, Interruptor, PageHeader, Panel, inputClass, textareaClass } from '@/components/admin/ui';
@@ -27,13 +27,17 @@ function desdeNoticia(n: NoticiaDB | null): NoticiaInput {
     categoria: 'Institucional',
     tags: [],
     autor: null,
+    redactor_id: null,
     fecha: new Date().toLocaleDateString('sv-SE'),
     portada_url: null,
     publicado: false,
   };
 }
 
-export default function NoticiaEditor({ noticia }: { noticia: NoticiaDB | null }) {
+// Noticia antigua firmada con un nombre que no está en el catálogo
+const AUTOR_TEXTO = '__texto';
+
+export default function NoticiaEditor({ noticia, redactores }: { noticia: NoticiaDB | null; redactores: Redactor[] }) {
   const router = useRouter();
   const [datos, setDatos] = useState<NoticiaInput>(() => desdeNoticia(noticia));
   const [tags, setTags] = useState(() => (noticia?.tags ?? []).join(', '));
@@ -61,6 +65,15 @@ export default function NoticiaEditor({ noticia }: { noticia: NoticiaDB | null }
     } finally {
       setGuardando(false);
     }
+  };
+
+  const redactor = redactores.find((r) => r.id === datos.redactor_id);
+
+  const elegirRedactor = (valor: string) => {
+    if (valor === AUTOR_TEXTO) return;
+    const r = redactores.find((x) => x.id === valor);
+    set('redactor_id', r?.id ?? null);
+    set('autor', r?.nombre ?? null);
   };
 
   const eliminar = async () => {
@@ -178,9 +191,60 @@ export default function NoticiaEditor({ noticia }: { noticia: NoticiaDB | null }
                   ))}
                 </datalist>
               </Campo>
-              <Campo label="Autor" htmlFor="autor">
-                <input id="autor" value={datos.autor ?? ''} onChange={(e) => set('autor', e.target.value)} className={inputClass} />
-              </Campo>
+              {redactores.length > 0 ? (
+                <Campo
+                  label="Autor"
+                  htmlFor="redactor_id"
+                  ayuda={
+                    <>
+                      Administra la lista en{' '}
+                      <Link href="/admin/redactores" className="text-azul-claro hover:underline">
+                        Redactores
+                      </Link>
+                    </>
+                  }
+                >
+                  <div className="flex items-center gap-2">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full border border-gray-200 bg-gray-50">
+                      {redactor?.avatar_url ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={redactor.avatar_url} alt="" className="h-full w-full object-cover" />
+                      ) : (
+                        <UserRound className="h-5 w-5 text-gray-400" />
+                      )}
+                    </div>
+                    <select
+                      id="redactor_id"
+                      value={datos.redactor_id ?? (datos.autor ? AUTOR_TEXTO : '')}
+                      onChange={(e) => elegirRedactor(e.target.value)}
+                      className={inputClass}
+                    >
+                      <option value="">Sin firma</option>
+                      {!datos.redactor_id && datos.autor && <option value={AUTOR_TEXTO}>{datos.autor} (sin avatar)</option>}
+                      {redactores.map((r) => (
+                        <option key={r.id} value={r.id}>
+                          {r.nombre}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </Campo>
+              ) : (
+                <Campo
+                  label="Autor"
+                  htmlFor="autor"
+                  ayuda={
+                    <>
+                      Para firmar con avatar, agrega redactores en{' '}
+                      <Link href="/admin/redactores" className="text-azul-claro hover:underline">
+                        Redactores
+                      </Link>
+                    </>
+                  }
+                >
+                  <input id="autor" value={datos.autor ?? ''} onChange={(e) => set('autor', e.target.value)} className={inputClass} />
+                </Campo>
+              )}
               <Campo label="Etiquetas" htmlFor="tags" ayuda="Separadas por coma">
                 <input
                   id="tags"

@@ -18,6 +18,7 @@ export type DestinoSubida =
   | { tipo: 'album'; albumId: string }
   | { tipo: 'hero' }
   | { tipo: 'rival' }
+  | { tipo: 'redactor' }
 
 /**
  * Entrega una URL firmada para que el navegador suba el archivo directo a
@@ -38,7 +39,9 @@ export async function prepararSubida(destino: DestinoSubida, mime: string) {
           `hero/${crypto.randomUUID()}/original.${ext}`
         : destino.tipo === 'rival'
           ? `rivales/${crypto.randomUUID()}.${ext}`
-          : `biblioteca/${ahora.getFullYear()}/${String(ahora.getMonth() + 1).padStart(2, '0')}/${crypto.randomUUID()}.${ext}`
+          : destino.tipo === 'redactor'
+            ? `redactores/${crypto.randomUUID()}.${ext}`
+            : `biblioteca/${ahora.getFullYear()}/${String(ahora.getMonth() + 1).padStart(2, '0')}/${crypto.randomUUID()}.${ext}`
 
   const { data, error } = await createAdminClient().storage.from(BUCKET_MEDIOS).createSignedUploadUrl(path)
   if (error) throw new Error(`No se pudo preparar la subida: ${error.message}`)
