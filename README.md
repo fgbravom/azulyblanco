@@ -57,7 +57,7 @@ El resto de `Docs/` son notas de etapas anteriores del proyecto y pueden estar d
 
 ## Despliegue
 
-Cada cambio que llega a la rama `Repositiorios` se publica solo en producción a través de Vercel. Por eso los cambios entran mediante pull request y alguien los revisa antes.
+Cada cambio que llega a la rama `Principal` se publica solo en producción a través de Vercel. Por eso los cambios entran mediante pull request y alguien los revisa antes.
 
 ## Licencia
 
