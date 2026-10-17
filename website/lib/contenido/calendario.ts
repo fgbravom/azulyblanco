@@ -44,6 +44,11 @@ export function actividadAEvento(a: Actividad, rival?: Rival): EventoCalendario 
     series: a.series.length > 0 ? a.series : undefined,
     precioEntrada: a.precio_entrada ?? undefined,
     edadGratis: a.edad_gratis ?? undefined,
+    // Sin la migración 012 las columnas no vienen (undefined) y el partido queda sin resultado
+    resultado:
+      a.goles_local != null && a.goles_visitante != null
+        ? { local: a.goles_local, visitante: a.goles_visitante }
+        : undefined,
   }
 }
 

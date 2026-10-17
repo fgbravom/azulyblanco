@@ -22,6 +22,8 @@ export interface Actividad {
   precio_entrada: string | null
   edad_gratis: string | null
   series: string[]
+  goles_local: number | null // resultado, en el orden del texto del rival (migración 012)
+  goles_visitante: number | null
   publicado: boolean
   legacy_id: string | null
   created_at: string

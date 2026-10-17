@@ -45,6 +45,8 @@ export function actividadVacia(): ActividadInput {
     precio_entrada: null,
     edad_gratis: null,
     series: [],
+    goles_local: null,
+    goles_visitante: null,
     publicado: true,
   };
 }
@@ -161,6 +163,33 @@ export default function ActividadForm({ id, inicial, lugares, rivales, onGuardad
           <p className="-mt-3 text-xs text-gray-500">
             Nuestros equipos (AYB, AYB35, SERIE HONOR…) se muestran con el escudo del club.
           </p>
+          <Campo label="Resultado" ayuda="Déjalo vacío hasta que se juegue el partido. Goles en el mismo orden: local – visita.">
+            <div className="flex items-center gap-2">
+              <input
+                aria-label={`Goles de ${local || 'local'}`}
+                type="number"
+                min={0}
+                max={99}
+                inputMode="numeric"
+                value={datos.goles_local ?? ''}
+                onChange={(e) => set('goles_local', e.target.value === '' ? null : Number(e.target.value))}
+                placeholder={local || 'Local'}
+                className={cn(inputClass, 'w-24 text-center')}
+              />
+              <span className="text-gray-400">–</span>
+              <input
+                aria-label={`Goles de ${visita || 'visita'}`}
+                type="number"
+                min={0}
+                max={99}
+                inputMode="numeric"
+                value={datos.goles_visitante ?? ''}
+                onChange={(e) => set('goles_visitante', e.target.value === '' ? null : Number(e.target.value))}
+                placeholder={visita || 'Visita'}
+                className={cn(inputClass, 'w-24 text-center')}
+              />
+            </div>
+          </Campo>
           <Campo label="Tipo de partido" htmlFor="tipo_partido">
             <select
               id="tipo_partido"

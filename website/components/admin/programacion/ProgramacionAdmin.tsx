@@ -178,13 +178,25 @@ export default function ProgramacionAdmin({ iniciales, rivales }: { iniciales: A
                               {ESTILO_TIPO[a.tipo].label}
                               {a.tipo_partido ? ` · ${a.tipo_partido}` : ''}
                             </span>
+                            {a.tipo === 'partido' && pasada && a.goles_local == null && (
+                              <span className="rounded bg-amber-50 px-1.5 py-0.5 text-[11px] font-medium text-amber-700">
+                                Falta resultado
+                              </span>
+                            )}
                             {!a.publicado && (
                               <span className="inline-flex items-center gap-1 rounded bg-gray-100 px-1.5 py-0.5 text-[11px] font-medium text-gray-600">
                                 <EyeOff className="h-3 w-3" /> Oculta
                               </span>
                             )}
                           </div>
-                          <p className="mt-1 truncate font-semibold text-gray-900">{nombreActividad(a)}</p>
+                          <p className="mt-1 truncate font-semibold text-gray-900">
+                            {nombreActividad(a)}
+                            {a.goles_local != null && a.goles_visitante != null && (
+                              <span className="ml-2 tabular-nums text-azul-primario">
+                                {a.goles_local} – {a.goles_visitante}
+                              </span>
+                            )}
+                          </p>
                           <div className="mt-0.5 flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-500">
                             {a.hora_inicio && (
                               <span className="inline-flex items-center gap-1">
@@ -217,7 +229,7 @@ export default function ProgramacionAdmin({ iniciales, rivales }: { iniciales: A
                         <Button variant="ghost" size="icon" title="Editar" onClick={() => setEditor({ id: a.id, inicial: aInput(a) })}>
                           <Pencil />
                         </Button>
-                        <Button variant="ghost" size="icon" title="Duplicar" onClick={() => setEditor({ id: null, inicial: aInput(a) })}>
+                        <Button variant="ghost" size="icon" title="Duplicar" onClick={() => setEditor({ id: null, inicial: { ...aInput(a), goles_local: null, goles_visitante: null } })}>
                           <Copy />
                         </Button>
                         <Button variant="ghost" size="icon" title="Eliminar" onClick={() => eliminar(a)} className="hover:text-red-600">

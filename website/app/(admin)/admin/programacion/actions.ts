@@ -19,6 +19,8 @@ const horaOpcional = z
   .nullable()
   .or(z.literal('').transform(() => null))
 
+const goles = z.number().int('Los goles deben ser un número entero').min(0, 'Los goles no pueden ser negativos').max(99).nullable()
+
 const actividadSchema = z.object({
   tipo: z.enum(['partido', 'entrenamiento', 'evento']),
   fecha: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Fecha inválida'),
@@ -36,6 +38,8 @@ const actividadSchema = z.object({
   precio_entrada: textoOpcional,
   edad_gratis: textoOpcional,
   series: z.array(z.string()),
+  goles_local: goles,
+  goles_visitante: goles,
   publicado: z.boolean(),
 })
 
@@ -65,6 +69,9 @@ export async function guardarActividad(id: string | null, input: ActividadInput)
   const datos = parsed.data
   if (datos.tipo === 'partido' && !datos.rival) throw new Error('Indica los equipos del partido')
   if (datos.tipo === 'evento' && !datos.titulo) throw new Error('El evento necesita un título')
+  if ((datos.goles_local === null) !== (datos.goles_visitante === null)) {
+    throw new Error('Completa los goles de ambos equipos o deja el resultado vacío')
+  }
 
   // Se limpian los campos que no corresponden al tipo elegido
   const fila = {
@@ -72,6 +79,8 @@ export async function guardarActividad(id: string | null, input: ActividadInput)
     rival: datos.tipo === 'partido' ? datos.rival : null,
     rival_id: datos.tipo === 'partido' ? datos.rival_id : null,
     tipo_partido: datos.tipo === 'partido' ? datos.tipo_partido : null,
+    goles_local: datos.tipo === 'partido' ? datos.goles_local : null,
+    goles_visitante: datos.tipo === 'partido' ? datos.goles_visitante : null,
     actividad: datos.tipo === 'entrenamiento' ? datos.actividad || 'ENTRENAMIENTO' : null,
     titulo: datos.tipo === 'evento' ? datos.titulo : null,
     descripcion: datos.tipo === 'evento' ? datos.descripcion : null,

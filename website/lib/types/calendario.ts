@@ -24,4 +24,5 @@ export interface EventoCalendario {
   series?: string[] // series que participan en el evento
   precioEntrada?: string // precio de entrada para eventos
   edadGratis?: string // edad hasta la cual no se paga
+  resultado?: { local: number; visitante: number } // goles, en el orden de `rival`
 }
