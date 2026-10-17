@@ -42,8 +42,13 @@ export function Header({ isHome = false, hideInitially = false }: HeaderProps) {
 
   return (
     <>
+      {/* El ::after solapa el borde inferior del header (2px dentro, 2px fuera):
+          con escalas fraccionarias (DPR 2.625, zoom) el antialiasing del borde
+          dejaba asomar una línea del fondo blanco del body entre header y hero.
+          Tiene que solaparse, no solo tocarse: dos bordes contiguos también la dejan ver.
+          -z-10 lo deja bajo el contenido: el escudo de desktop sobresale del header */}
       <header
-        className={`fixed top-0 left-0 right-0 z-50 w-full transition-all duration-500 ${
+        className={`fixed top-0 left-0 right-0 z-50 w-full transition-all duration-500 after:absolute after:inset-x-0 after:-bottom-0.5 after:-z-10 after:h-1 after:bg-inherit ${
           isHome
             ? scrolled
               ? 'bg-azul-primario'
