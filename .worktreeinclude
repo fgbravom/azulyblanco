@@ -1,0 +1,2 @@
+# Archivos ignorados por git que Claude Code copia a cada worktree nuevo (claude --worktree)
+website/.env.local

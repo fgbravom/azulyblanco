@@ -16,3 +16,6 @@ database/privado/
 
 # Notas de sesiones de la agente: local, no se versiona
 .opencode/
+
+# Worktrees de sesiones en paralelo de Claude Code
+.claude/worktrees/
