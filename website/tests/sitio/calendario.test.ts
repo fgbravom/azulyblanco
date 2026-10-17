@@ -1,11 +1,14 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { actividadAEvento, horaCorta, nombreActividad } from '@/lib/contenido/calendario'
 import {
+  desenlaceAYB,
+  equiposDelPartido,
   esEquipoAYB,
   esFechaHoy,
   filtrarSoloPartidos,
   formatearNombrePartido,
   obtenerProximosEventos,
+  serieDeAYB,
 } from '@/lib/utils/calendario'
 import type { Actividad } from '@/lib/contenido/tipos'
 import type { EventoCalendario } from '@/lib/types/calendario'
@@ -40,6 +43,14 @@ describe('actividadAEvento', () => {
     expect(e.horaFin).toBe('10:30')
     expect(e.series).toBeUndefined()
     expect(e.rival).toBeUndefined()
+  })
+
+  it('arma el resultado solo con los goles de ambos lados', () => {
+    expect(actividadAEvento(actividad({ goles_local: 2, goles_visitante: 0 })).resultado).toEqual({ local: 2, visitante: 0 })
+    expect(actividadAEvento(actividad({ goles_local: 0, goles_visitante: 0 })).resultado).toEqual({ local: 0, visitante: 0 })
+    expect(actividadAEvento(actividad({ goles_local: null, goles_visitante: null })).resultado).toBeUndefined()
+    // Sin la migración 012 las columnas no llegan
+    expect(actividadAEvento(actividad({})).resultado).toBeUndefined()
   })
 
   it('horaCorta sin hora devuelve undefined', () => {
@@ -99,5 +110,51 @@ describe('próximos eventos', () => {
   it('filtrarSoloPartidos deja fuera entrenamientos y eventos', () => {
     const eventos = [evento('2026-01-01', 'partido'), evento('2026-01-02', 'entrenamiento'), evento('2026-01-03', 'evento')]
     expect(filtrarSoloPartidos(eventos)).toHaveLength(1)
+  })
+})
+
+describe('detalle del partido', () => {
+  it.each([
+    ['AYB', undefined],
+    ['AYB35', 'Serie 35'],
+    ['SERIE HONOR', 'Serie Honor'],
+    ['Primera', 'Serie Primera'],
+  ])('serieDeAYB(%j) → %j', (sigla, serie) => {
+    expect(serieDeAYB(sigla)).toBe(serie)
+  })
+
+  it('usa el nombre completo y el logo del rival del catálogo', () => {
+    const { local, visitante } = equiposDelPartido({ rival: 'AYB35 VS SM', rivalNombre: 'San Martín', rivalLogo: '/sm.png' })
+    expect(local).toEqual({ sigla: 'AYB35', nombre: 'Azul y Blanco', detalle: 'Serie 35', esAYB: true })
+    expect(visitante).toEqual({ sigla: 'SM', nombre: 'San Martín', detalle: 'SM', esAYB: false, logo: '/sm.png' })
+  })
+
+  it('pone el rival a la izquierda cuando AYB es visita', () => {
+    const { local, visitante } = equiposDelPartido({ rival: 'SM VS AYB', rivalNombre: 'San Martín' })
+    expect(local).toMatchObject({ nombre: 'San Martín', esAYB: false })
+    expect(visitante).toMatchObject({ nombre: 'Azul y Blanco', esAYB: true })
+  })
+
+  it('sin rival del catálogo deja la sigla como nombre', () => {
+    expect(equiposDelPartido({ rival: 'AYB VS CLUB AMÉRICA' }).visitante).toMatchObject({ nombre: 'CLUB AMÉRICA', detalle: undefined })
+  })
+
+  it('sin "vs" asume AYB de local', () => {
+    const { local, visitante } = equiposDelPartido({ rival: 'Unión' })
+    expect(local.esAYB).toBe(true)
+    expect(visitante.sigla).toBe('Unión')
+  })
+
+  it.each([
+    ['AYB VS SM', 3, 1, 'victoria'],
+    ['SM VS AYB', 3, 1, 'derrota'],
+    ['AYB VS SM', 1, 1, 'empate'],
+    ['SERIE HONOR VS SERIE 35', 2, 0, undefined],
+  ])('%s %i-%i → %s para AYB', (rival, l, v, esperado) => {
+    expect(desenlaceAYB({ ...evento('2026-01-01'), rival, resultado: { local: l, visitante: v } })).toBe(esperado)
+  })
+
+  it('sin resultado no hay desenlace', () => {
+    expect(desenlaceAYB({ ...evento('2026-01-01'), rival: 'AYB VS SM' })).toBeUndefined()
   })
 })

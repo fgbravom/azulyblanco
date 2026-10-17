@@ -4,12 +4,8 @@ import { EventoCalendario } from '@/lib/types/calendario'
 import { useMemo, useState } from 'react'
 import { obtenerProximosEventos } from '@/lib/utils/calendario'
 import Image from 'next/image'
-import { Banknote, MapPin, X, Clock, MessageCircle } from 'lucide-react'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { SITE_CONFIG } from '@/lib/constants'
-import Link from 'next/link'
-import { NombrePartido } from './NombrePartido'
+import { Banknote, MapPin } from 'lucide-react'
+import { DetalleEvento } from './DetalleEvento'
 
 // Escudo del club, siempre contenido (relativo + fill con object-contain)
 function EscudoAYB({ alt }: { alt: string }) {
@@ -180,7 +176,13 @@ export function ProximosPartidos({ eventos, limite = 3 }: ProximosPartidosProps)
                       <span className="text-white font-bold text-sm md:text-2xl text-right break-words">{equipos.local}</span>
                       {escudoIzquierdo}
                     </div>
-                    <span className="text-white/70 text-sm md:text-2xl font-normal px-3 md:px-6 whitespace-nowrap">Vs</span>
+                    {evento.resultado ? (
+                      <span className="text-white text-lg md:text-3xl font-black tabular-nums px-3 md:px-6 whitespace-nowrap">
+                        {evento.resultado.local} – {evento.resultado.visitante}
+                      </span>
+                    ) : (
+                      <span className="text-white/70 text-sm md:text-2xl font-normal px-3 md:px-6 whitespace-nowrap">Vs</span>
+                    )}
                     {/* Rival: código alineado hacia el centro */}
                     <div className="flex items-center justify-start gap-2 md:gap-4 min-w-0">
                       {escudoDerecho}
@@ -242,167 +244,8 @@ export function ProximosPartidos({ eventos, limite = 3 }: ProximosPartidosProps)
         )
       })}
 
-      {/* Drawer/Panel Lateral de Detalle de Evento */}
       {eventoSeleccionado && (
-        <>
-          {/* Backdrop */}
-          <div
-            className="fixed inset-0 bg-black/30 z-40 transition-opacity"
-            onClick={() => setEventoSeleccionado(null)}
-          />
-
-          {/* Panel Lateral */}
-          <div className="fixed inset-y-0 right-0 w-full md:w-96 bg-white shadow-2xl z-50 transform transition-transform duration-300 ease-out overflow-y-auto">
-            {/* Header del Panel */}
-            <div className="sticky top-0 bg-gradient-to-r from-azul-primario to-azul-claro text-white p-6 shadow-md">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="absolute top-4 right-4 text-white hover:bg-white/20 rounded-full"
-                onClick={() => setEventoSeleccionado(null)}
-              >
-                <X className="w-5 h-5" />
-              </Button>
-
-              <div className="pr-10">
-                <div className="flex items-center gap-2 mb-3">
-                  <Badge
-                    variant={eventoSeleccionado.tipo === 'partido' ? 'default' : 'secondary'}
-                    className={`backdrop-blur-sm border-0 ${
-                      eventoSeleccionado.tipo === 'evento'
-                        ? 'bg-purple-500/30 text-white'
-                        : 'bg-white/20'
-                    }`}
-                  >
-                    {eventoSeleccionado.tipo === 'partido' ? '⚽' : eventoSeleccionado.tipo === 'evento' ? '🎉' : '🏃'} {eventoSeleccionado.tipo.toUpperCase()}
-                  </Badge>
-                  {!eventoSeleccionado.confirmado && (
-                    <Badge className="bg-orange-500/20 text-white border-white/40">
-                      Por confirmar
-                    </Badge>
-                  )}
-                </div>
-
-                {eventoSeleccionado.tipo === 'partido' ? (
-                  <NombrePartido
-                    rivalText={eventoSeleccionado.rival || 'Por confirmar'}
-                    rivalLogo={eventoSeleccionado.rivalLogo}
-                    className="text-2xl font-bold mb-2"
-                    mostrarVS={true}
-                    tamañoEscudo={32}
-                  />
-                ) : eventoSeleccionado.tipo === 'evento' ? (
-                  <h2 className="text-2xl font-bold mb-2">
-                    {eventoSeleccionado.titulo || 'Evento Especial'}
-                  </h2>
-                ) : (
-                  <h2 className="text-2xl font-bold mb-2">
-                    {eventoSeleccionado.actividad || 'Entrenamiento'}
-                  </h2>
-                )}
-
-                <div className="flex items-center gap-2 text-white/90">
-                  <span className="font-semibold">{eventoSeleccionado.dia}</span>
-                  <span>•</span>
-                  <span>{eventoSeleccionado.diaMes} de {eventoSeleccionado.mes}</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Contenido del Panel */}
-            <div className="p-6 space-y-6">
-              {/* Descripción del evento (solo para tipo evento) */}
-              {eventoSeleccionado.tipo === 'evento' && eventoSeleccionado.descripcion && (
-                <div className="bg-purple-50 rounded-xl p-4 border border-purple-200">
-                  <p className="text-sm text-gray-700 leading-relaxed">{eventoSeleccionado.descripcion}</p>
-                </div>
-              )}
-
-              {/* Detalles */}
-              <div className="space-y-4">
-                <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
-                  <div className="flex items-start gap-3">
-                    <div className="bg-azul-primario/10 p-2 rounded-lg">
-                      <MapPin className="w-5 h-5 text-azul-primario" />
-                    </div>
-                    <div className="flex-1">
-                      <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">Lugar</div>
-                      <div className="font-semibold text-gray-900">{eventoSeleccionado.estadio}</div>
-                    </div>
-                  </div>
-                </div>
-
-                {eventoSeleccionado.horaInicio && (
-                  <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
-                    <div className="flex items-start gap-3">
-                      <div className="bg-azul-primario/10 p-2 rounded-lg">
-                        <Clock className="w-5 h-5 text-azul-primario" />
-                      </div>
-                      <div className="flex-1">
-                        <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">Horario</div>
-                        <div className="font-semibold text-gray-900">
-                          {eventoSeleccionado.horaInicio}
-                          {eventoSeleccionado.horaFin ? ` - ${eventoSeleccionado.horaFin}` : ''} hrs
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Series participantes */}
-                {eventoSeleccionado.series && eventoSeleccionado.series.length > 0 && (
-                  <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
-                    <div className="text-xs text-gray-500 uppercase tracking-wide mb-2">Series Participantes</div>
-                    <div className="flex flex-wrap gap-2">
-                      {eventoSeleccionado.series.map((serie, index) => (
-                        <Badge key={index} variant="outline" className="bg-white">
-                          {serie}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Precio de entrada */}
-                {eventoSeleccionado.precioEntrada && (
-                  <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
-                    <div className="text-xs text-gray-500 uppercase tracking-wide mb-2">Entrada</div>
-                    <div className="space-y-1">
-                      <div className="font-semibold text-gray-900">
-                        General: ${eventoSeleccionado.precioEntrada.replace('.', '')}
-                      </div>
-                      {eventoSeleccionado.edadGratis && (
-                        <div className="text-sm text-green-600 font-medium">
-                          {eventoSeleccionado.edadGratis} NO PAGAN
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Botón WhatsApp solo para partidos */}
-              {eventoSeleccionado.tipo === 'partido' && SITE_CONFIG.contact.whatsapp && (
-                <div className="pt-2">
-                  <Button
-                    asChild
-                    className="w-full bg-green-500 hover:bg-green-600 text-white shadow-lg hover:shadow-xl transition-all rounded-xl h-12"
-                  >
-                    <Link
-                      href={`https://wa.me/${SITE_CONFIG.contact.whatsapp.replace(/[^0-9]/g, '')}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center justify-center gap-2"
-                    >
-                      <MessageCircle className="w-5 h-5" />
-                      <span className="font-semibold">Revisa la nómina</span>
-                    </Link>
-                  </Button>
-                </div>
-              )}
-            </div>
-          </div>
-        </>
+        <DetalleEvento key={eventoSeleccionado.id} evento={eventoSeleccionado} onCerrar={() => setEventoSeleccionado(null)} />
       )}
     </div>
   )

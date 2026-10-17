@@ -50,6 +50,69 @@ export function formatearNombrePartido(rivalText: string): {
   }
 }
 
+export interface EquipoPartido {
+  sigla: string // lo que se escribió en la programación: "AYB35", "SM"
+  nombre: string // nombre completo: "Azul y Blanco", "San Martín"
+  detalle?: string // segunda línea: la serie de AYB o la sigla del rival
+  esAYB: boolean
+  logo?: string // solo el rival del catálogo
+}
+
+/** "AYB35" → "Serie 35", "SERIE HONOR" → "Serie Honor", "AYB" → undefined */
+export function serieDeAYB(sigla: string): string | undefined {
+  const resto = sigla
+    .toUpperCase()
+    .replace(/AZUL Y BLANCO|AYB/g, '')
+    .trim()
+    .replace(/^SERIE\s+/, '')
+  if (!resto) return undefined
+  return `Serie ${resto.toLowerCase().replace(/(^|\s)\S/g, (l) => l.toUpperCase())}`
+}
+
+/**
+ * Los dos equipos de un partido, con nombre completo para el detalle.
+ * Sin "vs" en el texto se asume AYB local, igual que en las tarjetas.
+ */
+export function equiposDelPartido(
+  evento: Pick<EventoCalendario, 'rival' | 'rivalNombre' | 'rivalLogo'>
+): { local: EquipoPartido; visitante: EquipoPartido } {
+  const texto = evento.rival || 'Por confirmar'
+  const { equipoLocal, equipoVisitante } = formatearNombrePartido(texto)
+  const [siglaLocal, siglaVisitante] = equipoLocal ? [equipoLocal, equipoVisitante] : ['AYB', texto]
+  const localEsAYB = esEquipoAYB(siglaLocal)
+  // El rival del catálogo es el lado que no es de AYB (la visita si ninguno lo es)
+  const rivalEsLocal = !localEsAYB && esEquipoAYB(siglaVisitante)
+
+  const armar = (sigla: string, esRival: boolean): EquipoPartido => {
+    if (esEquipoAYB(sigla) && !esRival) {
+      return { sigla, nombre: 'Azul y Blanco', detalle: serieDeAYB(sigla), esAYB: true }
+    }
+    return {
+      sigla,
+      nombre: (esRival && evento.rivalNombre) || sigla,
+      detalle: esRival && evento.rivalNombre ? sigla : undefined,
+      esAYB: false,
+      logo: esRival ? evento.rivalLogo : undefined,
+    }
+  }
+
+  return {
+    local: armar(siglaLocal, rivalEsLocal),
+    visitante: armar(siglaVisitante, !rivalEsLocal && !esEquipoAYB(siglaVisitante)),
+  }
+}
+
+/** Cómo le fue a AYB; undefined si no hay resultado o si es un partido interno */
+export function desenlaceAYB(evento: EventoCalendario): 'victoria' | 'empate' | 'derrota' | undefined {
+  if (!evento.resultado) return undefined
+  const { local, visitante } = equiposDelPartido(evento)
+  if (local.esAYB === visitante.esAYB) return undefined
+  const [propios, ajenos] = local.esAYB
+    ? [evento.resultado.local, evento.resultado.visitante]
+    : [evento.resultado.visitante, evento.resultado.local]
+  return propios > ajenos ? 'victoria' : propios < ajenos ? 'derrota' : 'empate'
+}
+
 /**
  * Obtiene la fecha actual en formato YYYY-MM-DD
  * Esta función garantiza consistencia en la comparación de fechas
