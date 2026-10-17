@@ -155,7 +155,7 @@ export function Header({ isHome = false, hideInitially = false }: HeaderProps) {
             {/* CTA Buttons - Right side, visible from 1280px */}
             <div className="hidden xl:flex items-center gap-2 flex-shrink-0 order-4 xl:pt-3">
               <Button asChild variant="ghost" className="text-white hover:bg-white hover:text-azul-primario text-sm px-3 h-10 transition-colors">
-                <Link href="/admin/login">
+                <Link href="/admin/login" target="_blank" rel="noopener noreferrer">
                   <LogIn aria-hidden="true" />
                   Intranet
                 </Link>
@@ -255,7 +255,7 @@ export function Header({ isHome = false, hideInitially = false }: HeaderProps) {
             </Link>
           </Button>
           <Button asChild variant="outline" className="w-[60%] h-12 text-lg [&_svg]:size-5">
-            <Link href="/admin/login" onClick={() => setMobileMenuOpen(false)}>
+            <Link href="/admin/login" target="_blank" rel="noopener noreferrer" onClick={() => setMobileMenuOpen(false)}>
               <LogIn aria-hidden="true" />
               Intranet
             </Link>
