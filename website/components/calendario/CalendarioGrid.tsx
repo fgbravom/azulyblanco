@@ -1,227 +1,195 @@
 "use client"
 
-import { Card, CardContent } from '@/components/ui/card'
-import { EventoCalendario } from '@/lib/types/calendario'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
-import { Button } from '@/components/ui/button'
 import { useState } from 'react'
-import { esFechaHoy } from '@/lib/utils/calendario'
-import { DetalleEvento } from './DetalleEvento'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { EventoCalendario } from '@/lib/types/calendario'
+import { cn } from '@/lib/utils'
+import { ListaPorDia } from './ListaEventos'
+
+const DIAS_SEMANA = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom']
+const MESES = [
+  'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+  'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre',
+]
+
+const COLOR_TIPO = {
+  partido: 'bg-azul-primario',
+  evento: 'bg-purple-500',
+  entrenamiento: 'bg-gray-400',
+} as const
+
+const CHIP_TIPO = {
+  partido: 'border-azul-primario bg-azul-primario/5 text-azul-oscuro',
+  evento: 'border-purple-500 bg-purple-50 text-purple-800',
+  entrenamiento: 'border-gray-400 bg-gray-100 text-gray-700',
+} as const
+
+function nombreCorto(evento: EventoCalendario) {
+  if (evento.tipo === 'partido') return evento.rival || 'Partido'
+  if (evento.tipo === 'evento') return evento.titulo || 'Evento'
+  return evento.actividad || 'Entrenamiento'
+}
+
+/** "2026-10" + 7 → "2026-10-07" */
+function fechaDelMes(mes: string, dia: number) {
+  return `${mes}-${String(dia).padStart(2, '0')}`
+}
 
 interface CalendarioGridProps {
   eventos: EventoCalendario[]
+  hoy: string
+  onAbrir: (evento: EventoCalendario) => void
 }
 
-export function CalendarioGrid({ eventos }: CalendarioGridProps) {
-  // Inicializar con el mes actual
-  const [mesActual, setMesActual] = useState(() => {
-    const hoy = new Date()
-    return new Date(hoy.getFullYear(), hoy.getMonth(), 1)
-  })
-  const [eventoSeleccionado, setEventoSeleccionado] = useState<EventoCalendario | null>(null)
+/**
+ * Vista de mes: grilla con puntos por actividad en mobile y nombres abreviados en escritorio.
+ * Debajo van las tarjetas del mes completo, o solo las del día elegido en la grilla.
+ */
+export function CalendarioGrid({ eventos, hoy, onAbrir }: CalendarioGridProps) {
+  const [mes, setMes] = useState(() => hoy.slice(0, 7)) // "2026-10"
+  const [diaElegido, setDiaElegido] = useState<string | null>(null)
 
-  // Días de la semana empezando por LUNES (estándar chileno)
-  const diasSemana = ['LUN', 'MAR', 'MIÉ', 'JUE', 'VIE', 'SÁB', 'DOM']
-  const meses = [
-    'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-    'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+  const [anio, numeroMes] = mes.split('-').map(Number)
+  const diasEnMes = new Date(anio, numeroMes, 0).getDate()
+  // Lunes primero (estándar chileno): getDay() da 0 = domingo
+  const desfase = (new Date(anio, numeroMes - 1, 1).getDay() + 6) % 7
+  const celdas: (number | null)[] = [
+    ...Array<null>(desfase).fill(null),
+    ...Array.from({ length: diasEnMes }, (_, i) => i + 1),
   ]
+  while (celdas.length % 7 !== 0) celdas.push(null)
 
-  // Obtener el primer día del mes y el número de días
-  const primerDia = new Date(mesActual.getFullYear(), mesActual.getMonth(), 1)
-  const ultimoDia = new Date(mesActual.getFullYear(), mesActual.getMonth() + 1, 0)
-  const diasEnMes = ultimoDia.getDate()
-  // Ajustar para que lunes sea 0 (getDay() devuelve 0=domingo, 1=lunes, etc.)
-  const diaSemanaInicio = (primerDia.getDay() + 6) % 7
+  const delMes = eventos.filter((e) => e.fecha.startsWith(`${mes}-`))
+  const porDia = (fecha: string) => delMes.filter((e) => e.fecha === fecha)
+  const visibles = diaElegido ? porDia(diaElegido) : delMes
 
-  // Verificar si un día es hoy usando la función centralizada
-  const esHoy = (dia: number) => {
-    const año = mesActual.getFullYear()
-    const mes = String(mesActual.getMonth() + 1).padStart(2, '0')
-    const diaStr = String(dia).padStart(2, '0')
-    const fecha = `${año}-${mes}-${diaStr}`
-    return esFechaHoy(fecha)
-  }
-
-  // Obtener eventos para un día específico
-  const getEventosDelDia = (dia: number) => {
-    const fechaBuscada = `${mesActual.getFullYear()}-${String(mesActual.getMonth() + 1).padStart(2, '0')}-${String(dia).padStart(2, '0')}`
-    return eventos.filter(evento => evento.fecha === fechaBuscada)
-  }
-
-  // Navegar entre meses
-  const mesAnterior = () => {
-    setMesActual(new Date(mesActual.getFullYear(), mesActual.getMonth() - 1, 1))
-  }
-
-  const mesSiguiente = () => {
-    setMesActual(new Date(mesActual.getFullYear(), mesActual.getMonth() + 1, 1))
-  }
-
-  // Generar array de días (incluyendo espacios vacíos al inicio)
-  const dias = []
-
-  // Días vacíos al inicio
-  for (let i = 0; i < diaSemanaInicio; i++) {
-    dias.push(null)
-  }
-
-  // Días del mes
-  for (let dia = 1; dia <= diasEnMes; dia++) {
-    dias.push(dia)
+  const moverMes = (paso: number) => {
+    const destino = new Date(anio, numeroMes - 1 + paso, 1)
+    setMes(`${destino.getFullYear()}-${String(destino.getMonth() + 1).padStart(2, '0')}`)
+    setDiaElegido(null)
   }
 
   return (
-    <div className="w-full">
-      {/* Header con navegación */}
-      <div className="flex items-center justify-between mb-6">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={mesAnterior}
-          className="flex items-center gap-1"
+    <div>
+      <div className="mb-4 flex items-center justify-between gap-2">
+        <button
+          type="button"
+          onClick={() => moverMes(-1)}
+          aria-label="Mes anterior"
+          className="flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 bg-white text-azul-primario transition-colors hover:bg-azul-primario hover:text-white"
         >
-          <ChevronLeft className="w-4 h-4" />
-          Anterior
-        </Button>
-
-        <h2 className="text-2xl font-bold text-azul-oscuro">
-          {meses[mesActual.getMonth()]} {mesActual.getFullYear()}
+          <ChevronLeft className="h-5 w-5" />
+        </button>
+        <h2 className="text-xl font-bold text-azul-primario md:text-2xl" aria-live="polite">
+          {MESES[numeroMes - 1]} {anio}
         </h2>
-
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={mesSiguiente}
-          className="flex items-center gap-1"
+        <button
+          type="button"
+          onClick={() => moverMes(1)}
+          aria-label="Mes siguiente"
+          className="flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 bg-white text-azul-primario transition-colors hover:bg-azul-primario hover:text-white"
         >
-          Siguiente
-          <ChevronRight className="w-4 h-4" />
-        </Button>
+          <ChevronRight className="h-5 w-5" />
+        </button>
       </div>
 
-      {/* Grid del calendario */}
-      <Card className="overflow-hidden rounded-lg">
-        <CardContent className="p-0">
-          {/* Encabezados de días de la semana */}
-          <div className="grid grid-cols-7 bg-azul-primario text-white">
-            {diasSemana.map((dia) => (
-              <div
-                key={dia}
-                className="text-center py-3 text-sm font-semibold border-r border-white/20 last:border-r-0"
+      <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
+        <div className="grid grid-cols-7 border-b border-gray-100">
+          {DIAS_SEMANA.map((dia) => (
+            <div key={dia} className="py-3 text-center text-xs font-semibold uppercase text-gray-500">
+              <span className="md:hidden">{dia.charAt(0)}</span>
+              <span className="hidden md:inline">{dia}</span>
+            </div>
+          ))}
+        </div>
+
+        <div className="grid grid-cols-7">
+          {celdas.map((dia, i) => {
+            const fueraDeFila = i % 7 === 6 ? '' : 'border-r'
+            if (!dia) return <div key={i} className={cn('border-b border-gray-100 bg-gray-50/60', fueraDeFila)} />
+
+            const fecha = fechaDelMes(mes, dia)
+            const delDia = porDia(fecha)
+            const elegido = diaElegido === fecha
+            const esHoy = fecha === hoy
+
+            return (
+              <button
+                key={i}
+                type="button"
+                disabled={delDia.length === 0}
+                aria-pressed={elegido}
+                aria-label={`${dia} de ${MESES[numeroMes - 1].toLowerCase()}${delDia.length ? `, ${delDia.length} actividades` : ''}`}
+                onClick={() => setDiaElegido(elegido ? null : fecha)}
+                className={cn(
+                  'flex min-h-14 flex-col items-center gap-1 border-b border-gray-100 p-1 transition-colors md:min-h-28 md:items-stretch md:p-2',
+                  fueraDeFila,
+                  delDia.length > 0 && 'hover:bg-azul-primario/5',
+                  elegido && 'bg-azul-primario/10 hover:bg-azul-primario/10'
+                )}
               >
-                {dia}
-              </div>
-            ))}
-          </div>
-
-          {/* Días del mes */}
-          <div className="grid grid-cols-7">
-            {dias.map((dia, index) => {
-              const eventosDelDia = dia ? getEventosDelDia(dia) : []
-              const esHoyDia = dia ? esHoy(dia) : false
-
-              return (
-                <div
-                  key={index}
-                  className={`
-                    min-h-[100px] md:min-h-[120px] p-2 border-r border-b border-gray-200
-                    ${dia ? 'bg-white hover:bg-gray-50' : 'bg-gray-100'}
-                    ${index % 7 === 6 ? 'border-r-0' : ''}
-                  `}
-                >
-                  {dia && (
-                    <>
-                      {/* Número del día */}
-                      <div className="flex justify-end mb-1">
-                        <span
-                          className={`
-                            text-sm font-semibold w-7 h-7 flex items-center justify-center rounded-full
-                            ${esHoyDia ? 'bg-azul-primario text-white' : 'text-gray-700'}
-                          `}
-                        >
-                          {dia}
-                        </span>
-                      </div>
-
-                      {/* Eventos del día */}
-                      <div className="space-y-1">
-                        {eventosDelDia.slice(0, 2).map((evento) => {
-                          const esPartido = evento.tipo === 'partido'
-                          const esEvento = evento.tipo === 'evento'
-                          const esEntrenamiento = evento.tipo === 'entrenamiento'
-
-                          return (
-                            <div
-                              key={evento.id}
-                              onClick={() => setEventoSeleccionado(evento)}
-                              className={`
-                                text-xs px-2 py-1 rounded truncate cursor-pointer transition-all
-                                ${esPartido
-                                  ? 'bg-azul-primario/10 text-azul-oscuro border-l-2 border-azul-primario hover:bg-azul-primario/20'
-                                  : esEvento
-                                  ? 'bg-purple-100 text-purple-800 border-l-2 border-purple-500 hover:bg-purple-200'
-                                  : 'bg-gray-200 text-gray-700 border-l-2 border-gray-400 hover:bg-gray-300'
-                                }
-                              `}
-                              title={esPartido ? evento.rival : esEvento ? evento.titulo : evento.actividad}
-                            >
-                              <div className="flex items-center gap-1">
-                                <span>{esPartido ? '⚽' : esEvento ? '🎉' : '🏃'}</span>
-                                <span className="truncate">
-                                  {esPartido ? evento.rival : esEvento ? evento.titulo : evento.actividad}
-                                </span>
-                              </div>
-                              {esPartido && evento.resultado ? (
-                                <div className="text-[10px] font-bold tabular-nums">
-                                  {evento.resultado.local} – {evento.resultado.visitante}
-                                </div>
-                              ) : evento.horaInicio && (
-                                <div className="text-[10px] opacity-75">
-                                  {evento.horaInicio}hs
-                                </div>
-                              )}
-                            </div>
-                          )
-                        })}
-                        {eventosDelDia.length > 2 && (
-                          <div className="text-[10px] text-gray-500 px-2">
-                            +{eventosDelDia.length - 2} más
-                          </div>
-                        )}
-                      </div>
-                    </>
+                <span
+                  className={cn(
+                    'flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-sm md:self-end',
+                    esHoy ? 'bg-azul-primario font-bold text-white' : delDia.length ? 'font-semibold text-gray-900' : 'text-gray-400'
                   )}
-                </div>
-              )
-            })}
-          </div>
-        </CardContent>
-      </Card>
+                >
+                  {dia}
+                </span>
 
-      {/* Leyenda */}
-      <div className="mt-4 flex flex-wrap items-center gap-4 text-sm text-gray-600">
-        <div className="flex items-center gap-2">
-          <div className="w-4 h-4 rounded-full bg-azul-primario"></div>
-          <span>Día actual</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-4 h-1 bg-azul-primario"></div>
-          <span>Partido</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-4 h-1 bg-purple-500"></div>
-          <span>Evento Especial</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-4 h-1 bg-gray-400"></div>
-          <span>Entrenamiento</span>
+                {/* Mobile: un punto por actividad */}
+                {delDia.length > 0 && (
+                  <span className="flex gap-0.5 md:hidden">
+                    {delDia.slice(0, 3).map((e) => (
+                      <span key={e.id} className={cn('h-1.5 w-1.5 rounded-full', COLOR_TIPO[e.tipo])} />
+                    ))}
+                  </span>
+                )}
+
+                {/* Escritorio: nombre abreviado con hora o resultado */}
+                <span className="hidden w-full space-y-1 text-left md:block">
+                  {delDia.slice(0, 2).map((e) => (
+                    <span key={e.id} className={cn('block rounded border-l-2 px-1.5 py-0.5 text-[11px] leading-tight', CHIP_TIPO[e.tipo])}>
+                      <span className="block truncate font-medium">{nombreCorto(e)}</span>
+                      {e.resultado ? (
+                        <span className="font-bold tabular-nums">{e.resultado.local} – {e.resultado.visitante}</span>
+                      ) : (
+                        e.horaInicio && <span className="opacity-75">{e.horaInicio} hrs</span>
+                      )}
+                    </span>
+                  ))}
+                  {delDia.length > 2 && (
+                    <span className="block px-1.5 text-[11px] text-gray-500">+{delDia.length - 2} más</span>
+                  )}
+                </span>
+              </button>
+            )
+          })}
         </div>
       </div>
 
-      {eventoSeleccionado && (
-        <DetalleEvento key={eventoSeleccionado.id} evento={eventoSeleccionado} onCerrar={() => setEventoSeleccionado(null)} />
-      )}
+      <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-gray-500">
+        <span className="flex items-center gap-1.5"><span className={cn('h-2 w-2 rounded-full', COLOR_TIPO.partido)} />Partido</span>
+        <span className="flex items-center gap-1.5"><span className={cn('h-2 w-2 rounded-full', COLOR_TIPO.evento)} />Evento especial</span>
+        <span className="flex items-center gap-1.5"><span className={cn('h-2 w-2 rounded-full', COLOR_TIPO.entrenamiento)} />Entrenamiento</span>
+      </div>
+
+      <div className="mt-10">
+        {diaElegido && (
+          <button
+            type="button"
+            onClick={() => setDiaElegido(null)}
+            className="mb-4 text-sm font-medium text-azul-claro hover:underline"
+          >
+            Ver todo {MESES[numeroMes - 1].toLowerCase()}
+          </button>
+        )}
+        {visibles.length > 0 ? (
+          <ListaPorDia eventos={visibles} hoy={hoy} onAbrir={onAbrir} />
+        ) : (
+          <p className="py-10 text-center text-gray-500">Sin actividades en {MESES[numeroMes - 1].toLowerCase()}</p>
+        )}
+      </div>
     </div>
   )
 }

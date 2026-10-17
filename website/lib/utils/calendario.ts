@@ -119,6 +119,33 @@ export function fechaLarga(evento: Pick<EventoCalendario, 'dia' | 'diaMes' | 'me
   return `${dia} ${evento.diaMes} de ${evento.mes.toLowerCase()}`
 }
 
+/**
+ * Separa la programación de la página de partidos: lo de hoy en adelante en orden,
+ * y los partidos ya jugados del más reciente al más antiguo (dentro del día, por hora).
+ */
+export function separarProgramacion(
+  eventos: EventoCalendario[],
+  hoy: string
+): { proximos: EventoCalendario[]; jugados: EventoCalendario[] } {
+  return {
+    proximos: ordenarEventosPorFecha(eventos.filter((e) => e.fecha >= hoy)),
+    jugados: eventos
+      .filter((e) => e.tipo === 'partido' && e.fecha < hoy)
+      .sort((a, b) => b.fecha.localeCompare(a.fecha)),
+  }
+}
+
+/** Agrupa eventos ya ordenados por día, conservando el orden */
+export function agruparPorDia(eventos: EventoCalendario[]): { fecha: string; eventos: EventoCalendario[] }[] {
+  const grupos: { fecha: string; eventos: EventoCalendario[] }[] = []
+  for (const evento of eventos) {
+    const ultimo = grupos[grupos.length - 1]
+    if (ultimo?.fecha === evento.fecha) ultimo.eventos.push(evento)
+    else grupos.push({ fecha: evento.fecha, eventos: [evento] })
+  }
+  return grupos
+}
+
 /** Cómo le fue a AYB; undefined si no hay resultado o si es un partido interno */
 export function desenlaceAYB(evento: EventoCalendario): 'victoria' | 'empate' | 'derrota' | undefined {
   if (!evento.resultado) return undefined

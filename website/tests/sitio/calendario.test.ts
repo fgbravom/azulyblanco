@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { actividadAEvento, horaCorta, nombreActividad } from '@/lib/contenido/calendario'
 import {
+  agruparPorDia,
   desenlaceAYB,
   equiposDeEvento,
   equiposDelPartido,
@@ -10,6 +11,7 @@ import {
   filtrarSoloPartidos,
   formatearNombrePartido,
   obtenerProximosEventos,
+  separarProgramacion,
   serieDeAYB,
 } from '@/lib/utils/calendario'
 import type { Actividad } from '@/lib/contenido/tipos'
@@ -169,5 +171,34 @@ describe('detalle del partido', () => {
 
   it('fechaLarga capitaliza solo el día', () => {
     expect(fechaLarga({ dia: 'MIÉRCOLES', diaMes: 7, mes: 'OCTUBRE' })).toBe('Miércoles 7 de octubre')
+  })
+})
+
+describe('página de partidos', () => {
+  const lista = [
+    { ...evento('2026-10-10'), id: 'a' },
+    { ...evento('2026-10-17', 'entrenamiento'), id: 'b' },
+    { ...evento('2026-10-17'), id: 'c' },
+    { ...evento('2026-10-18'), id: 'd1' },
+    { ...evento('2026-10-18'), id: 'd2' },
+    { ...evento('2026-10-03'), id: 'e1' },
+    { ...evento('2026-10-03'), id: 'e2' },
+    { ...evento('2026-10-12', 'evento'), id: 'f' },
+  ]
+
+  it('separa lo de hoy en adelante de los partidos ya jugados', () => {
+    const { proximos, jugados } = separarProgramacion(lista, '2026-10-17')
+    expect(proximos.map((e) => e.id)).toEqual(['b', 'c', 'd1', 'd2'])
+    // Del más reciente al más antiguo, sin entrenamientos ni eventos, y por hora dentro del día
+    expect(jugados.map((e) => e.id)).toEqual(['a', 'e1', 'e2'])
+  })
+
+  it('agrupa por día conservando el orden', () => {
+    const { proximos } = separarProgramacion(lista, '2026-10-17')
+    expect(agruparPorDia(proximos).map((g) => [g.fecha, g.eventos.length])).toEqual([
+      ['2026-10-17', 2],
+      ['2026-10-18', 2],
+    ])
+    expect(agruparPorDia([])).toEqual([])
   })
 })
