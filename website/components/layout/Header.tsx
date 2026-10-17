@@ -42,18 +42,15 @@ export function Header({ isHome = false, hideInitially = false }: HeaderProps) {
 
   return (
     <>
-      {/* El ::after solapa el borde inferior del header (2px dentro, 2px fuera):
+      {/* El fondo azul es el ::after, que cubre el header y 2px más hacia abajo:
           con escalas fraccionarias (DPR 2.625, zoom) el antialiasing del borde
           dejaba asomar una línea del fondo blanco del body entre header y hero.
-          Tiene que solaparse, no solo tocarse: dos bordes contiguos también la dejan ver.
+          Una sola capa y no un parche aparte bajo el borde: dos capas se ven como
+          dos piezas al animarse (franja más oscura o un salto de 2px al final).
           -z-10 lo deja bajo el contenido: el escudo de desktop sobresale del header */}
       <header
-        className={`fixed top-0 left-0 right-0 z-50 w-full transition-all duration-500 after:absolute after:inset-x-0 after:-bottom-0.5 after:-z-10 after:h-1 after:bg-inherit ${
-          isHome
-            ? scrolled
-              ? 'bg-azul-primario'
-              : 'bg-transparent'
-            : 'bg-azul-primario'
+        className={`fixed top-0 left-0 right-0 z-50 w-full transition-all duration-500 after:absolute after:inset-x-0 after:top-0 after:-bottom-0.5 after:-z-10 after:bg-azul-primario after:transition-opacity after:duration-500 ${
+          isHome && !scrolled ? 'after:opacity-0' : ''
         }`}
         // Oculto hasta que el hero abre la cortina (ver "Hero" en globals.css)
         data-hero-gated={hideInitially ? '' : undefined}
