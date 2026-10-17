@@ -69,17 +69,17 @@ export default async function HomePage() {
         <HeroSection />
 
         {/* Próximos Partidos */}
-        <section className="py-16 bg-azul-primario">
-          <div className="mb-8">
+        <section className="bg-white">
+          <div className="pt-16 pb-8 bg-azul-primario">
             <div className="mx-auto max-w-5xl px-4 md:px-8">
               <h2 className="text-3xl md:text-4xl font-bold text-white mb-2">PROGRAMACIÓN</h2>
               <p className="text-white">No te pierdas ningún encuentro del club</p>
             </div>
           </div>
-          <div className="w-full">
+          <div className="w-full py-4 md:py-6">
             <ProximosPartidos eventos={eventos} limite={4} />
           </div>
-          <div className="mt-8 text-center px-4">
+          <div className="pt-8 pb-16 text-center px-4 bg-azul-primario">
             <Button variant="outline" asChild className="bg-transparent border-2 border-white text-white hover:bg-white hover:text-azul-primario transition-colors">
               <Link href="/partidos">Ver calendario completo →</Link>
             </Button>
