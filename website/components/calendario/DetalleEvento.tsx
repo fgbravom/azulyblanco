@@ -2,71 +2,25 @@
 
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
-import Image from 'next/image'
 import Link from 'next/link'
 import {
   Banknote, Clock, Dumbbell, ExternalLink, MapPin, MessageCircle, PartyPopper, Ticket, Trophy, Users, X,
 } from 'lucide-react'
 import { EventoCalendario } from '@/lib/types/calendario'
 import { SITE_CONFIG } from '@/lib/constants'
-import { desenlaceAYB, equiposDelPartido, type EquipoPartido } from '@/lib/utils/calendario'
+import { equiposDeEvento, fechaLarga } from '@/lib/utils/calendario'
 import { cn } from '@/lib/utils'
+import { Marcador } from './Marcador'
 
 const DURACION_MS = 300
 // Arrastre hacia abajo (px) a partir del cual la hoja se cierra en mobile
 const UMBRAL_CIERRE = 100
 
-const TIPO = {
+export const TIPO = {
   partido: { label: 'Partido', icono: Trophy },
   entrenamiento: { label: 'Entrenamiento', icono: Dumbbell },
   evento: { label: 'Evento especial', icono: PartyPopper },
 } as const
-
-const DESENLACE = {
-  victoria: { label: 'Victoria', clase: 'bg-green-50 text-green-700' },
-  empate: { label: 'Empate', clase: 'bg-gray-100 text-gray-700' },
-  derrota: { label: 'Derrota', clase: 'bg-red-50 text-red-700' },
-}
-
-/** "SÁBADO" → "Sábado" */
-function capitalizar(texto: string) {
-  return texto.charAt(0) + texto.slice(1).toLowerCase()
-}
-
-function Escudo({ equipo }: { equipo: EquipoPartido }) {
-  if (equipo.esAYB) {
-    return (
-      <div className="relative h-16 w-16">
-        <Image src="/images/escudoazulyblanco.png" alt={equipo.nombre} fill sizes="64px" className="object-contain" />
-      </div>
-    )
-  }
-  return (
-    <div className="flex h-16 w-16 items-center justify-center">
-      {equipo.logo ? (
-        <div className="h-14 w-14 overflow-hidden rounded-full">
-          <Image src={equipo.logo} alt={equipo.nombre} width={56} height={56} sizes="56px" className="h-full w-full object-cover" />
-        </div>
-      ) : (
-        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gray-100">
-          <span className="text-sm font-bold text-gray-400">{equipo.sigla.substring(0, 3).toUpperCase()}</span>
-        </div>
-      )}
-    </div>
-  )
-}
-
-function Equipo({ equipo }: { equipo: EquipoPartido }) {
-  return (
-    <div className="flex min-w-0 flex-col items-center gap-2 text-center">
-      <Escudo equipo={equipo} />
-      <div className="min-w-0">
-        <p className="break-words text-sm font-bold leading-tight text-azul-primario">{equipo.nombre}</p>
-        {equipo.detalle && <p className="mt-0.5 text-xs text-gray-500">{equipo.detalle}</p>}
-      </div>
-    </div>
-  )
-}
 
 function Fila({ icono: Icono, titulo, children }: { icono: typeof Clock; titulo: string; children: ReactNode }) {
   return (
@@ -133,12 +87,8 @@ export function DetalleEvento({ evento, onCerrar }: DetalleEventoProps) {
   }, [])
 
   const tipo = TIPO[evento.tipo]
-  const conVs = evento.tipo === 'partido' || (evento.tipo === 'entrenamiento' && /\s+vs\s+/i.test(evento.actividad ?? ''))
-  const equipos = conVs
-    ? equiposDelPartido(evento.tipo === 'partido' ? evento : { rival: evento.actividad })
-    : null
-  const desenlace = evento.tipo === 'partido' ? desenlaceAYB(evento) : undefined
-  const fecha = `${capitalizar(evento.dia)} ${evento.diaMes} de ${evento.mes.toLowerCase()}`
+  const equipos = equiposDeEvento(evento)
+  const fecha = fechaLarga(evento)
   const horario = evento.horaInicio && `${evento.horaInicio}${evento.horaFin ? ` - ${evento.horaFin}` : ''} hrs`
   // En los partidos los nombres ya están en el marcador: el título es la fecha
   const esPartido = evento.tipo === 'partido'
@@ -215,32 +165,7 @@ export function DetalleEvento({ evento, onCerrar }: DetalleEventoProps) {
         <div className="overflow-y-auto overscroll-contain px-6 pb-[max(1.5rem,env(safe-area-inset-bottom))]">
           {/* Marcador */}
           {equipos && (
-            <div className="mb-5 grid grid-cols-[1fr_auto_1fr] items-start gap-3 rounded-2xl bg-gray-50 px-3 py-5">
-              <Equipo equipo={equipos.local} />
-              <div className="flex flex-col items-center gap-1.5 pt-4">
-                {evento.resultado ? (
-                  <>
-                    <span className="whitespace-nowrap text-3xl font-black tabular-nums text-azul-primario">
-                      {evento.resultado.local} – {evento.resultado.visitante}
-                    </span>
-                    <span className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">Final</span>
-                    {desenlace && (
-                      <span className={cn('rounded-full px-2 py-0.5 text-[11px] font-semibold', DESENLACE[desenlace].clase)}>
-                        {DESENLACE[desenlace].label}
-                      </span>
-                    )}
-                  </>
-                ) : (
-                  <>
-                    <span className="text-xl font-bold text-gray-400">VS</span>
-                    {evento.horaInicio && (
-                      <span className="text-xs font-semibold text-gray-600">{evento.horaInicio} hrs</span>
-                    )}
-                  </>
-                )}
-              </div>
-              <Equipo equipo={equipos.visitante} />
-            </div>
+            <Marcador evento={evento} equipos={equipos} className="mb-5 rounded-2xl bg-gray-50 px-3 py-5" />
           )}
 
           {evento.tipo === 'evento' && evento.descripcion && (

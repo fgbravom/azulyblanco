@@ -2,9 +2,11 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { actividadAEvento, horaCorta, nombreActividad } from '@/lib/contenido/calendario'
 import {
   desenlaceAYB,
+  equiposDeEvento,
   equiposDelPartido,
   esEquipoAYB,
   esFechaHoy,
+  fechaLarga,
   filtrarSoloPartidos,
   formatearNombrePartido,
   obtenerProximosEventos,
@@ -156,5 +158,16 @@ describe('detalle del partido', () => {
 
   it('sin resultado no hay desenlace', () => {
     expect(desenlaceAYB({ ...evento('2026-01-01'), rival: 'AYB VS SM' })).toBeUndefined()
+  })
+
+  it('arma los equipos de partidos y entrenamientos "X vs Y", y de nada más', () => {
+    expect(equiposDeEvento({ ...evento('2026-01-01'), rival: 'AYB VS SM' })?.visitante.sigla).toBe('SM')
+    expect(equiposDeEvento({ ...evento('2026-01-01', 'entrenamiento'), actividad: 'Serie Honor vs Serie 35' })?.local.sigla).toBe('Serie Honor')
+    expect(equiposDeEvento({ ...evento('2026-01-01', 'entrenamiento'), actividad: 'Físico' })).toBeNull()
+    expect(equiposDeEvento({ ...evento('2026-01-01', 'evento'), titulo: 'Asado' })).toBeNull()
+  })
+
+  it('fechaLarga capitaliza solo el día', () => {
+    expect(fechaLarga({ dia: 'MIÉRCOLES', diaMes: 7, mes: 'OCTUBRE' })).toBe('Miércoles 7 de octubre')
   })
 })

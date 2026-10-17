@@ -102,6 +102,23 @@ export function equiposDelPartido(
   }
 }
 
+/** Los dos equipos si la actividad es un enfrentamiento (partido o entrenamiento "X vs Y"); null si no */
+export function equiposDeEvento(
+  evento: EventoCalendario
+): { local: EquipoPartido; visitante: EquipoPartido } | null {
+  if (evento.tipo === 'partido') return equiposDelPartido(evento)
+  if (evento.tipo === 'entrenamiento' && /\s+vs\s+/i.test(evento.actividad ?? '')) {
+    return equiposDelPartido({ rival: evento.actividad })
+  }
+  return null
+}
+
+/** "Sábado 18 de octubre" */
+export function fechaLarga(evento: Pick<EventoCalendario, 'dia' | 'diaMes' | 'mes'>): string {
+  const dia = evento.dia.charAt(0) + evento.dia.slice(1).toLowerCase()
+  return `${dia} ${evento.diaMes} de ${evento.mes.toLowerCase()}`
+}
+
 /** Cómo le fue a AYB; undefined si no hay resultado o si es un partido interno */
 export function desenlaceAYB(evento: EventoCalendario): 'victoria' | 'empate' | 'derrota' | undefined {
   if (!evento.resultado) return undefined
