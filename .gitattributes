@@ -1,0 +1,2 @@
+# Los hooks de git se ejecutan con sh: deben quedar con fin de linea LF
+.githooks/* text eol=lf

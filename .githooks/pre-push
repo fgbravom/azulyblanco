@@ -1,0 +1,12 @@
+#!/bin/sh
+# Verifica website/ antes de cada push: la rama Principal despliega directo a produccion en Vercel.
+# Para saltarlo en una emergencia: git push --no-verify
+set -e
+
+cd "$(git rev-parse --show-toplevel)/website"
+
+echo "pre-push: lint, tipos y tests de website/"
+npm run --silent lint
+npx --no-install tsc --noEmit
+npm test --silent
+echo "pre-push: todo en verde"
