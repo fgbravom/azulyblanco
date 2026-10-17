@@ -72,7 +72,7 @@ export function ListaPorDia({ eventos, hoy, onAbrir }: ListaPorDiaProps) {
   const anioActual = hoy.slice(0, 4)
 
   return (
-    <div className="space-y-10">
+    <div className="grid gap-10 lg:grid-cols-3 lg:items-start lg:gap-x-6">
       {agruparPorDia(eventos).map(({ fecha, eventos: delDia }) => {
         const relativo = fecha === hoy ? 'Hoy' : fecha === manana ? 'Mañana' : null
         return (
@@ -88,7 +88,7 @@ export function ListaPorDia({ eventos, hoy, onAbrir }: ListaPorDiaProps) {
                 </span>
               )}
             </h2>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
               {delDia.map((evento) => (
                 <TarjetaEvento key={evento.id} evento={evento} onAbrir={() => onAbrir(evento)} />
               ))}
