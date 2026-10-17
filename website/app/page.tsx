@@ -6,7 +6,6 @@ import { ProximosPartidos } from '@/components/calendario/ProximosPartidos'
 import { getEventosCalendario, getNacionalidadesPlantel, getNoticiasPublicas } from '@/lib/contenido/publico'
 import { HeroSection } from '@/components/hero/HeroSection'
 import { UltimasNoticias } from '@/components/noticias/UltimasNoticias'
-import { obtenerProximosEventos } from '@/lib/utils/calendario'
 import { SITE_CONFIG } from '@/lib/constants'
 import Bandera from '@/components/ui/bandera'
 
@@ -58,7 +57,6 @@ export default async function HomePage() {
     getNoticiasPublicas(),
     getNacionalidadesPlantel(),
   ])
-  const [proximoEvento] = obtenerProximosEventos(eventos, 1)
   return (
     <>
       <Header isHome={true} hideInitially={true} />
@@ -89,10 +87,7 @@ export default async function HomePage() {
         </section>
 
         {/* Últimas noticias */}
-        <UltimasNoticias
-          noticias={todasLasNoticias.slice(0, proximoEvento ? 3 : 4)}
-          proximoEvento={proximoEvento}
-        />
+        <UltimasNoticias noticias={todasLasNoticias.slice(0, 4)} />
 
         {/* CTA Final */}
         <section className="py-16 px-4 bg-azul-primario text-white">
