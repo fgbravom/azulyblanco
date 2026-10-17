@@ -72,7 +72,7 @@ export default async function AlbumPage({ params }: PageProps) {
       <Header />
       <main className="min-h-screen bg-white">
         {/* Hero */}
-        <section className="bg-azul-primario text-white pt-32 2xl:pt-44 pb-12 px-4">
+        <section className="bg-azul-primario text-white pt-32 xl:pt-44 pb-12 px-4">
           <div className="container mx-auto px-4 max-w-6xl">
             <Link
               href="/galeria"

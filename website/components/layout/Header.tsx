@@ -58,11 +58,11 @@ export function Header({ isHome = false, hideInitially = false }: HeaderProps) {
         // Oculto hasta que el hero abre la cortina (ver "Hero" en globals.css)
         data-hero-gated={hideInitially ? '' : undefined}
       >
-        <div className="container mx-auto px-2 2xl:px-4">
-          <div className="flex h-22 2xl:h-20 items-center justify-between gap-1 2xl:gap-4">
-            {/* Mobile Menu Button - Visible below 1536px */}
+        <div className="container mx-auto px-2 xl:px-4">
+          <div className="flex h-22 xl:h-20 items-center justify-between gap-1 xl:gap-4">
+            {/* Mobile Menu Button - Visible below 1280px */}
             <button
-              className="2xl:hidden p-2 order-1 text-white transition-colors duration-300 relative z-[60]"
+              className="xl:hidden p-2 order-1 text-white transition-colors duration-300 relative z-[60]"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               aria-label="Toggle menu"
             >
@@ -91,19 +91,19 @@ export function Header({ isHome = false, hideInitially = false }: HeaderProps) {
             </button>
 
             {/* Logo - Always centered */}
-            <Link href="/" className="flex items-center flex-shrink-0 order-2 absolute left-1/2 -translate-x-1/2 2xl:top-1">
+            <Link href="/" className="flex items-center flex-shrink-0 order-2 absolute left-1/2 -translate-x-1/2 xl:top-1">
               <Image
                 src="/images/escudoazulyblanco.png"
                 alt={`Escudo ${SITE_CONFIG.name}`}
                 width={200}
                 height={200}
-                className="h-20 2xl:h-35 w-auto"
+                className="h-20 xl:h-35 w-auto"
                 data-hero-crest-target=""
               />
             </Link>
 
-            {/* Navigation - Desktop (visible from 1536px to handle 125% zoom) */}
-            <nav className="hidden 2xl:flex items-center gap-2 order-1 2xl:ml-4 2xl:pt-7 max-w-[40%]" suppressHydrationWarning>
+            {/* Navigation - Desktop (visible from 1280px: notebooks de 14" al 150%) */}
+            <nav className="hidden xl:flex items-center gap-2 order-1 xl:ml-4 xl:pt-7 max-w-[40%]" suppressHydrationWarning>
               {mounted && NAVIGATION_ITEMS.map((item) => (
                 item.submenu ? (
                   <DropdownMenu
@@ -142,7 +142,7 @@ export function Header({ isHome = false, hideInitially = false }: HeaderProps) {
             </nav>
 
             {/* Social Media Icons - Between logo and CTA */}
-            <div className="hidden 2xl:flex items-center gap-3 flex-shrink-0 order-3 2xl:pt-7 ml-30">
+            <div className="hidden xl:flex items-center gap-3 flex-shrink-0 order-3 xl:pt-7 ml-30">
               <Link
                 href={SITE_CONFIG.social.instagram}
                 target="_blank"
@@ -155,8 +155,8 @@ export function Header({ isHome = false, hideInitially = false }: HeaderProps) {
               {/* Facebook vive en el footer y en /contacto: el header queda solo con Instagram */}
             </div>
 
-            {/* CTA Buttons - Right side, visible from 1536px */}
-            <div className="hidden 2xl:flex items-center gap-2 flex-shrink-0 order-4 2xl:pt-3">
+            {/* CTA Buttons - Right side, visible from 1280px */}
+            <div className="hidden xl:flex items-center gap-2 flex-shrink-0 order-4 xl:pt-3">
               <Button asChild variant="ghost" className="text-white hover:bg-white hover:text-azul-primario text-sm px-3 h-10 transition-colors">
                 <Link href="/admin/login">
                   <LogIn aria-hidden="true" />
@@ -169,21 +169,21 @@ export function Header({ isHome = false, hideInitially = false }: HeaderProps) {
             </div>
 
             {/* Spacer for mobile to balance layout */}
-            <div className="2xl:hidden w-10 order-3"></div>
+            <div className="xl:hidden w-10 order-3"></div>
           </div>
         </div>
       </header>
 
-      {/* Mobile Menu Sidebar - Visible below 1536px */}
+      {/* Mobile Menu Sidebar - Visible below 1280px */}
       <div
-        className={`fixed inset-0 bg-black/50 z-[55] 2xl:hidden transition-opacity duration-300 ${
+        className={`fixed inset-0 bg-black/50 z-[55] xl:hidden transition-opacity duration-300 ${
           mobileMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
         }`}
         onClick={() => setMobileMenuOpen(false)}
       />
 
       <div
-        className={`fixed top-0 left-0 h-full w-[80%] max-w-md bg-white z-[56] 2xl:hidden transform transition-transform duration-300 ease-in-out ${
+        className={`fixed top-0 left-0 h-full w-[80%] max-w-md bg-white z-[56] xl:hidden transform transition-transform duration-300 ease-in-out ${
           mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
