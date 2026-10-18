@@ -1,7 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { requireAdmin } from '@/lib/auth/session'
+import { requireAdmin, requireEditorNoticias } from '@/lib/auth/session'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { BUCKET_MEDIOS, type Medio } from '@/lib/contenido/tipos'
 
@@ -25,7 +25,9 @@ export type DestinoSubida =
  * Supabase Storage, sin pasar por la función de Vercel (límite de 4,5 MB).
  */
 export async function prepararSubida(destino: DestinoSubida, mime: string) {
-  await requireAdmin()
+  const sesion = await requireEditorNoticias()
+  // Un redactor solo sube a la biblioteca (portadas e imágenes de sus noticias)
+  if (sesion.rol === 'redactor' && destino?.tipo !== 'biblioteca') throw new Error('No autorizado')
 
   const ext = EXTENSIONES[mime]
   if (!ext) throw new Error('Formato no permitido. Usa JPG, PNG, WebP, GIF o AVIF.')
@@ -50,7 +52,7 @@ export async function prepararSubida(destino: DestinoSubida, mime: string) {
 }
 
 export async function listarMedios(): Promise<Medio[]> {
-  await requireAdmin()
+  await requireEditorNoticias()
 
   const { data, error } = await createAdminClient()
     .from('medios')
@@ -69,7 +71,7 @@ export async function registrarMedio(input: {
   ancho: number
   alto: number
 }): Promise<Medio> {
-  await requireAdmin()
+  await requireEditorNoticias()
   if (!input.path.startsWith('biblioteca/')) throw new Error('Ruta inválida')
 
   const supabase = createAdminClient()

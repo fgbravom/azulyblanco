@@ -76,9 +76,18 @@ describe('server actions del admin sin sesión', () => {
   )
 })
 
-// Acciones que además puede usar un redactor (requireEditorNoticias). Vacía por ahora:
-// agregar una acá debe justificarse en la revisión del PR.
-const ACCIONES_REDACTOR = new Set<string>([])
+// Acciones que además puede usar un redactor (requireEditorNoticias). Cada una
+// aplica sus propias reglas (solo sus noticias, solo la biblioteca...), que se prueban
+// aparte; agregar una acá debe justificarse en la revisión del PR.
+const ACCIONES_REDACTOR = new Set([
+  '(admin)/admin/noticias → listarNoticias',
+  '(admin)/admin/noticias → obtenerNoticia',
+  '(admin)/admin/noticias → guardarNoticia',
+  '(admin)/admin/noticias → cambiarPublicacionNoticia',
+  '(admin)/admin/medios → prepararSubida',
+  '(admin)/admin/medios → listarMedios',
+  '(admin)/admin/medios → registrarMedio',
+])
 
 describe('server actions del admin con sesión de redactor', () => {
   let base: Awaited<ReturnType<typeof simularSesion>>['base']

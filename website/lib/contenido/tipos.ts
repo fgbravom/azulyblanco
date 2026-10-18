@@ -54,6 +54,25 @@ export interface Redactor {
   updated_at: string
 }
 
+/** Última vez que una noticia volvió a borrador: quién, cuándo y por qué */
+export interface DespublicacionNoticia {
+  motivo: string
+  por: string // nombre del redactor, o "Administración"
+  fecha: string
+}
+
+/** Acceso al panel de un redactor (nunca incluye el hash de la contraseña) */
+export interface CuentaRedactor {
+  usuario: string
+  activa: boolean
+  ultimo_ingreso: string | null
+  debe_cambiar_password: boolean
+}
+
+export interface RedactorConCuenta extends Redactor {
+  cuenta: CuentaRedactor | null
+}
+
 export interface NoticiaDB {
   id: string
   slug: string
@@ -69,9 +88,11 @@ export interface NoticiaDB {
   publicado: boolean
   created_at: string
   updated_at: string
+  /** Solo lo llena el admin, en noticias no publicadas con una despublicación registrada */
+  despublicacion?: DespublicacionNoticia | null
 }
 
-export type NoticiaInput = Omit<NoticiaDB, 'id' | 'created_at' | 'updated_at'>
+export type NoticiaInput = Omit<NoticiaDB, 'id' | 'created_at' | 'updated_at' | 'despublicacion'>
 
 export type CategoriaAlbum = 'partidos' | 'entrenamientos' | 'eventos' | 'historia'
 

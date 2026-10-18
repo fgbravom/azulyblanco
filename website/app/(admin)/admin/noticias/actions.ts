@@ -2,11 +2,11 @@
 
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
-import { requireAdmin } from '@/lib/auth/session'
+import { requireAdmin, requireEditorNoticias, type Sesion } from '@/lib/auth/session'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidarSitio } from '@/lib/admin/revalidar'
 import { slugify } from '@/lib/admin/slug'
-import type { NoticiaDB, NoticiaInput } from '@/lib/contenido/tipos'
+import type { DespublicacionNoticia, NoticiaDB, NoticiaInput } from '@/lib/contenido/tipos'
 
 const noticiaSchema = z.object({
   slug: z.string().trim(),
@@ -22,6 +22,14 @@ const noticiaSchema = z.object({
   publicado: z.boolean(),
 })
 
+const motivoRedactorSchema = z
+  .string({ error: 'Escribe el motivo de la despublicación' })
+  .trim()
+  .min(10, 'El motivo debe tener al menos 10 caracteres')
+  .max(500, 'El motivo no puede superar los 500 caracteres')
+// El admin puede despublicar sin motivo; si escribe uno, solo se limita el largo
+const motivoAdminSchema = z.string().trim().max(500, 'El motivo no puede superar los 500 caracteres')
+
 function cambios(slug?: string) {
   revalidatePath('/admin/noticias')
   revalidatePath('/admin')
@@ -29,38 +37,128 @@ function cambios(slug?: string) {
   if (slug) revalidatePath(`/noticias/${slug}`)
 }
 
-export async function listarNoticias(): Promise<NoticiaDB[]> {
-  await requireAdmin()
-  const { data, error } = await createAdminClient()
-    .from('noticias')
-    .select('id, slug, titulo, bajada, categoria, tags, autor, redactor_id, fecha, portada_url, publicado, created_at, updated_at')
-    .order('fecha', { ascending: false })
+type Supabase = ReturnType<typeof createAdminClient>
+type FilaPrevia = { slug: string; redactor_id: string | null; publicado: boolean }
+
+// Los helpers de abajo no se exportan: todo export de un actions.ts es una server action
+
+/** Id del redactor si la sesión es de uno; null para el admin */
+const idRedactor = (sesion: Sesion) => (sesion.rol === 'redactor' ? sesion.redactorId : null)
+
+/** Slug, dueño y estado de publicación de la noticia, leídos una sola vez */
+async function leerFilaPrevia(supabase: Supabase, id: string): Promise<FilaPrevia | null> {
+  const { data, error } = await supabase.from('noticias').select('slug, redactor_id, publicado').eq('id', id).maybeSingle()
+  if (error) throw new Error(error.message)
+  return data as FilaPrevia | null
+}
+
+/** Un redactor solo toca sus noticias; las ajenas (o inexistentes) se rechazan igual */
+function comprobarPropiedad(sesion: Sesion, previa: FilaPrevia | null) {
+  if (sesion.rol === 'redactor' && previa?.redactor_id !== sesion.redactorId) throw new Error('No autorizado')
+}
+
+/**
+ * Motivo a registrar cuando una noticia publicada pasa a borrador, o null si no
+ * corresponde. El redactor debe escribirlo; el admin solo si quiere.
+ */
+function motivoDespublicacion(sesion: Sesion, previa: FilaPrevia | null, publicado: boolean, motivo?: string): string | null {
+  if (!previa?.publicado || publicado) return null
+  if (sesion.rol === 'redactor') {
+    const parsed = motivoRedactorSchema.safeParse(motivo)
+    if (!parsed.success) throw new Error(parsed.error.issues[0]?.message ?? 'Motivo inválido')
+    return parsed.data
+  }
+  const parsed = motivoAdminSchema.safeParse(motivo ?? '')
+  if (!parsed.success) throw new Error(parsed.error.issues[0]?.message ?? 'Motivo inválido')
+  return parsed.data || null
+}
+
+async function registrarDespublicacion(supabase: Supabase, noticiaId: string, sesion: Sesion, motivo: string | null) {
+  if (!motivo) return
+  const { error } = await supabase
+    .from('noticias_despublicaciones')
+    .insert({ noticia_id: noticiaId, redactor_id: idRedactor(sesion), motivo })
+  if (error) throw new Error(error.message)
+}
+
+/** Última despublicación de cada noticia (la ve solo el admin) */
+async function ultimasDespublicaciones(supabase: Supabase, ids: string[]): Promise<Map<string, DespublicacionNoticia>> {
+  const ultimas = new Map<string, DespublicacionNoticia>()
+  if (ids.length === 0) return ultimas
+  const { data, error } = await supabase
+    .from('noticias_despublicaciones')
+    .select('noticia_id, motivo, created_at, redactores(nombre)')
+    .in('noticia_id', ids)
     .order('created_at', { ascending: false })
   if (error) throw new Error(error.message)
-  return (data as Omit<NoticiaDB, 'contenido'>[]).map((n) => ({ ...n, contenido: '' }))
+  for (const d of (data ?? []) as {
+    noticia_id: string
+    motivo: string
+    created_at: string
+    redactores: { nombre: string } | { nombre: string }[] | null
+  }[]) {
+    if (ultimas.has(d.noticia_id)) continue
+    const redactor = Array.isArray(d.redactores) ? d.redactores[0] : d.redactores
+    ultimas.set(d.noticia_id, { motivo: d.motivo, por: redactor?.nombre ?? 'Administración', fecha: d.created_at })
+  }
+  return ultimas
+}
+
+export async function listarNoticias(): Promise<NoticiaDB[]> {
+  const sesion = await requireEditorNoticias()
+  const supabase = createAdminClient()
+  const yo = idRedactor(sesion)
+
+  let consulta = supabase
+    .from('noticias')
+    .select('id, slug, titulo, bajada, categoria, tags, autor, redactor_id, fecha, portada_url, publicado, created_at, updated_at')
+  if (yo) consulta = consulta.eq('redactor_id', yo)
+  const { data, error } = await consulta.order('fecha', { ascending: false }).order('created_at', { ascending: false })
+  if (error) throw new Error(error.message)
+  const noticias = (data as Omit<NoticiaDB, 'contenido'>[]).map((n) => ({ ...n, contenido: '' }))
+  if (yo) return noticias
+
+  const despublicaciones = await ultimasDespublicaciones(supabase, noticias.filter((n) => !n.publicado).map((n) => n.id))
+  return noticias.map((n) => ({ ...n, despublicacion: despublicaciones.get(n.id) ?? null }))
 }
 
 export async function obtenerNoticia(id: string): Promise<NoticiaDB | null> {
-  await requireAdmin()
-  const { data, error } = await createAdminClient().from('noticias').select('*').eq('id', id).maybeSingle()
+  const sesion = await requireEditorNoticias()
+  const supabase = createAdminClient()
+  const yo = idRedactor(sesion)
+
+  let consulta = supabase.from('noticias').select('*').eq('id', id)
+  if (yo) consulta = consulta.eq('redactor_id', yo)
+  const { data, error } = await consulta.maybeSingle()
   if (error) throw new Error(error.message)
-  return data as NoticiaDB | null
+  const noticia = data as NoticiaDB | null
+  if (!noticia || yo || noticia.publicado) return noticia
+
+  const despublicaciones = await ultimasDespublicaciones(supabase, [noticia.id])
+  return { ...noticia, despublicacion: despublicaciones.get(noticia.id) ?? null }
 }
 
-export async function guardarNoticia(id: string | null, input: NoticiaInput): Promise<NoticiaDB> {
-  await requireAdmin()
+export async function guardarNoticia(
+  id: string | null,
+  input: NoticiaInput,
+  opciones?: { motivoDespublicacion?: string }
+): Promise<NoticiaDB> {
+  const sesion = await requireEditorNoticias()
+  const yo = idRedactor(sesion)
 
-  const parsed = noticiaSchema.safeParse(input)
+  // Un redactor firma siempre como él mismo, sin importar lo que traiga el input
+  const entrada = sesion.rol === 'redactor' ? { ...input, redactor_id: sesion.redactorId, autor: sesion.nombre } : input
+  const parsed = noticiaSchema.safeParse(entrada)
   if (!parsed.success) throw new Error(parsed.error.issues[0]?.message ?? 'Datos inválidos')
 
   const supabase = createAdminClient()
 
-  // Si cambia el slug, la URL antigua también debe regenerarse
-  let slugAnterior: string | undefined
-  if (id) {
-    const { data } = await supabase.from('noticias').select('slug').eq('id', id).maybeSingle()
-    slugAnterior = data?.slug
-  }
+  // Una sola lectura de la fila previa: slug (si cambia, la URL antigua también
+  // debe regenerarse), dueño y estado de publicación
+  const previa = id ? await leerFilaPrevia(supabase, id) : null
+  if (id) comprobarPropiedad(sesion, previa)
+  const slugAnterior = previa?.slug
+  const motivo = id ? motivoDespublicacion(sesion, previa, parsed.data.publicado, opciones?.motivoDespublicacion) : null
 
   // Un slug sin cambios se respeta tal cual: las noticias importadas pueden
   // tener mayúsculas y sus enlaces ya están compartidos
@@ -68,16 +166,15 @@ export async function guardarNoticia(id: string | null, input: NoticiaInput): Pr
   const fila = { ...parsed.data, slug }
   if (!fila.slug) throw new Error('La dirección (slug) no puede quedar vacía')
 
-  // Con un redactor del catálogo, el autor en texto es su nombre
-  if (fila.redactor_id) {
+  // Con un redactor del catálogo, el autor en texto es su nombre (el redactor ya trae el suyo)
+  if (fila.redactor_id && !yo) {
     const { data: redactor } = await supabase.from('redactores').select('nombre').eq('id', fila.redactor_id).maybeSingle()
     if (!redactor) throw new Error('El redactor elegido ya no existe')
     fila.autor = redactor.nombre
   }
 
-  const consulta = id
-    ? supabase.from('noticias').update(fila).eq('id', id)
-    : supabase.from('noticias').insert(fila)
+  let consulta = id ? supabase.from('noticias').update(fila).eq('id', id) : supabase.from('noticias').insert(fila)
+  if (id && yo) consulta = consulta.eq('redactor_id', yo)
   const { data, error } = await consulta.select().single()
 
   if (error) {
@@ -85,20 +182,28 @@ export async function guardarNoticia(id: string | null, input: NoticiaInput): Pr
     throw new Error(error.message)
   }
 
+  await registrarDespublicacion(supabase, (data as NoticiaDB).id, sesion, motivo)
+
   cambios(fila.slug)
   if (slugAnterior && slugAnterior !== fila.slug) revalidatePath(`/noticias/${slugAnterior}`)
   return data as NoticiaDB
 }
 
-export async function cambiarPublicacionNoticia(id: string, publicado: boolean) {
-  await requireAdmin()
-  const { data, error } = await createAdminClient()
-    .from('noticias')
-    .update({ publicado })
-    .eq('id', id)
-    .select('slug')
-    .single()
+export async function cambiarPublicacionNoticia(id: string, publicado: boolean, motivo?: string) {
+  const sesion = await requireEditorNoticias()
+  const yo = idRedactor(sesion)
+  const supabase = createAdminClient()
+
+  const previa = await leerFilaPrevia(supabase, id)
+  comprobarPropiedad(sesion, previa)
+  const motivoFinal = motivoDespublicacion(sesion, previa, publicado, motivo)
+
+  let consulta = supabase.from('noticias').update({ publicado }).eq('id', id)
+  if (yo) consulta = consulta.eq('redactor_id', yo)
+  const { data, error } = await consulta.select('slug').single()
   if (error) throw new Error(error.message)
+
+  await registrarDespublicacion(supabase, id, sesion, motivoFinal)
   cambios(data.slug)
 }
 

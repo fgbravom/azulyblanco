@@ -16,11 +16,26 @@ export type CookiesFalsas = {
 }
 
 /** Estado de la cuenta del redactor en la base; null = la cuenta no existe */
+export const NOMBRE_REDACTOR = 'Redactora de Prueba'
+
 export type CuentaFalsa = {
   activa?: boolean
   version_sesion?: number
   debe_cambiar_password?: boolean
 } | null
+
+/** Lo que devuelve la base para la cuenta del redactor; null = la cuenta no existe */
+export function filaCuenta(cuenta: CuentaFalsa = {}) {
+  return (
+    cuenta && {
+      activa: true,
+      version_sesion: 0,
+      debe_cambiar_password: false,
+      redactores: { nombre: NOMBRE_REDACTOR },
+      ...cuenta,
+    }
+  )
+}
 
 /**
  * Simula las cookies de la petición: con sesión de admin (`'admin'` o `true`),
@@ -49,13 +64,7 @@ export async function simularSesion(
   vi.mocked(cookies).mockResolvedValue(almacen as unknown as Awaited<ReturnType<typeof cookies>>)
 
   if (rol === 'redactor' && vi.isMockFunction(createAdminClient)) {
-    const fila = cuenta && {
-      activa: true,
-      version_sesion: 0,
-      debe_cambiar_password: false,
-      redactores: { nombre: 'Redactora de Prueba' },
-      ...cuenta,
-    }
+    const fila = filaCuenta(cuenta)
     almacen.base = crearSupabaseFalso((c) => (c.tabla === 'cuentas_redactores' ? { data: fila } : undefined))
     vi.mocked(createAdminClient).mockReturnValue(almacen.base.cliente)
   }
