@@ -31,7 +31,7 @@ export default async function AdminLayout({
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <AdminSidebar cuotas={cuotasHabilitadas()} rol={sesion.rol} />
+      <AdminSidebar cuotas={cuotasHabilitadas()} rol={sesion.rol} nombre={sesion.rol === 'redactor' ? sesion.nombre : undefined} />
 
       {/* Área principal con margen para el sidebar */}
       <div className="lg:pl-64">

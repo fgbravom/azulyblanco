@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 import NoticiaEditor from '@/components/admin/noticias/NoticiaEditor';
+import { obtenerSesion } from '@/lib/auth/session';
 import { listarRedactores } from '../../redactores/actions';
 import { obtenerNoticia } from '../actions';
 
@@ -7,8 +8,21 @@ export default async function EditarNoticiaPage({ params }: { params: Promise<{ 
   const { id } = await params;
   if (!/^[0-9a-f-]{36}$/i.test(id)) notFound();
 
-  const [noticia, redactores] = await Promise.all([obtenerNoticia(id), listarRedactores().catch(() => [])]);
+  const sesion = await obtenerSesion();
+  // Un redactor no ve el catálogo de redactores; la noticia ajena llega como null (404)
+  const esRedactor = sesion?.rol === 'redactor';
+  const [noticia, redactores] = await Promise.all([
+    obtenerNoticia(id),
+    esRedactor ? Promise.resolve([]) : listarRedactores().catch(() => []),
+  ]);
   if (!noticia) notFound();
 
-  return <NoticiaEditor noticia={noticia} redactores={redactores} />;
+  return (
+    <NoticiaEditor
+      noticia={noticia}
+      redactores={redactores}
+      rol={esRedactor ? 'redactor' : 'admin'}
+      nombreRedactor={sesion?.rol === 'redactor' ? sesion.nombre : undefined}
+    />
+  );
 }

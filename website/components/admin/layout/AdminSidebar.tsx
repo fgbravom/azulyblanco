@@ -11,6 +11,7 @@ import {
   CalendarDays,
   Newspaper,
   PenLine,
+  UserRound,
   Images,
   ImageIcon,
   Users,
@@ -50,12 +51,25 @@ const secciones = [
   },
 ];
 
+// Lo único que ve un redactor
+const seccionesRedactor = [
+  {
+    titulo: null,
+    items: [
+      { name: 'Noticias', href: '/admin/noticias', icon: Newspaper },
+      { name: 'Mi cuenta', href: '/admin/cuenta', icon: UserRound },
+    ],
+  },
+];
+
+type Rol = 'admin' | 'redactor';
+
 function estaActivo(pathname: string, href: string) {
   if (href === '/admin') return pathname === '/admin';
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-function Navegacion({ onNavigate, cuotas }: { onNavigate?: () => void; cuotas: boolean }) {
+function Navegacion({ onNavigate, cuotas, rol, nombre }: { onNavigate?: () => void; cuotas: boolean; rol: Rol; nombre?: string }) {
   const pathname = usePathname();
   const router = useRouter();
 
@@ -67,12 +81,17 @@ function Navegacion({ onNavigate, cuotas }: { onNavigate?: () => void; cuotas: b
 
   return (
     <div className="flex h-full flex-col bg-azul-primario text-white">
-      <Link href="/admin" onClick={onNavigate} className="flex h-16 shrink-0 items-center px-5 border-b border-white/10">
-        <p className="font-heading font-bold">Administración</p>
+      <Link
+        href={rol === 'redactor' ? '/admin/noticias' : '/admin'}
+        onClick={onNavigate}
+        className="flex h-16 shrink-0 flex-col justify-center border-b border-white/10 px-5"
+      >
+        <p className="font-heading font-bold">{rol === 'redactor' ? 'Redacción' : 'Administración'}</p>
+        {rol === 'redactor' && nombre && <p className="truncate text-xs text-white/70">{nombre}</p>}
       </Link>
 
       <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-6">
-        {secciones.map((seccion, i) => (
+        {(rol === 'redactor' ? seccionesRedactor : secciones).map((seccion, i) => (
           <div key={seccion.titulo ?? i}>
             {seccion.titulo && (
               <p className="px-3 mb-2 text-[11px] font-semibold uppercase tracking-wider text-azul-cielo/80">
@@ -128,15 +147,14 @@ function Navegacion({ onNavigate, cuotas }: { onNavigate?: () => void; cuotas: b
   );
 }
 
-// rol: la fase siguiente filtra los ítems según quién ingresó
-export default function AdminSidebar({ cuotas }: { cuotas: boolean; rol?: 'admin' | 'redactor' }) {
+export default function AdminSidebar({ cuotas, rol = 'admin', nombre }: { cuotas: boolean; rol?: Rol; nombre?: string }) {
   const [abierto, setAbierto] = useState(false);
 
   return (
     <>
       {/* Escritorio: barra fija a la izquierda */}
       <aside className="hidden lg:fixed lg:inset-y-0 lg:z-40 lg:flex lg:w-64 lg:flex-col">
-        <Navegacion cuotas={cuotas} />
+        <Navegacion cuotas={cuotas} rol={rol} nombre={nombre} />
       </aside>
 
       {/* Móvil: barra superior + panel deslizable */}
@@ -145,7 +163,7 @@ export default function AdminSidebar({ cuotas }: { cuotas: boolean; rol?: 'admin
           <Menu className="h-6 w-6" />
         </button>
         {/* Escudo centrado, como en el header del sitio */}
-        <Link href="/admin" className="absolute left-1/2 -translate-x-1/2">
+        <Link href={rol === 'redactor' ? '/admin/noticias' : '/admin'} className="absolute left-1/2 -translate-x-1/2">
           <Image src="/images/escudoazulyblanco.png" alt="Inicio de administración" width={48} height={48} className="h-12 w-12 object-contain" />
         </Link>
       </div>
@@ -161,7 +179,7 @@ export default function AdminSidebar({ cuotas }: { cuotas: boolean; rol?: 'admin
             >
               <X className="h-5 w-5" />
             </button>
-            <Navegacion onNavigate={() => setAbierto(false)} cuotas={cuotas} />
+            <Navegacion onNavigate={() => setAbierto(false)} cuotas={cuotas} rol={rol} nombre={nombre} />
           </div>
         </div>
       )}

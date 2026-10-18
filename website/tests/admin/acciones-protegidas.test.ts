@@ -87,6 +87,7 @@ const ACCIONES_REDACTOR = new Set([
   '(admin)/admin/medios → prepararSubida',
   '(admin)/admin/medios → listarMedios',
   '(admin)/admin/medios → registrarMedio',
+  '(admin)/admin/cuenta → cambiarMiPassword',
 ])
 
 describe('server actions del admin con sesión de redactor', () => {

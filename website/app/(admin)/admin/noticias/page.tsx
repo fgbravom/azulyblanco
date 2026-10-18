@@ -3,9 +3,11 @@ import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ErrorDatos, PageHeader } from '@/components/admin/ui';
 import NoticiasAdmin from '@/components/admin/noticias/NoticiasAdmin';
+import { obtenerSesion } from '@/lib/auth/session';
 import { listarNoticias } from './actions';
 
 export default async function NoticiasPage() {
+  const rol = (await obtenerSesion())?.rol ?? 'admin';
   let noticias;
   let error: string | null = null;
   try {
@@ -18,7 +20,7 @@ export default async function NoticiasPage() {
     <>
       <PageHeader
         titulo="Noticias"
-        descripcion="Redacta, publica y edita las noticias del club."
+        descripcion={rol === 'redactor' ? 'Tus noticias: redáctalas, publícalas y edítalas.' : 'Redacta, publica y edita las noticias del club.'}
         acciones={
           <Button asChild>
             <Link href="/admin/noticias/nueva">
@@ -27,7 +29,7 @@ export default async function NoticiasPage() {
           </Button>
         }
       />
-      {error || !noticias ? <ErrorDatos mensaje={error ?? ''} /> : <NoticiasAdmin iniciales={noticias} />}
+      {error || !noticias ? <ErrorDatos mensaje={error ?? ''} /> : <NoticiasAdmin iniciales={noticias} rol={rol} />}
     </>
   );
 }
