@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import type { Redactor } from '@/lib/contenido/tipos';
 import { guardarRedactor } from '@/app/(admin)/admin/redactores/actions';
 import { subirImagen } from '@/lib/admin/subir-imagen';
-import { Campo, inputClass } from '@/components/admin/ui';
+import { BarraAcciones, Campo, inputClass } from '@/components/admin/ui';
 
 // El avatar se ve a lo más a 64 px; 256 cubre pantallas de alta densidad
 const LADO_AVATAR = 256;
@@ -116,7 +116,7 @@ export default function RedactorForm({ redactor, onGuardado, onCancelar }: Props
         />
       </Campo>
 
-      <div className="flex justify-end gap-2 border-t border-gray-200 pt-4">
+      <BarraAcciones dialogo>
         <Button type="button" variant="outline" onClick={onCancelar} disabled={guardando}>
           Cancelar
         </Button>
@@ -124,7 +124,7 @@ export default function RedactorForm({ redactor, onGuardado, onCancelar }: Props
           {guardando && <Loader2 className="animate-spin" />}
           {redactor ? 'Guardar cambios' : 'Crear redactor'}
         </Button>
-      </div>
+      </BarraAcciones>
     </form>
   );
 }
