@@ -9,7 +9,7 @@ import { cn } from '@/lib/utils';
 import type { Actividad, ActividadInput, Rival } from '@/lib/contenido/tipos';
 import { horaCorta, nombreActividad } from '@/lib/contenido/calendario';
 import { cambiarConfirmacion, eliminarActividad } from '@/app/(admin)/admin/programacion/actions';
-import { PageHeader, Vacio, inputClass } from '@/components/admin/ui';
+import { FiltroChips, MenuAcciones, PageHeader, Vacio, inputClass } from '@/components/admin/ui';
 import ActividadForm, { actividadVacia } from './ActividadForm';
 
 type Periodo = 'proximas' | 'pasadas' | 'todas';
@@ -113,8 +113,20 @@ export default function ProgramacionAdmin({ iniciales, rivales }: { iniciales: A
 
       {/* Filtros */}
       <div className="mb-6 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-        <div className="flex flex-wrap gap-2">
-          <div className="inline-flex rounded-lg bg-white p-1 shadow-sm ring-1 ring-gray-200">
+        <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+          <div className="sm:hidden">
+            <FiltroChips
+              etiqueta="Período"
+              valor={periodo}
+              onChange={setPeriodo}
+              opciones={[
+                { valor: 'proximas', etiqueta: 'Próximas' },
+                { valor: 'pasadas', etiqueta: 'Pasadas' },
+                { valor: 'todas', etiqueta: 'Todas' },
+              ]}
+            />
+          </div>
+          <div className="hidden rounded-lg bg-white p-1 shadow-sm ring-1 ring-gray-200 sm:inline-flex">
             {(['proximas', 'pasadas', 'todas'] as Periodo[]).map((p) => (
               <button
                 key={p}
@@ -128,7 +140,7 @@ export default function ProgramacionAdmin({ iniciales, rivales }: { iniciales: A
               </button>
             ))}
           </div>
-          <select value={tipo} onChange={(e) => setTipo(e.target.value as FiltroTipo)} className={cn(inputClass, 'w-auto')}>
+          <select value={tipo} onChange={(e) => setTipo(e.target.value as FiltroTipo)} className={cn(inputClass, 'sm:w-auto')}>
             <option value="todos">Todos los tipos</option>
             <option value="partido">Partidos</option>
             <option value="entrenamiento">Entrenamientos</option>
@@ -164,8 +176,12 @@ export default function ProgramacionAdmin({ iniciales, rivales }: { iniciales: A
                   const fecha = new Date(`${a.fecha}T12:00:00`);
                   const pasada = a.fecha < hoy;
                   return (
-                    <li key={a.id} className={cn('flex flex-col gap-3 p-4 sm:flex-row sm:items-center', pasada && 'bg-gray-50/60')}>
-                      <div className="flex min-w-0 flex-1 items-center gap-4">
+                    <li
+                      key={a.id}
+                      onClick={() => setEditor({ id: a.id, inicial: aInput(a) })}
+                      className={cn('flex cursor-pointer flex-col gap-3 p-4 active:bg-gray-50 sm:cursor-default sm:flex-row sm:items-center sm:active:bg-transparent', pasada && 'bg-gray-50/60')}
+                    >
+                      <div className="flex min-w-0 flex-1 items-center gap-3 sm:gap-4">
                         <div className={cn('flex w-14 shrink-0 flex-col items-center rounded-lg py-1.5', pasada ? 'bg-gray-100 text-gray-500' : 'bg-azul-primario text-white')}>
                           <span className="text-[10px] font-semibold uppercase">
                             {fecha.toLocaleDateString('es-CL', { weekday: 'short' }).replace('.', '')}
@@ -215,7 +231,27 @@ export default function ProgramacionAdmin({ iniciales, rivales }: { iniciales: A
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-1 sm:shrink-0">
+                      {/* Móvil: confirmación y menú; toda la fila abre el editor */}
+                      <div className="flex items-center justify-between gap-2 sm:hidden" onClick={(e) => e.stopPropagation()}>
+                        <button
+                          onClick={() => confirmar(a)}
+                          className={cn(
+                            'min-h-10 rounded-full px-3.5 py-1 text-sm font-medium transition-colors',
+                            a.confirmado ? 'bg-green-50 text-green-700' : 'bg-amber-50 text-amber-700'
+                          )}
+                        >
+                          {a.confirmado ? 'Confirmado' : 'Por confirmar'}
+                        </button>
+                        <MenuAcciones
+                          acciones={[
+                            { etiqueta: 'Editar', icono: Pencil, onSelect: () => setEditor({ id: a.id, inicial: aInput(a) }) },
+                            { etiqueta: 'Duplicar', icono: Copy, onSelect: () => setEditor({ id: null, inicial: { ...aInput(a), goles_local: null, goles_visitante: null } }) },
+                            { etiqueta: 'Eliminar', icono: Trash2, onSelect: () => eliminar(a), peligro: true },
+                          ]}
+                        />
+                      </div>
+
+                      <div className="hidden items-center gap-1 sm:flex sm:shrink-0" onClick={(e) => e.stopPropagation()}>
                         <button
                           onClick={() => confirmar(a)}
                           title="Cambiar confirmación"
@@ -246,7 +282,7 @@ export default function ProgramacionAdmin({ iniciales, rivales }: { iniciales: A
       )}
 
       <Dialog open={editor !== null} onOpenChange={(abierto) => !abierto && setEditor(null)}>
-        <DialogContent className="max-h-[92vh] max-w-2xl overflow-y-auto bg-white">
+        <DialogContent className="max-h-[92dvh] max-w-2xl overflow-y-auto bg-white">
           <DialogHeader>
             <DialogTitle className="text-azul-primario">
               {editor?.id ? 'Editar actividad' : 'Nueva actividad'}

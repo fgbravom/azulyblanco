@@ -10,7 +10,7 @@ import { TIPOS_PARTIDO } from '@/lib/contenido/tipos';
 import type { TipoEvento } from '@/lib/types/calendario';
 import { esEquipoAYB } from '@/lib/utils/calendario';
 import { guardarActividad } from '@/app/(admin)/admin/programacion/actions';
-import { Campo, Interruptor, inputClass, textareaClass } from '@/components/admin/ui';
+import { BarraAcciones, Campo, Interruptor, inputClass, textareaClass } from '@/components/admin/ui';
 
 export const SERIES_OPCIONES = ['Serie Primera', 'Serie Honor', 'Serie 35'];
 
@@ -120,8 +120,8 @@ export default function ActividadForm({ id, inicial, lugares, rivales, onGuardad
         ))}
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <Campo label="Fecha *" htmlFor="fecha">
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+        <Campo label="Fecha *" htmlFor="fecha" className="col-span-2 sm:col-span-1">
           <input id="fecha" type="date" required value={datos.fecha} onChange={(e) => set('fecha', e.target.value)} className={inputClass} />
         </Campo>
         <Campo label="Hora de inicio" htmlFor="hora_inicio">
@@ -144,7 +144,7 @@ export default function ActividadForm({ id, inicial, lugares, rivales, onGuardad
               </select>
             </Campo>
           )}
-          <div className="grid grid-cols-[1fr_auto_1fr] items-end gap-2">
+          <div className="grid grid-cols-1 items-end gap-2 sm:grid-cols-[1fr_auto_1fr]">
             <Campo label="Local *" htmlFor="local">
               <input id="local" required value={local} onChange={(e) => setEquipos([e.target.value, visita])} placeholder="AYB" className={inputClass} />
             </Campo>
@@ -152,7 +152,7 @@ export default function ActividadForm({ id, inicial, lugares, rivales, onGuardad
               type="button"
               onClick={() => setEquipos([visita, local])}
               title="Intercambiar local y visita"
-              className="mb-0.5 rounded-md border border-gray-300 p-2.5 text-gray-500 hover:border-azul-claro hover:text-azul-primario"
+              className="mb-0.5 flex h-10 w-full items-center justify-center rounded-md border border-gray-300 text-gray-500 sm:h-auto sm:w-auto sm:p-2.5 hover:border-azul-claro hover:text-azul-primario"
             >
               <ArrowLeftRight className="h-4 w-4" />
             </button>
@@ -265,7 +265,7 @@ export default function ActividadForm({ id, inicial, lugares, rivales, onGuardad
                 onClick={() => toggleSerie(serie)}
                 aria-pressed={activa}
                 className={cn(
-                  'rounded-full border px-3 py-1 text-sm transition-colors',
+                  'rounded-full border px-3.5 py-2 text-sm transition-colors sm:px-3 sm:py-1',
                   activa ? 'border-azul-claro bg-azul-claro text-white' : 'border-gray-300 text-gray-700 hover:border-azul-claro'
                 )}
               >
@@ -291,7 +291,7 @@ export default function ActividadForm({ id, inicial, lugares, rivales, onGuardad
         />
       </div>
 
-      <div className="flex justify-end gap-2 border-t border-gray-200 pt-4">
+      <BarraAcciones dialogo>
         <Button type="button" variant="outline" onClick={onCancelar} disabled={guardando}>
           Cancelar
         </Button>
@@ -299,7 +299,7 @@ export default function ActividadForm({ id, inicial, lugares, rivales, onGuardad
           {guardando && <Loader2 className="animate-spin" />}
           {id ? 'Guardar cambios' : 'Crear actividad'}
         </Button>
-      </div>
+      </BarraAcciones>
     </form>
   );
 }
