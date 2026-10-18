@@ -8,8 +8,9 @@
 |---|---|---|
 | Portada | `hero_fotos`, archivos en `medios/hero/<id>/` | Hero del inicio |
 | Programación | `programacion` | Inicio y `/partidos` |
-| Noticias | `noticias` (contenido en Markdown) | Inicio, `/noticias` |
+| Noticias | `noticias` (contenido en Markdown); motivos de despublicación en `noticias_despublicaciones` | Inicio, `/noticias` |
 | Galerías | `albumes` + `fotos`, archivos en `medios/galeria/<album>/` | `/galeria` |
+| Redactores | `redactores` (nombre y avatar, de lectura pública) y `cuentas_redactores` (acceso al panel, solo servidor) | Firma de cada noticia |
 | Imágenes | `medios`, archivos en `medios/biblioteca/` | Portadas, fotos de jugadores, series |
 | Plantel | `jugadores` (APIs `/api/jugadores`) | `/series/*` |
 | Series | columnas nuevas de `categorias` + cuerpo técnico en `equipos` | `/series/*` |
@@ -112,12 +113,35 @@ Unitarias con [Vitest](https://vitest.dev), en [`website/tests/`](../website/tes
 | Carpeta | Qué cubre |
 |---|---|
 | `tests/admin/auth/` | Token de sesión, contraseña, freno de intentos, login/logout y middleware |
-| `tests/admin/` | Que **cada** ruta `/api` y **cada** server action rechace sin sesión sin tocar la base; cuotas, noticias, series, slugs y validaciones |
+| `tests/admin/` | Que **cada** ruta `/api` y **cada** server action rechace sin sesión sin tocar la base, y que un redactor solo pueda usar las acciones de `ACCIONES_REDACTOR`; permisos de noticias y medios, cuentas de redactores, cuotas, series, slugs y validaciones |
 | `tests/sitio/` | Calendario, plantel público, respaldo a archivos y el link personal de cuotas |
 | `tests/seguridad/` | Guardianes estáticos: leen las migraciones y la configuración y fallan si un cambio vuelve a exponer datos personales a la clave pública |
-| `tests/componentes/` | Login y componentes de calendario y cuotas, renderizados con Testing Library (jsdom) |
+| `tests/componentes/` | Login, menú por rol, diálogo de motivo y componentes de calendario y cuotas, renderizados con Testing Library (jsdom) |
 
-Una server action o ruta `/api` nueva queda cubierta sola por las pruebas de protección: si no llama a `requireAdmin()` o `rechazarSinSesion()`, la suite falla.
+Una server action o ruta `/api` nueva queda cubierta sola por las pruebas de protección: si no llama a `requireAdmin()` o `rechazarSinSesion()`, la suite falla. Si una acción se abre a redactores con `requireEditorNoticias()`, hay que agregarla a `ACCIONES_REDACTOR` en `tests/admin/acciones-protegidas.test.ts` y probar sus reglas por separado.
+
+## Redactores con acceso
+
+El panel tiene dos roles. El **admin** (usuario `ab06`, contraseña de `ADMIN_PASSWORD_HASH`) conserva todo. Un **redactor** ingresa con el usuario y la contraseña de su cuenta y solo ve `/admin/noticias` y `/admin/cuenta`.
+
+| | Admin | Redactor |
+|---|---|---|
+| Noticias | Todas | Solo las suyas (`redactor_id` propio); firma siempre con su nombre |
+| Publicar / despublicar | Sí, sin motivo obligatorio | Sí; para despublicar debe escribir un motivo (10 a 500 caracteres) |
+| Eliminar noticias | Sí | No |
+| Imágenes | Biblioteca completa, puede eliminar | Subir a la biblioteca, listar y elegir; no eliminar ni subir a otros destinos |
+| Resto del panel y `/api/*` | Sí | No (el middleware redirige o responde 401, y cada acción lo vuelve a comprobar) |
+| Mi cuenta | No aplica (su contraseña es una variable de entorno) | Cambiar su contraseña |
+
+**Dar acceso a un redactor.** En `/admin/redactores`, botón «Acceso al panel» del redactor → «Crear acceso» con un usuario (3 a 32 caracteres: minúsculas, números, punto, guion y guion bajo; `ab06` está reservado). El panel muestra una contraseña temporal **una sola vez**: hay que entregársela al redactor. Al ingresar, el redactor es enviado a «Mi cuenta» y no puede usar nada más hasta cambiarla (mínimo 10 caracteres).
+
+**Restablecer, cambiar usuario o desactivar.** Desde el mismo diálogo. Restablecer genera otra contraseña temporal; desactivar impide ingresar hasta que se reactive.
+
+**Revocación de sesiones.** El token de sesión lleva el id del redactor y la `version_sesion` de su cuenta. En cada petición al servidor se compara con la base y se confirma que la cuenta siga activa. Restablecer la contraseña, desactivar la cuenta o que el propio redactor cambie su contraseña suben `version_sesion` y cierran sus demás sesiones (al cambiarla él mismo, su sesión actual se vuelve a emitir). El middleware no consulta la base: solo valida la firma.
+
+**Despublicaciones.** Cada vez que una noticia publicada vuelve a borrador con motivo, se guarda una fila en `noticias_despublicaciones` (`redactor_id` nulo si la despublicó el admin). El admin ve en el listado y en el editor quién la despublicó, cuándo y por qué.
+
+**Migración 013.** Crea `cuentas_redactores` y `noticias_despublicaciones` (con RLS y sin políticas: solo `service_role`). **Debe aplicarse en producción antes de desplegar el código** (`npm run db:push`, con autorización), porque el login y el listado de redactores ya consultan esas tablas.
 
 ## Seguridad
 
