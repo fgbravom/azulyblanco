@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import type { Rival } from '@/lib/contenido/tipos';
 import { eliminarRival } from '@/app/(admin)/admin/rivales/actions';
-import { PageHeader, Vacio } from '@/components/admin/ui';
+import { MenuAcciones, PageHeader, Vacio } from '@/components/admin/ui';
 import RivalForm from './RivalForm';
 
 export default function RivalesAdmin({ iniciales }: { iniciales: Rival[] }) {
@@ -56,7 +56,11 @@ export default function RivalesAdmin({ iniciales }: { iniciales: Rival[] }) {
       ) : (
         <ul className="divide-y divide-gray-100 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
           {rivales.map((r) => (
-            <li key={r.id} className="flex items-center gap-4 p-4">
+            <li
+              key={r.id}
+              onClick={() => setEditor({ rival: r })}
+              className="flex cursor-pointer items-center gap-3 p-4 active:bg-gray-50 sm:cursor-default sm:gap-4 sm:active:bg-transparent"
+            >
               <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full border border-gray-200 bg-gray-50">
                 {r.logo_url ? (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -74,13 +78,14 @@ export default function RivalesAdmin({ iniciales }: { iniciales: Rival[] }) {
                     href={r.sitio_web}
                     target="_blank"
                     rel="noreferrer"
-                    className="mt-0.5 inline-flex items-center gap-1 truncate text-xs text-azul-claro hover:underline"
+                    onClick={(e) => e.stopPropagation()}
+                    className="mt-0.5 inline-flex max-w-full items-center gap-1 truncate text-xs text-azul-claro hover:underline"
                   >
                     <ExternalLink className="h-3 w-3 shrink-0" /> {r.sitio_web.replace(/^https?:\/\//, '')}
                   </a>
                 )}
               </div>
-              <div className="flex shrink-0 items-center gap-1">
+              <div className="hidden shrink-0 items-center gap-1 sm:flex" onClick={(e) => e.stopPropagation()}>
                 <Button variant="ghost" size="icon" title="Editar" onClick={() => setEditor({ rival: r })}>
                   <Pencil />
                 </Button>
@@ -88,13 +93,20 @@ export default function RivalesAdmin({ iniciales }: { iniciales: Rival[] }) {
                   <Trash2 />
                 </Button>
               </div>
+              <MenuAcciones
+                className="sm:hidden"
+                acciones={[
+                  { etiqueta: 'Editar', icono: Pencil, onSelect: () => setEditor({ rival: r }) },
+                  { etiqueta: 'Eliminar', icono: Trash2, onSelect: () => eliminar(r), peligro: true },
+                ]}
+              />
             </li>
           ))}
         </ul>
       )}
 
       <Dialog open={editor !== null} onOpenChange={(abierto) => !abierto && setEditor(null)}>
-        <DialogContent className="max-h-[92vh] max-w-lg overflow-y-auto bg-white">
+        <DialogContent className="max-h-[92dvh] max-w-lg overflow-y-auto bg-white">
           <DialogHeader>
             <DialogTitle className="text-azul-primario">{editor?.rival ? 'Editar rival' : 'Nuevo rival'}</DialogTitle>
           </DialogHeader>

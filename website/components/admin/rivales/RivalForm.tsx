@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import type { Rival } from '@/lib/contenido/tipos';
 import { guardarRival } from '@/app/(admin)/admin/rivales/actions';
 import { subirImagen } from '@/lib/admin/subir-imagen';
-import { Campo, inputClass } from '@/components/admin/ui';
+import { BarraAcciones, Campo, inputClass } from '@/components/admin/ui';
 
 interface Props {
   /** null = rival nuevo */
@@ -143,7 +143,7 @@ export default function RivalForm({ rival, onGuardado, onCancelar }: Props) {
         />
       </Campo>
 
-      <div className="flex justify-end gap-2 border-t border-gray-200 pt-4">
+      <BarraAcciones dialogo>
         <Button type="button" variant="outline" onClick={onCancelar} disabled={guardando}>
           Cancelar
         </Button>
@@ -151,7 +151,7 @@ export default function RivalForm({ rival, onGuardado, onCancelar }: Props) {
           {guardando && <Loader2 className="animate-spin" />}
           {rival ? 'Guardar cambios' : 'Crear rival'}
         </Button>
-      </div>
+      </BarraAcciones>
     </form>
   );
 }
