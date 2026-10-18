@@ -1,11 +1,34 @@
 'use client'
 
-import ReactMarkdown from 'react-markdown'
+import ReactMarkdown, { type ExtraProps } from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import Link from 'next/link'
+import { idVideoYoutube, inicioVideoYoutube } from '@/lib/youtube'
+import { VideoYoutube } from './VideoYoutube'
 
 interface MDXRendererProps {
   content: string
+}
+
+type Element = NonNullable<ExtraProps['node']>
+type ElementContent = Element['children'][number]
+
+function textoDe(nodo: ElementContent): string {
+  if (nodo.type === 'text') return nodo.value
+  if (nodo.type === 'element') return nodo.children.map(textoDe).join('')
+  return ''
+}
+
+/** Un párrafo que solo contiene un link de YouTube se muestra como video incrustado */
+function videoDelParrafo(nodo: Element | undefined) {
+  const hijos = nodo?.children.filter((h) => !(h.type === 'text' && !h.value.trim())) ?? []
+  const link = hijos[0]
+  if (hijos.length !== 1 || link.type !== 'element' || link.tagName !== 'a') return null
+  const href = String(link.properties.href ?? '')
+  const id = idVideoYoutube(href)
+  if (!id) return null
+  const texto = textoDe(link).trim()
+  return { id, inicio: inicioVideoYoutube(href), titulo: texto && texto !== href ? texto : undefined }
 }
 
 export function MDXRenderer({ content }: MDXRendererProps) {
@@ -27,9 +50,11 @@ export function MDXRenderer({ content }: MDXRendererProps) {
         h4: ({ children }) => (
           <h4 className="text-base font-semibold text-gray-700 mb-2 mt-5">{children}</h4>
         ),
-        p: ({ children }) => (
-          <p className="text-base leading-relaxed text-gray-700 mb-5">{children}</p>
-        ),
+        p: ({ node, children }) => {
+          const video = videoDelParrafo(node)
+          if (video) return <VideoYoutube {...video} />
+          return <p className="text-base leading-relaxed text-gray-700 mb-5">{children}</p>
+        },
         ul: ({ children }) => (
           <ul className="list-disc list-outside space-y-2 mb-5 text-gray-700 ml-5">{children}</ul>
         ),

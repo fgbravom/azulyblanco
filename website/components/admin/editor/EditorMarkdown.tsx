@@ -1,11 +1,13 @@
 'use client';
 
 import { useRef, useState } from 'react';
-import { Bold, Heading2, ImagePlus, Italic, Link2, List, ListOrdered, Quote } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Bold, Heading2, ImagePlus, Italic, Link2, List, ListOrdered, Quote, Youtube } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { MDXRenderer } from '@/components/mdx/MDXRenderer';
 import { cn } from '@/lib/utils';
-import { textareaClass } from '@/components/admin/ui';
+import { Campo, inputClass, textareaClass } from '@/components/admin/ui';
+import { idVideoYoutube } from '@/lib/youtube';
 import Biblioteca from '@/components/admin/medios/Biblioteca';
 
 const BOTONES = [
@@ -17,6 +19,7 @@ const BOTONES = [
   { icono: Quote, titulo: 'Cita' },
   { icono: Link2, titulo: 'Enlace' },
   { icono: ImagePlus, titulo: 'Imagen' },
+  { icono: Youtube, titulo: 'Video de YouTube' },
 ] as const;
 
 interface Props {
@@ -31,6 +34,8 @@ export default function EditorMarkdown({ value, onChange, filas = 18, placeholde
   const area = useRef<HTMLTextAreaElement>(null);
   const [vista, setVista] = useState<'escribir' | 'previa'>('escribir');
   const [eligiendoImagen, setEligiendoImagen] = useState(false);
+  const [urlVideo, setUrlVideo] = useState<string | null>(null);
+  const videoValido = urlVideo !== null && idVideoYoutube(urlVideo) !== null;
 
   /** Envuelve la selección (o inserta un ejemplo) y deja el cursor en su lugar */
   const aplicar = (antes: string, despues = '', ejemplo = 'texto') => {
@@ -70,6 +75,14 @@ export default function EditorMarkdown({ value, onChange, filas = 18, placeholde
     setEligiendoImagen(false);
   };
 
+  /** Un link de YouTube solo en su párrafo se muestra como video en el sitio */
+  const insertarVideo = () => {
+    if (!urlVideo || !videoValido) return;
+    const pos = area.current?.selectionStart ?? value.length;
+    onChange(value.slice(0, pos) + `\n\n${urlVideo.trim()}\n\n` + value.slice(pos));
+    setUrlVideo(null);
+  };
+
   const ejecutar = (titulo: (typeof BOTONES)[number]['titulo']) => {
     switch (titulo) {
       case 'Negrita': return aplicar('**', '**');
@@ -80,6 +93,7 @@ export default function EditorMarkdown({ value, onChange, filas = 18, placeholde
       case 'Cita': return prefijarLineas(() => '> ');
       case 'Enlace': return aplicar('[', '](https://)', 'texto del enlace');
       case 'Imagen': return setEligiendoImagen(true);
+      case 'Video de YouTube': return setUrlVideo('');
     }
   };
 
@@ -131,7 +145,7 @@ export default function EditorMarkdown({ value, onChange, filas = 18, placeholde
       )}
 
       <div className="border-t border-gray-100 bg-gray-50 px-3 py-1.5 text-[11px] text-gray-500">
-        Formato Markdown: **negrita**, _cursiva_, ## subtítulo, - lista, &gt; cita. Deja una línea en blanco entre párrafos.
+        Formato Markdown: **negrita**, _cursiva_, ## subtítulo, - lista, &gt; cita. Deja una línea en blanco entre párrafos. Un link de YouTube solo en su línea se ve como video.
       </div>
 
       <Dialog open={eligiendoImagen} onOpenChange={setEligiendoImagen}>
@@ -140,6 +154,43 @@ export default function EditorMarkdown({ value, onChange, filas = 18, placeholde
             <DialogTitle className="text-azul-primario">Insertar imagen</DialogTitle>
           </DialogHeader>
           {eligiendoImagen && <Biblioteca modo="seleccion" onSeleccionar={(m) => insertarImagen(m.url, m.nombre)} />}
+        </DialogContent>
+      </Dialog>
+
+      {/* Sin <form>: el editor ya vive dentro del formulario de la noticia */}
+      <Dialog open={urlVideo !== null} onOpenChange={(abierto) => !abierto && setUrlVideo(null)}>
+        <DialogContent className="max-w-lg bg-white">
+          <DialogHeader>
+            <DialogTitle className="text-azul-primario">Insertar video de YouTube</DialogTitle>
+          </DialogHeader>
+          <Campo
+            label="Link del video"
+            htmlFor="url-video"
+            error={urlVideo && !videoValido ? 'No parece un link de YouTube.' : undefined}
+            ayuda="Sirven los links de youtube.com, youtu.be y Shorts."
+          >
+            <input
+              id="url-video"
+              autoFocus
+              value={urlVideo ?? ''}
+              onChange={(e) => setUrlVideo(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key !== 'Enter') return;
+                e.preventDefault();
+                insertarVideo();
+              }}
+              placeholder="https://www.youtube.com/watch?v=…"
+              className={inputClass}
+            />
+          </Campo>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setUrlVideo(null)}>
+              Cancelar
+            </Button>
+            <Button type="button" disabled={!videoValido} onClick={insertarVideo}>
+              Insertar
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
