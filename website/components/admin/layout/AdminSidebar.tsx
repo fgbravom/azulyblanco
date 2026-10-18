@@ -67,12 +67,8 @@ function Navegacion({ onNavigate, cuotas }: { onNavigate?: () => void; cuotas: b
 
   return (
     <div className="flex h-full flex-col bg-azul-primario text-white">
-      <Link href="/admin" onClick={onNavigate} className="flex h-16 shrink-0 items-center gap-3 px-5 border-b border-white/10">
-        <Image src="/images/escudoazulyblanco.png" alt="" width={32} height={32} className="h-8 w-8 object-contain" />
-        <div className="leading-tight">
-          <p className="font-heading font-bold">Azul y Blanco</p>
-          <p className="text-[11px] uppercase tracking-wider text-azul-cielo">Administración</p>
-        </div>
+      <Link href="/admin" onClick={onNavigate} className="flex h-16 shrink-0 items-center px-5 border-b border-white/10">
+        <p className="font-heading font-bold">Administración</p>
       </Link>
 
       <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-6">
@@ -143,11 +139,14 @@ export default function AdminSidebar({ cuotas }: { cuotas: boolean }) {
       </aside>
 
       {/* Móvil: barra superior + panel deslizable */}
-      <div className="sticky top-0 z-40 flex h-14 items-center gap-3 bg-azul-primario px-4 text-white lg:hidden">
+      <div className="sticky top-0 z-40 flex h-16 items-center bg-azul-primario px-4 text-white lg:hidden">
         <button onClick={() => setAbierto(true)} aria-label="Abrir menú" className="-ml-1 rounded-md p-1.5 hover:bg-white/10">
           <Menu className="h-6 w-6" />
         </button>
-        <p className="font-heading font-bold">Azul y Blanco</p>
+        {/* Escudo centrado, como en el header del sitio */}
+        <Link href="/admin" className="absolute left-1/2 -translate-x-1/2">
+          <Image src="/images/escudoazulyblanco.png" alt="Inicio de administración" width={48} height={48} className="h-12 w-12 object-contain" />
+        </Link>
       </div>
 
       {abierto && (
