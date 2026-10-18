@@ -1,10 +1,10 @@
 import NoticiaEditor from '@/components/admin/noticias/NoticiaEditor';
-import { obtenerSesion } from '@/lib/auth/session';
+import { sesionParaNoticias } from '@/lib/auth/session';
 import { listarRedactores } from '../../redactores/actions';
 
 export default async function NuevaNoticiaPage() {
-  const sesion = await obtenerSesion();
-  if (sesion?.rol === 'redactor') {
+  const sesion = await sesionParaNoticias();
+  if (sesion.rol === 'redactor') {
     return <NoticiaEditor noticia={null} redactores={[]} rol="redactor" nombreRedactor={sesion.nombre} />;
   }
   const redactores = await listarRedactores().catch(() => []);

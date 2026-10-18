@@ -1,10 +1,8 @@
 // @vitest-environment jsdom
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
-const router = { push: vi.fn(), refresh: vi.fn() }
-vi.mock('next/navigation', () => ({ useRouter: () => router }))
 vi.mock('next/image', () => ({
   // eslint-disable-next-line @next/next/no-img-element
   default: ({ src, alt }: { src: string; alt: string }) => <img src={src} alt={alt} />,
@@ -18,6 +16,17 @@ function respuesta(status: number, body: object) {
 
 describe('página de login del admin', () => {
   const fetchFalso = vi.fn()
+  // El login entra con una navegación completa (window.location.assign)
+  const assign = vi.fn()
+  const locationOriginal = window.location
+
+  beforeAll(() => {
+    Object.defineProperty(window, 'location', { configurable: true, value: { ...locationOriginal, assign } })
+  })
+
+  afterAll(() => {
+    Object.defineProperty(window, 'location', { configurable: true, value: locationOriginal })
+  })
 
   beforeEach(() => {
     vi.clearAllMocks()
@@ -50,7 +59,7 @@ describe('página de login del admin', () => {
     await usuario.type(screen.getByLabelText(/contraseña de acceso/i), 'clave-correcta')
     await usuario.click(screen.getByRole('button', { name: 'Iniciar Sesión' }))
 
-    await waitFor(() => expect(router.push).toHaveBeenCalledWith('/admin'))
+    await waitFor(() => expect(assign).toHaveBeenCalledWith('/admin'))
     expect(fetchFalso).toHaveBeenCalledWith('/api/auth/login', expect.objectContaining({ method: 'POST' }))
     expect(JSON.parse(fetchFalso.mock.calls[0][1].body)).toEqual({ usuario: 'ab06', password: 'clave-correcta' })
   })
@@ -64,7 +73,7 @@ describe('página de login del admin', () => {
     await usuario.type(screen.getByLabelText(/contraseña de acceso/i), 'clave')
     await usuario.click(screen.getByRole('button', { name: 'Iniciar Sesión' }))
 
-    await waitFor(() => expect(router.push).toHaveBeenCalledWith('/admin/noticias'))
+    await waitFor(() => expect(assign).toHaveBeenCalledWith('/admin/noticias'))
   })
 
   it('el campo de usuario ayuda al gestor de contraseñas', () => {
@@ -82,7 +91,7 @@ describe('página de login del admin', () => {
     await usuario.click(screen.getByRole('button', { name: 'Iniciar Sesión' }))
 
     expect(await screen.findByText('Usuario o contraseña incorrectos')).toBeInTheDocument()
-    expect(router.push).not.toHaveBeenCalled()
+    expect(assign).not.toHaveBeenCalled()
   })
 
   it('avisa cuando hay demasiados intentos', async () => {

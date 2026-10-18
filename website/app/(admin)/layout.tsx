@@ -1,7 +1,6 @@
 export const dynamic = 'force-dynamic';
 
 import type { Metadata } from 'next';
-import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { obtenerSesion } from '@/lib/auth/session';
 import AdminSidebar from '@/components/admin/layout/AdminSidebar';
@@ -21,12 +20,6 @@ export default async function AdminLayout({
 
   if (!sesion) {
     redirect('/admin/login');
-  }
-
-  // Con contraseña temporal, el redactor solo puede cambiarla (x-pathname lo pone el middleware)
-  if (sesion.rol === 'redactor' && sesion.debeCambiarPassword) {
-    const pathname = (await headers()).get('x-pathname');
-    if (pathname !== '/admin/cuenta') redirect('/admin/cuenta');
   }
 
   return (

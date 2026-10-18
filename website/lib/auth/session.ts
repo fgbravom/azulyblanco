@@ -1,5 +1,6 @@
 import { cache } from 'react';
 import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
 import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { SESSION_COOKIE, SESSION_MAX_AGE, firmarToken, verificarToken, type DatosToken } from './token';
@@ -82,6 +83,21 @@ export async function requireAdmin() {
 export async function requireEditorNoticias(): Promise<Sesion> {
   const sesion = await obtenerSesion();
   if (!sesion) throw new Error('No autorizado');
+  if (sesion.rol === 'redactor' && sesion.debeCambiarPassword) {
+    throw new Error('Primero cambia tu contraseña temporal en Mi cuenta');
+  }
+  return sesion;
+}
+
+/**
+ * Para las páginas de noticias: sin sesión al login y, con contraseña temporal,
+ * a Mi cuenta. Va en cada página y no en el layout, porque el layout no se
+ * vuelve a renderizar al navegar dentro del panel.
+ */
+export async function sesionParaNoticias(): Promise<Sesion> {
+  const sesion = await obtenerSesion();
+  if (!sesion) redirect('/admin/login');
+  if (sesion.rol === 'redactor' && sesion.debeCambiarPassword) redirect('/admin/cuenta');
   return sesion;
 }
 

@@ -66,11 +66,6 @@ describe('middleware', () => {
     expect((await pedir('/admin', `${expira}.${firma}`)).status).toBe(307)
   })
 
-  it('pasa la ruta al layout en x-pathname', async () => {
-    const res = await pedir('/admin/noticias', await tokenAdmin())
-    expect(res.headers.get('x-middleware-request-x-pathname')).toBe('/admin/noticias')
-  })
-
   describe('con sesión de redactor', () => {
     it('deja pasar noticias y su cuenta', async () => {
       const token = await tokenRedactor()

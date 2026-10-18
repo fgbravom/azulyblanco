@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import Image from 'next/image';
@@ -13,7 +12,6 @@ export default function LoginPage() {
   const [mostrar, setMostrar] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,8 +28,9 @@ export default function LoginPage() {
       const data = await res.json();
 
       if (res.ok) {
-        router.push(data.rol === 'redactor' ? '/admin/noticias' : '/admin');
-        router.refresh();
+        // Navegación completa: con la cookie recién creada el panel se arma de cero
+        // (con router.push + refresh, el desvío a /admin/cuenta dejaba la página en blanco)
+        window.location.assign(data.rol === 'redactor' ? '/admin/noticias' : '/admin');
       } else {
         setError(data.error || 'Usuario o contraseña incorrectos');
       }

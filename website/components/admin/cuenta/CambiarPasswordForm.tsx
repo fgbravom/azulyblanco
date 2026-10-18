@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { AlertTriangle, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -16,7 +15,6 @@ interface Props {
 }
 
 export default function CambiarPasswordForm({ nombre, usuario, debeCambiar }: Props) {
-  const router = useRouter();
   const [actual, setActual] = useState('');
   const [nueva, setNueva] = useState('');
   const [confirmacion, setConfirmacion] = useState('');
@@ -34,8 +32,9 @@ export default function CambiarPasswordForm({ nombre, usuario, debeCambiar }: Pr
     try {
       await cambiarMiPassword(actual, nueva);
       toast.success('Contraseña actualizada');
-      router.push('/admin/noticias');
-      router.refresh();
+      // La cookie se volvió a emitir: navegación completa, como en el login
+      // eslint-disable-next-line @next/next/no-location-assign-relative-destination -- a propósito: el panel debe armarse de cero
+      window.location.assign('/admin/noticias');
     } catch (e) {
       setError(e instanceof Error ? e.message : 'No se pudo cambiar la contraseña');
     } finally {

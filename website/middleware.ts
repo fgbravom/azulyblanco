@@ -5,13 +5,6 @@ import { SESSION_COOKIE, verificarToken } from '@/lib/auth/token';
 // Lo único del panel que ve un redactor
 const REDACTOR_RUTAS = ['/admin/noticias', '/admin/cuenta'];
 
-// Deja pasar la petición con la ruta en un header, para que el layout sepa dónde está
-function pasar(request: NextRequest) {
-  const headers = new Headers(request.headers);
-  headers.set('x-pathname', request.nextUrl.pathname);
-  return NextResponse.next({ request: { headers } });
-}
-
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
@@ -26,7 +19,7 @@ export async function middleware(request: NextRequest) {
   );
 
   if (sesion?.rol === 'admin') {
-    return pasar(request);
+    return NextResponse.next();
   }
 
   if (sesion?.rol === 'redactor') {
@@ -35,7 +28,7 @@ export async function middleware(request: NextRequest) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
     if (REDACTOR_RUTAS.some((ruta) => pathname === ruta || pathname.startsWith(`${ruta}/`))) {
-      return pasar(request);
+      return NextResponse.next();
     }
     return NextResponse.redirect(new URL('/admin/noticias', request.url));
   }

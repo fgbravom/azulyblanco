@@ -5,7 +5,7 @@ import { argsDe } from '../../helpers/supabase-falso'
 vi.mock('@/lib/supabase/admin', () => ({ createAdminClient: vi.fn() }))
 
 const { createAdminClient } = await import('@/lib/supabase/admin')
-const { obtenerSesion, requireAdmin, requireEditorNoticias, rechazarSinSesion, verifySession } = await import(
+const { obtenerSesion, requireAdmin, requireEditorNoticias, rechazarSinSesion, sesionParaNoticias, verifySession } = await import(
   '@/lib/auth/session'
 )
 
@@ -76,5 +76,24 @@ describe('sesión con rol', () => {
 
     await simularSesion(false)
     await expect(requireEditorNoticias()).rejects.toThrow('No autorizado')
+  })
+
+  it('requireEditorNoticias rechaza al redactor con la contraseña temporal pendiente', async () => {
+    await simularSesion('redactor', { debe_cambiar_password: true })
+    await expect(requireEditorNoticias()).rejects.toThrow('contraseña temporal')
+  })
+
+  it('sesionParaNoticias manda al login sin sesión y a Mi cuenta con contraseña temporal', async () => {
+    await simularSesion(false)
+    await expect(sesionParaNoticias()).rejects.toThrow('NEXT_REDIRECT')
+
+    await simularSesion('redactor', { debe_cambiar_password: true })
+    await expect(sesionParaNoticias()).rejects.toThrow('NEXT_REDIRECT')
+
+    await simularSesion('redactor')
+    expect(await sesionParaNoticias()).toMatchObject({ rol: 'redactor', redactorId: REDACTOR_ID })
+
+    await simularSesion('admin')
+    expect(await sesionParaNoticias()).toEqual({ rol: 'admin' })
   })
 })
