@@ -8,7 +8,7 @@
 |---|---|---|
 | Portada | `hero_fotos`, archivos en `medios/hero/<id>/` | Hero del inicio |
 | Programación | `programacion` | Inicio y `/partidos` |
-| Noticias | `noticias` (contenido en Markdown); motivos de despublicación en `noticias_despublicaciones` | Inicio, `/noticias` |
+| Noticias | `noticias` (contenido en Markdown; un link de YouTube solo en su línea se incrusta como video); motivos de despublicación en `noticias_despublicaciones` | Inicio, `/noticias` |
 | Galerías | `albumes` + `fotos`, archivos en `medios/galeria/<album>/` | `/galeria` |
 | Redactores | `redactores` (nombre y avatar, de lectura pública) y `cuentas_redactores` (acceso al panel, solo servidor) | Firma de cada noticia |
 | Imágenes | `medios`, archivos en `medios/biblioteca/` | Portadas, fotos de jugadores, series |
