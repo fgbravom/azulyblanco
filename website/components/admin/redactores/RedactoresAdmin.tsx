@@ -2,12 +2,13 @@
 
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { Pencil, PenLine, Plus, Trash2 } from 'lucide-react';
+import { KeyRound, Pencil, PenLine, Plus, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import type { Redactor } from '@/lib/contenido/tipos';
+import type { CuentaRedactor, Redactor, RedactorConCuenta } from '@/lib/contenido/tipos';
 import { eliminarRedactor } from '@/app/(admin)/admin/redactores/actions';
 import { MenuAcciones, PageHeader, Vacio } from '@/components/admin/ui';
+import AccesoDialog from './AccesoDialog';
 import RedactorForm from './RedactorForm';
 
 function inicialesDe(nombre: string) {
@@ -20,16 +21,38 @@ function inicialesDe(nombre: string) {
     .toUpperCase();
 }
 
-export default function RedactoresAdmin({ iniciales }: { iniciales: Redactor[] }) {
+function EstadoAcceso({ cuenta }: { cuenta: CuentaRedactor | null }) {
+  if (!cuenta) return null;
+  return (
+    <span
+      className={
+        cuenta.activa
+          ? 'rounded-full bg-green-50 px-2 py-0.5 text-xs font-medium text-green-700'
+          : 'rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600'
+      }
+    >
+      {cuenta.activa ? 'Con acceso' : 'Acceso desactivado'}
+    </span>
+  );
+}
+
+export default function RedactoresAdmin({ iniciales }: { iniciales: RedactorConCuenta[] }) {
   const [redactores, setRedactores] = useState(iniciales);
   const [editor, setEditor] = useState<{ redactor: Redactor | null } | null>(null);
+  const [accesoId, setAccesoId] = useState<string | null>(null);
+  const acceso = redactores.find((r) => r.id === accesoId) ?? null;
 
   const guardado = (redactor: Redactor) => {
     setRedactores((prev) =>
-      [...prev.filter((r) => r.id !== redactor.id), redactor].sort((a, b) => a.nombre.localeCompare(b.nombre))
+      [...prev.filter((r) => r.id !== redactor.id), { ...redactor, cuenta: prev.find((r) => r.id === redactor.id)?.cuenta ?? null }].sort((a, b) =>
+        a.nombre.localeCompare(b.nombre)
+      )
     );
     setEditor(null);
   };
+
+  const cuentaCambiada = (id: string, cuenta: CuentaRedactor | null) =>
+    setRedactores((prev) => prev.map((r) => (r.id === id ? { ...r, cuenta } : r)));
 
   const eliminar = async (r: Redactor) => {
     if (!confirm(`¿Eliminar a "${r.nombre}"? Sus noticias conservan la firma, pero sin avatar.`)) return;
@@ -46,7 +69,7 @@ export default function RedactoresAdmin({ iniciales }: { iniciales: Redactor[] }
     <>
       <PageHeader
         titulo="Redactores"
-        descripcion="Quienes firman las noticias, con su avatar. Se eligen al escribir una noticia."
+        descripcion="Quienes firman las noticias, con su avatar. Pueden tener un acceso para escribir las suyas."
         acciones={
           <Button onClick={() => setEditor({ redactor: null })}>
             <Plus /> Nuevo redactor
@@ -81,8 +104,19 @@ export default function RedactoresAdmin({ iniciales }: { iniciales: Redactor[] }
                   <span className="text-sm font-bold text-gray-400">{inicialesDe(r.nombre)}</span>
                 )}
               </div>
-              <p className="min-w-0 flex-1 truncate font-semibold text-gray-900">{r.nombre}</p>
+              <div className="min-w-0 flex-1">
+                <p className="truncate font-semibold text-gray-900">{r.nombre}</p>
+                {r.cuenta && (
+                  <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-gray-500">
+                    <EstadoAcceso cuenta={r.cuenta} />
+                    <span className="font-mono">{r.cuenta.usuario}</span>
+                  </p>
+                )}
+              </div>
               <div className="hidden shrink-0 items-center gap-1 sm:flex" onClick={(e) => e.stopPropagation()}>
+                <Button variant="ghost" size="icon" title="Acceso al panel" onClick={() => setAccesoId(r.id)}>
+                  <KeyRound />
+                </Button>
                 <Button variant="ghost" size="icon" title="Editar" onClick={() => setEditor({ redactor: r })}>
                   <Pencil />
                 </Button>
@@ -94,6 +128,7 @@ export default function RedactoresAdmin({ iniciales }: { iniciales: Redactor[] }
                 className="sm:hidden"
                 acciones={[
                   { etiqueta: 'Editar', icono: Pencil, onSelect: () => setEditor({ redactor: r }) },
+                  { etiqueta: 'Acceso al panel', icono: KeyRound, onSelect: () => setAccesoId(r.id) },
                   { etiqueta: 'Eliminar', icono: Trash2, onSelect: () => eliminar(r), peligro: true },
                 ]}
               />
@@ -101,6 +136,8 @@ export default function RedactoresAdmin({ iniciales }: { iniciales: Redactor[] }
           ))}
         </ul>
       )}
+
+      {acceso && <AccesoDialog key={acceso.id} redactor={acceso} onCuenta={cuentaCambiada} onCerrar={() => setAccesoId(null)} />}
 
       <Dialog open={editor !== null} onOpenChange={(abierto) => !abierto && setEditor(null)}>
         <DialogContent className="max-h-[92dvh] max-w-lg overflow-y-auto bg-white">
