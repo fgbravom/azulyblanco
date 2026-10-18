@@ -6,11 +6,13 @@
 
 import { cn } from '@/lib/utils';
 
+export { default as MenuAcciones, type AccionMenu } from './MenuAcciones';
+
 export const inputClass =
-  'flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-azul-primario focus-visible:border-azul-primario disabled:opacity-50';
+  'flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-base text-gray-900 shadow-sm placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-azul-primario focus-visible:border-azul-primario disabled:opacity-50 sm:text-sm';
 
 export const textareaClass =
-  'flex w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-azul-primario focus-visible:border-azul-primario';
+  'flex w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-base text-gray-900 shadow-sm placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-azul-primario focus-visible:border-azul-primario sm:text-sm';
 
 export function PageHeader({
   titulo,
@@ -31,7 +33,7 @@ export function PageHeader({
           <h1 className="text-2xl font-heading font-bold text-azul-primario sm:text-3xl">{titulo}</h1>
           {descripcion && <p className="mt-1 text-sm text-gray-600">{descripcion}</p>}
         </div>
-        {acciones && <div className="flex shrink-0 flex-wrap gap-2">{acciones}</div>}
+        {acciones && <div className="flex shrink-0 flex-wrap gap-2 [&>*]:flex-1 sm:[&>*]:flex-none">{acciones}</div>}
       </div>
     </div>
   );
@@ -53,7 +55,7 @@ export function Panel({
   return (
     <section className={cn('rounded-xl border border-gray-200 bg-white shadow-sm', className)}>
       {(titulo || acciones) && (
-        <div className="flex items-start justify-between gap-4 border-b border-gray-100 px-5 py-4">
+        <div className="flex items-start justify-between gap-4 border-b border-gray-100 px-4 py-4 sm:px-5">
           <div>
             {titulo && <h2 className="font-heading font-semibold text-gray-900">{titulo}</h2>}
             {descripcion && <p className="mt-0.5 text-sm text-gray-500">{descripcion}</p>}
@@ -61,8 +63,85 @@ export function Panel({
           {acciones}
         </div>
       )}
-      <div className="p-5">{children}</div>
+      <div className="p-4 sm:p-5">{children}</div>
     </section>
+  );
+}
+
+/**
+ * Fila de filtros tipo chip. En el celular no se parte en varias líneas:
+ * se desliza en horizontal y llega hasta el borde de la pantalla.
+ */
+export function FiltroChips<T extends string | number>({
+  opciones,
+  valor,
+  onChange,
+  extra,
+  etiqueta,
+}: {
+  opciones: { valor: T; etiqueta: React.ReactNode; cantidad?: number }[];
+  valor: T;
+  onChange: (valor: T) => void;
+  /** Control al final de la fila (por ejemplo, un selector de año) */
+  extra?: React.ReactNode;
+  /** Nombre accesible del grupo */
+  etiqueta?: string;
+}) {
+  return (
+    <div className="flex items-center gap-2">
+      <div
+        role="group"
+        aria-label={etiqueta}
+        className="-mx-4 flex min-w-0 flex-1 gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 sm:pb-0 [&::-webkit-scrollbar]:hidden"
+      >
+        {opciones.map((o) => (
+          <button
+            key={o.valor}
+            type="button"
+            onClick={() => onChange(o.valor)}
+            aria-pressed={o.valor === valor}
+            className={cn(
+              'shrink-0 whitespace-nowrap rounded-full border px-3.5 py-1.5 text-sm transition-colors sm:px-3 sm:py-1',
+              o.valor === valor
+                ? 'border-azul-primario bg-azul-primario text-white'
+                : 'border-gray-300 bg-white text-gray-700 hover:border-azul-claro'
+            )}
+          >
+            {o.etiqueta}
+            {o.cantidad !== undefined && <span className="ml-1 opacity-70">({o.cantidad})</span>}
+          </button>
+        ))}
+      </div>
+      {extra && <div className="shrink-0">{extra}</div>}
+    </div>
+  );
+}
+
+/**
+ * Botones de guardar/cancelar de un formulario largo. En el celular quedan
+ * fijos al pie de la pantalla para no tener que bajar hasta el final.
+ */
+export function BarraAcciones({
+  children,
+  dialogo,
+  className,
+}: {
+  children: React.ReactNode;
+  /** Dentro de un diálogo: calza con su padding y, desde sm, lleva la línea superior de siempre */
+  dialogo?: boolean;
+  className?: string;
+}) {
+  return (
+    <div
+      className={cn(
+        'sticky bottom-0 z-20 -mx-4 flex gap-2 border-t border-gray-200 bg-white/95 px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur [&>*]:flex-1',
+        'sm:static sm:mx-0 sm:justify-end sm:border-0 sm:bg-transparent sm:p-0 sm:backdrop-blur-none sm:[&>*]:flex-none',
+        dialogo && '-mx-5 -mb-5 px-5 sm:mb-0 sm:border-t sm:pt-4',
+        className
+      )}
+    >
+      {children}
+    </div>
   );
 }
 

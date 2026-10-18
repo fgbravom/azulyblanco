@@ -204,3 +204,19 @@ html:not([data-hero]) header[data-hero-gated] [data-hero-crest-target] {
     transition: none;
   }
 }
+
+/* Admin: los diálogos suben desde abajo en el celular */
+@keyframes admin-hoja-sube {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [role='dialog'] {
+    animation: none !important;
+  }
+}
