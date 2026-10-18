@@ -10,13 +10,15 @@ import { CATEGORIAS_NOTICIA, type NoticiaDB, type NoticiaInput, type Redactor } 
 import { parseTags, slugify } from '@/lib/admin/slug';
 import { eliminarNoticia, guardarNoticia } from '@/app/(admin)/admin/noticias/actions';
 import { BarraAcciones, Campo, EstadoBadge, Interruptor, PageHeader, Panel, inputClass, textareaClass } from '@/components/admin/ui';
+import AvisoDespublicacion from './AvisoDespublicacion';
+import MotivoDespublicacion from './MotivoDespublicacion';
 import SelectorImagen from '@/components/admin/medios/SelectorImagen';
 import EditorMarkdown from '@/components/admin/editor/EditorMarkdown';
 
 function desdeNoticia(n: NoticiaDB | null): NoticiaInput {
   if (n) {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { id, created_at, updated_at, ...resto } = n;
+    const { id, created_at, updated_at, despublicacion, ...resto } = n;
     return resto;
   }
   return {
@@ -37,7 +39,16 @@ function desdeNoticia(n: NoticiaDB | null): NoticiaInput {
 // Noticia antigua firmada con un nombre que no está en el catálogo
 const AUTOR_TEXTO = '__texto';
 
-export default function NoticiaEditor({ noticia, redactores }: { noticia: NoticiaDB | null; redactores: Redactor[] }) {
+interface Props {
+  noticia: NoticiaDB | null;
+  /** Catálogo para elegir autor (solo el admin; un redactor firma siempre como él mismo) */
+  redactores: Redactor[];
+  rol?: 'admin' | 'redactor';
+  /** Nombre del redactor que escribe, para mostrarlo como autor fijo */
+  nombreRedactor?: string;
+}
+
+export default function NoticiaEditor({ noticia, redactores, rol = 'admin', nombreRedactor }: Props) {
   const router = useRouter();
   const [datos, setDatos] = useState<NoticiaInput>(() => desdeNoticia(noticia));
   const [tags, setTags] = useState(() => (noticia?.tags ?? []).join(', '));
@@ -45,17 +56,26 @@ export default function NoticiaEditor({ noticia, redactores }: { noticia: Notici
   const [slugManual, setSlugManual] = useState(Boolean(noticia));
   const [guardando, setGuardando] = useState(false);
   const [sinGuardar, setSinGuardar] = useState(false);
+  const esAdmin = rol === 'admin';
+  // Si la noticia está publicada en la base, despublicarla (siendo redactor) exige un motivo
+  const [publicadaGuardada, setPublicadaGuardada] = useState(Boolean(noticia?.publicado));
+  const [pidiendoMotivo, setPidiendoMotivo] = useState(false);
 
   const set = <K extends keyof NoticiaInput>(campo: K, valor: NoticiaInput[K]) => {
     setSinGuardar(true);
     setDatos((d) => ({ ...d, [campo]: valor }));
   };
 
-  const guardar = async (publicado = datos.publicado) => {
+  const guardar = async (publicado = datos.publicado, motivoDespublicacion?: string) => {
     setGuardando(true);
     try {
-      const guardada = await guardarNoticia(noticia?.id ?? null, { ...datos, publicado, tags: parseTags(tags) });
+      const guardada = await guardarNoticia(
+        noticia?.id ?? null,
+        { ...datos, publicado, tags: parseTags(tags) },
+        motivoDespublicacion ? { motivoDespublicacion } : undefined
+      );
       setDatos(desdeNoticia(guardada));
+      setPublicadaGuardada(guardada.publicado);
       setSinGuardar(false);
       toast.success(publicado ? 'Noticia publicada' : 'Borrador guardado');
       if (!noticia) router.replace(`/admin/noticias/${guardada.id}`);
@@ -65,6 +85,11 @@ export default function NoticiaEditor({ noticia, redactores }: { noticia: Notici
     } finally {
       setGuardando(false);
     }
+  };
+
+  const solicitarGuardado = () => {
+    if (!esAdmin && publicadaGuardada && !datos.publicado) setPidiendoMotivo(true);
+    else guardar();
   };
 
   const redactor = redactores.find((r) => r.id === datos.redactor_id);
@@ -91,7 +116,7 @@ export default function NoticiaEditor({ noticia, redactores }: { noticia: Notici
     <form
       onSubmit={(e) => {
         e.preventDefault();
-        guardar();
+        solicitarGuardado();
       }}
     >
       <PageHeader
@@ -119,6 +144,10 @@ export default function NoticiaEditor({ noticia, redactores }: { noticia: Notici
           </>
         }
       />
+
+      {esAdmin && noticia && !noticia.publicado && noticia.despublicacion && (
+        <AvisoDespublicacion despublicacion={noticia.despublicacion} />
+      )}
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_320px]">
         <div className="space-y-5">
@@ -192,7 +221,14 @@ export default function NoticiaEditor({ noticia, redactores }: { noticia: Notici
                   ))}
                 </datalist>
               </Campo>
-              {redactores.length > 0 ? (
+              {!esAdmin ? (
+                <Campo label="Autor" ayuda="Firmas siempre con tu nombre.">
+                  <div className="flex h-10 items-center gap-2 rounded-md border border-gray-200 bg-gray-50 px-3 text-sm text-gray-700">
+                    <UserRound className="h-4 w-4 shrink-0 text-gray-400" />
+                    <span className="truncate">{nombreRedactor || datos.autor}</span>
+                  </div>
+                </Campo>
+              ) : redactores.length > 0 ? (
                 <Campo
                   label="Autor"
                   htmlFor="redactor_id"
@@ -273,7 +309,7 @@ export default function NoticiaEditor({ noticia, redactores }: { noticia: Notici
             </div>
           </Panel>
 
-          {noticia && (
+          {noticia && esAdmin && (
             <Button type="button" variant="ghost" onClick={eliminar} className="w-full text-red-600 hover:bg-red-50 hover:text-red-700">
               <Trash2 /> Eliminar noticia
             </Button>
@@ -292,6 +328,17 @@ export default function NoticiaEditor({ noticia, redactores }: { noticia: Notici
           Guardar{sinGuardar ? ' cambios' : ''}
         </Button>
       </BarraAcciones>
+
+      {pidiendoMotivo && (
+        <MotivoDespublicacion
+          titulo={datos.titulo}
+          onConfirmar={async (motivo) => {
+            setPidiendoMotivo(false);
+            await guardar(false, motivo);
+          }}
+          onCancelar={() => setPidiendoMotivo(false)}
+        />
+      )}
     </form>
   );
 }

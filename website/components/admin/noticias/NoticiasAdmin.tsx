@@ -8,14 +8,19 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import type { NoticiaDB } from '@/lib/contenido/tipos';
 import { cambiarPublicacionNoticia, eliminarNoticia } from '@/app/(admin)/admin/noticias/actions';
+import AvisoDespublicacion from './AvisoDespublicacion';
+import MotivoDespublicacion from './MotivoDespublicacion';
 import { EstadoBadge, FiltroChips, MenuAcciones, Vacio, formatearFecha, inputClass } from '@/components/admin/ui';
 
 type Filtro = 'todas' | 'publicadas' | 'borradores';
 
-export default function NoticiasAdmin({ iniciales }: { iniciales: NoticiaDB[] }) {
+export default function NoticiasAdmin({ iniciales, rol = 'admin' }: { iniciales: NoticiaDB[]; rol?: 'admin' | 'redactor' }) {
   const [noticias, setNoticias] = useState(iniciales);
   const [filtro, setFiltro] = useState<Filtro>('todas');
   const [busqueda, setBusqueda] = useState('');
+  // Noticia que un redactor está por despublicar: falta que escriba el motivo
+  const [pidiendoMotivo, setPidiendoMotivo] = useState<NoticiaDB | null>(null);
+  const esAdmin = rol === 'admin';
 
   const visibles = useMemo(() => {
     const q = busqueda.trim().toLowerCase();
@@ -32,15 +37,19 @@ export default function NoticiasAdmin({ iniciales }: { iniciales: NoticiaDB[] })
     borradores: noticias.filter((n) => !n.publicado).length,
   };
 
-  const alternarPublicacion = async (n: NoticiaDB) => {
+  const alternarPublicacion = async (n: NoticiaDB, motivo?: string) => {
     try {
-      await cambiarPublicacionNoticia(n.id, !n.publicado);
+      await cambiarPublicacionNoticia(n.id, !n.publicado, motivo);
       setNoticias((prev) => prev.map((x) => (x.id === n.id ? { ...x, publicado: !n.publicado } : x)));
+      setPidiendoMotivo(null);
       toast.success(n.publicado ? 'Noticia pasada a borrador' : 'Noticia publicada');
     } catch (e) {
       toast.error(e instanceof Error ? e.message : 'No se pudo actualizar');
     }
   };
+
+  // El redactor debe explicar por qué despublica; el admin no
+  const pedirCambio = (n: NoticiaDB) => (n.publicado && !esAdmin ? setPidiendoMotivo(n) : alternarPublicacion(n));
 
   const eliminar = async (n: NoticiaDB) => {
     if (!confirm(`¿Eliminar la noticia "${n.titulo}"? No se puede deshacer.`)) return;
@@ -57,7 +66,7 @@ export default function NoticiasAdmin({ iniciales }: { iniciales: NoticiaDB[] })
     return (
       <Vacio
         icono={Newspaper}
-        titulo="Aún no hay noticias"
+        titulo={esAdmin ? 'Aún no hay noticias' : 'Aún no has escrito noticias'}
         descripcion="Escribe la primera: puedes guardarla como borrador y publicarla cuando esté lista."
         accion={
           <Button asChild>
@@ -109,20 +118,21 @@ export default function NoticiasAdmin({ iniciales }: { iniciales: NoticiaDB[] })
                   <span>{formatearFecha(n.fecha)}</span>
                   {n.autor && <span>{n.autor}</span>}
                 </div>
+                {esAdmin && !n.publicado && n.despublicacion && <AvisoDespublicacion despublicacion={n.despublicacion} compacto />}
               </div>
             </Link>
             <MenuAcciones
               className="sm:hidden"
               acciones={[
-                { etiqueta: n.publicado ? 'Despublicar' : 'Publicar', onSelect: () => alternarPublicacion(n) },
+                { etiqueta: n.publicado ? 'Despublicar' : 'Publicar', onSelect: () => pedirCambio(n) },
                 ...(n.publicado
                   ? [{ etiqueta: 'Ver en el sitio', icono: ExternalLink, onSelect: () => window.open(`/noticias/${n.slug}`, '_blank', 'noopener') }]
                   : []),
-                { etiqueta: 'Eliminar', icono: Trash2, peligro: true, onSelect: () => eliminar(n) },
+                ...(esAdmin ? [{ etiqueta: 'Eliminar', icono: Trash2, peligro: true, onSelect: () => eliminar(n) }] : []),
               ]}
             />
             <div className="hidden items-center gap-1 sm:flex sm:shrink-0">
-              <Button variant="outline" size="sm" onClick={() => alternarPublicacion(n)}>
+              <Button variant="outline" size="sm" onClick={() => pedirCambio(n)}>
                 {n.publicado ? 'Despublicar' : 'Publicar'}
               </Button>
               {n.publicado && (
@@ -137,14 +147,24 @@ export default function NoticiasAdmin({ iniciales }: { iniciales: NoticiaDB[] })
                   <Pencil />
                 </Link>
               </Button>
-              <Button variant="ghost" size="icon" title="Eliminar" onClick={() => eliminar(n)} className="hover:text-red-600">
-                <Trash2 />
-              </Button>
+              {esAdmin && (
+                <Button variant="ghost" size="icon" title="Eliminar" onClick={() => eliminar(n)} className="hover:text-red-600">
+                  <Trash2 />
+                </Button>
+              )}
             </div>
           </li>
         ))}
         {visibles.length === 0 && <li className="p-8 text-center text-sm text-gray-500">Ninguna noticia coincide con el filtro.</li>}
       </ul>
+
+      {pidiendoMotivo && (
+        <MotivoDespublicacion
+          titulo={pidiendoMotivo.titulo}
+          onConfirmar={(motivo) => alternarPublicacion(pidiendoMotivo, motivo)}
+          onCancelar={() => setPidiendoMotivo(null)}
+        />
+      )}
     </div>
   );
 }
