@@ -15,12 +15,13 @@ describe('medios con sesión de redactor', () => {
     await simularSesion('redactor')
   })
 
-  it('puede subir a la biblioteca, listar y registrar medios', async () => {
+  it('puede subir a la biblioteca y su avatar, listar y registrar medios', async () => {
     const falso = crearSupabaseFalso((c) => (c.tabla === 'cuentas_redactores' ? { data: { activa: true, version_sesion: 0 } } : { data: [] }))
     vi.mocked(createAdminClient).mockReturnValue(falso.cliente)
 
     const subida = await prepararSubida({ tipo: 'biblioteca' }, 'image/webp')
     expect(subida.path).toMatch(/^biblioteca\//)
+    expect((await prepararSubida({ tipo: 'redactor' }, 'image/webp')).path).toMatch(/^redactores\//)
     await expect(listarMedios()).resolves.toEqual([])
     await expect(registrarMedio(MEDIO)).resolves.toBeDefined()
   })
@@ -29,7 +30,6 @@ describe('medios con sesión de redactor', () => {
     [{ tipo: 'album', albumId: 'x' }],
     [{ tipo: 'hero' }],
     [{ tipo: 'rival' }],
-    [{ tipo: 'redactor' }],
   ] as const)('prepararSubida con destino %j se rechaza', async (destino) => {
     await expect(prepararSubida(destino, 'image/webp')).rejects.toThrow('No autorizado')
   })

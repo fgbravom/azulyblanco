@@ -27,7 +27,8 @@ export type DestinoSubida =
 export async function prepararSubida(destino: DestinoSubida, mime: string) {
   const sesion = await requireEditorNoticias()
   // Un redactor solo sube a la biblioteca (portadas e imágenes de sus noticias)
-  if (sesion.rol === 'redactor' && destino?.tipo !== 'biblioteca') throw new Error('No autorizado')
+  // y su propio avatar: cambiarMiAvatar solo lo asigna a su ficha
+  if (sesion.rol === 'redactor' && destino?.tipo !== 'biblioteca' && destino?.tipo !== 'redactor') throw new Error('No autorizado')
 
   const ext = EXTENSIONES[mime]
   if (!ext) throw new Error('Formato no permitido. Usa JPG, PNG, WebP, GIF o AVIF.')

@@ -12,9 +12,11 @@ interface Props {
   usuario: string;
   /** Tiene una contraseña temporal: debe cambiarla antes de seguir */
   debeCambiar: boolean;
+  /** Panel del avatar, entre los datos de acceso y la contraseña */
+  avatar?: React.ReactNode;
 }
 
-export default function CambiarPasswordForm({ nombre, usuario, debeCambiar }: Props) {
+export default function CambiarPasswordForm({ nombre, usuario, debeCambiar, avatar }: Props) {
   const [actual, setActual] = useState('');
   const [nueva, setNueva] = useState('');
   const [confirmacion, setConfirmacion] = useState('');
@@ -59,6 +61,8 @@ export default function CambiarPasswordForm({ nombre, usuario, debeCambiar }: Pr
           <dd className="break-all font-mono text-gray-900">{usuario}</dd>
         </dl>
       </Panel>
+
+      {avatar}
 
       <form onSubmit={enviar}>
         <Panel titulo="Cambiar contraseña" descripcion="Mínimo 10 caracteres.">

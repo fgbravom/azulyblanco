@@ -7,7 +7,7 @@ import { argsDe, crearSupabaseFalso, uso } from '../helpers/supabase-falso'
 vi.mock('@/lib/supabase/admin', () => ({ createAdminClient: vi.fn() }))
 
 const { createAdminClient } = await import('@/lib/supabase/admin')
-const { cambiarMiPassword } = await import('@/app/(admin)/admin/cuenta/actions')
+const { cambiarMiPassword, cambiarMiAvatar } = await import('@/app/(admin)/admin/cuenta/actions')
 
 const ACTUAL = 'contrasena-temporal'
 const NUEVA = 'una-clave-bien-larga'
@@ -75,5 +75,61 @@ describe('cambiarMiPassword', () => {
       redactorId: REDACTOR_ID,
       version: 1,
     })
+  })
+})
+
+describe('cambiarMiAvatar', () => {
+  const URL_BUCKET = 'https://falso.supabase.co/storage/v1/object/public/medios'
+
+  function conAvatar(avatarActual: string | null) {
+    const falso = crearSupabaseFalso((c) =>
+      c.tabla === 'cuentas_redactores'
+        ? { data: filaCuenta() }
+        : c.tabla === 'redactores' && !uso(c, 'update')
+          ? { data: { avatar_url: avatarActual } }
+          : undefined
+    )
+    const remove = vi.fn(async () => ({ data: [], error: null }))
+    const storage = falso.cliente.storage.from()
+    falso.cliente.storage.from = () => ({ ...storage, remove })
+    vi.mocked(createAdminClient).mockReturnValue(falso.cliente)
+    return { ...falso, remove }
+  }
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it('rechaza al admin y a un redactor con contraseña temporal', async () => {
+    await simularSesion('admin')
+    await expect(cambiarMiAvatar('redactores/a.webp')).rejects.toThrow('No autorizado')
+    await simularSesion('redactor', { debe_cambiar_password: true })
+    await expect(cambiarMiAvatar('redactores/a.webp')).rejects.toThrow('contraseña temporal')
+  })
+
+  it('guarda el avatar en su propia ficha y borra el anterior del bucket', async () => {
+    await simularSesion('redactor')
+    const falso = conAvatar(`${URL_BUCKET}/redactores/viejo.webp`)
+    await expect(cambiarMiAvatar('redactores/nuevo.webp')).resolves.toBe(`${URL_BUCKET}/redactores/nuevo.webp`)
+
+    const update = falso.a('redactores').find((c) => uso(c, 'update'))!
+    expect(argsDe(update, 'update')?.[0]).toEqual({ avatar_url: `${URL_BUCKET}/redactores/nuevo.webp` })
+    expect(argsDe(update, 'eq')).toEqual(['id', REDACTOR_ID])
+    expect(falso.remove).toHaveBeenCalledWith(['redactores/viejo.webp'])
+  })
+
+  it('quita el avatar sin tocar un archivo de public/', async () => {
+    await simularSesion('redactor')
+    const falso = conAvatar('/images/redactores/felipe.webp')
+    await expect(cambiarMiAvatar(null)).resolves.toBeNull()
+    expect(argsDe(falso.a('redactores').find((c) => uso(c, 'update'))!, 'update')?.[0]).toEqual({ avatar_url: null })
+    expect(falso.remove).not.toHaveBeenCalled()
+  })
+
+  it.each(['biblioteca/2026/03/a.webp', 'redactores/../hero/x.webp'])('rechaza la ruta %s sin escribir', async (path) => {
+    await simularSesion('redactor')
+    const falso = conAvatar(null)
+    await expect(cambiarMiAvatar(path)).rejects.toThrow('Ruta de avatar inválida')
+    expect(falso.consultas.some((c) => uso(c, 'update'))).toBe(false)
   })
 })

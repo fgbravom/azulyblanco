@@ -1,8 +1,11 @@
 'use server'
 
 import bcrypt from 'bcryptjs'
+import { revalidatePath } from 'next/cache'
+import { borrarAvatar, urlAvatar } from '@/lib/admin/avatar-redactor'
+import { revalidarSitio } from '@/lib/admin/revalidar'
 import { hashPassword, validarPasswordNueva } from '@/lib/auth/password'
-import { createSession, obtenerSesion } from '@/lib/auth/session'
+import { createSession, obtenerSesion, requireEditorNoticias } from '@/lib/auth/session'
 import { createAdminClient } from '@/lib/supabase/admin'
 
 /**
@@ -37,4 +40,31 @@ export async function cambiarMiPassword(actual: string, nueva: string) {
   if (errorGuardado) throw new Error(errorGuardado.message)
 
   await createSession({ rol: 'redactor', redactorId: sesion.redactorId, version })
+}
+
+/**
+ * Un redactor cambia su propio avatar. `avatarPath` es la ruta de una imagen ya
+ * subida con URL firmada (destino "redactor"); `null` lo quita. Devuelve la
+ * nueva URL pública.
+ */
+export async function cambiarMiAvatar(avatarPath: string | null): Promise<string | null> {
+  const sesion = await requireEditorNoticias()
+  if (sesion.rol !== 'redactor') throw new Error('No autorizado')
+  if (avatarPath !== null && typeof avatarPath !== 'string') throw new Error('Ruta de avatar inválida')
+
+  const supabase = createAdminClient()
+  const avatarUrl = avatarPath ? urlAvatar(supabase, avatarPath) : null
+
+  const { data: actual, error } = await supabase.from('redactores').select('avatar_url').eq('id', sesion.redactorId).single()
+  if (error) throw new Error(error.message)
+
+  const { error: errorGuardado } = await supabase.from('redactores').update({ avatar_url: avatarUrl }).eq('id', sesion.redactorId)
+  if (errorGuardado) throw new Error(errorGuardado.message)
+
+  if (actual.avatar_url !== avatarUrl) await borrarAvatar(supabase, actual.avatar_url)
+
+  revalidatePath('/admin/cuenta')
+  revalidatePath('/admin/redactores')
+  revalidarSitio('noticias')
+  return avatarUrl
 }

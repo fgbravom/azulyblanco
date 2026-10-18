@@ -6,7 +6,8 @@ import { requireAdmin } from '@/lib/auth/session'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidarSitio } from '@/lib/admin/revalidar'
 import { ADMIN_USUARIO, generarPasswordTemporal, hashPassword } from '@/lib/auth/password'
-import { BUCKET_MEDIOS, type CuentaRedactor, type Redactor, type RedactorConCuenta } from '@/lib/contenido/tipos'
+import { borrarAvatar, urlAvatar } from '@/lib/admin/avatar-redactor'
+import type { CuentaRedactor, Redactor, RedactorConCuenta } from '@/lib/contenido/tipos'
 
 const redactorSchema = z.object({
   nombre: z.string().trim().min(1, 'Indica el nombre del redactor'),
@@ -24,12 +25,6 @@ function cambios() {
   revalidatePath('/admin/redactores')
   revalidatePath('/admin/noticias', 'layout')
   revalidarSitio('noticias')
-}
-
-/** Ruta en el bucket de un avatar subido desde el admin; null si es un archivo de public/ */
-function pathEnBucket(url: string | null) {
-  const path = url?.split(`/object/public/${BUCKET_MEDIOS}/`)[1]
-  return path?.startsWith('redactores/') ? path : null
 }
 
 export async function listarRedactores(): Promise<RedactorConCuenta[]> {
@@ -74,8 +69,7 @@ export async function guardarRedactor(
 
   const cambiaAvatar = input.avatarPath !== undefined
   if (input.avatarPath) {
-    if (!input.avatarPath.startsWith('redactores/')) throw new Error('Ruta de avatar inválida')
-    fila.avatar_url = supabase.storage.from(BUCKET_MEDIOS).getPublicUrl(input.avatarPath).data.publicUrl
+    fila.avatar_url = urlAvatar(supabase, input.avatarPath)
   } else if (input.avatarPath === null) {
     fila.avatar_url = null
   }
@@ -96,10 +90,7 @@ export async function guardarRedactor(
   }
 
   // Se reemplazó o quitó el avatar: el archivo anterior ya no se usa
-  if (cambiaAvatar && avatarAnterior && avatarAnterior !== fila.avatar_url) {
-    const pathAnterior = pathEnBucket(avatarAnterior)
-    if (pathAnterior) await supabase.storage.from(BUCKET_MEDIOS).remove([pathAnterior])
-  }
+  if (cambiaAvatar && avatarAnterior !== fila.avatar_url) await borrarAvatar(supabase, avatarAnterior)
 
   cambios()
   return data as Redactor
@@ -115,8 +106,7 @@ export async function eliminarRedactor(id: string) {
   const { error: errorBorrado } = await supabase.from('redactores').delete().eq('id', id)
   if (errorBorrado) throw new Error(errorBorrado.message)
 
-  const path = pathEnBucket(redactor.avatar_url)
-  if (path) await supabase.storage.from(BUCKET_MEDIOS).remove([path])
+  await borrarAvatar(supabase, redactor.avatar_url)
 
   cambios()
 }
