@@ -148,7 +148,7 @@ export default function CuotaDialog({
 
   return (
     <Dialog open onOpenChange={(abierto) => !abierto && onClose()}>
-      <DialogContent className="max-h-[92vh] max-w-xl overflow-y-auto bg-white">
+      <DialogContent className="max-w-xl overflow-y-auto bg-white">
         <DialogHeader>
           <DialogTitle className="text-xl text-azul-primario">{jugador.nombre_completo}</DialogTitle>
           <DialogDescription className="text-gray-600">Cuota de {mes}</DialogDescription>
@@ -200,7 +200,7 @@ export default function CuotaDialog({
                       size="sm"
                       onClick={() => anular(p)}
                       disabled={ocupado !== null}
-                      className="text-gray-500 hover:text-red-600"
+                      className="h-10 shrink-0 text-gray-500 hover:text-red-600 sm:h-8"
                     >
                       <Ban /> Anular
                     </Button>
@@ -213,9 +213,9 @@ export default function CuotaDialog({
 
         {/* Registrar pago */}
         {cuota?.estado !== 'exenta' && (
-          <form onSubmit={registrar} className="space-y-3 rounded-lg border border-gray-200 p-4">
+          <form onSubmit={registrar} className="space-y-3 rounded-lg border border-gray-200 p-3 sm:p-4">
             <h3 className="text-sm font-semibold text-gray-800">Registrar pago</h3>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <Campo label="Monto" htmlFor="pago-monto">
                 <input
                   id="pago-monto"
@@ -259,7 +259,7 @@ export default function CuotaDialog({
                   className={inputClass}
                 />
               </Campo>
-              <Campo label="Registrado por" htmlFor="pago-por" className="col-span-2 sm:col-span-1">
+              <Campo label="Registrado por" htmlFor="pago-por" className="sm:col-span-1">
                 <input
                   id="pago-por"
                   value={pago.registrado_por}
@@ -268,7 +268,7 @@ export default function CuotaDialog({
                   className={inputClass}
                 />
               </Campo>
-              <Campo label="Nota" htmlFor="pago-nota" className="col-span-2 sm:col-span-1">
+              <Campo label="Nota" htmlFor="pago-nota" className="sm:col-span-1">
                 <input
                   id="pago-nota"
                   value={pago.nota}
@@ -286,11 +286,11 @@ export default function CuotaDialog({
 
         {/* Exención y monto */}
         <details className="rounded-lg border border-gray-200" open={cuota?.estado === 'exenta'}>
-          <summary className="cursor-pointer select-none px-4 py-3 text-sm font-semibold text-gray-800">
+          <summary className="cursor-pointer select-none px-4 py-3.5 sm:py-3 text-sm font-semibold text-gray-800">
             Exención y monto de la cuota
           </summary>
           <form onSubmit={guardarAjuste} className="space-y-3 border-t border-gray-100 p-4">
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <Campo label="Exención" htmlFor="cuota-exencion" ayuda="Una cuota exenta no suma deuda.">
                 <select
                   id="cuota-exencion"
@@ -327,15 +327,15 @@ export default function CuotaDialog({
                 className={textareaClass}
               />
             </Campo>
-            <div className="flex items-center justify-between gap-2">
+            <div className="flex flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-between">
               {cuota ? (
-                <Button type="button" variant="ghost" size="sm" onClick={eliminar} disabled={ocupado !== null} className="text-gray-500 hover:text-red-600">
+                <Button type="button" variant="ghost" size="sm" onClick={eliminar} disabled={ocupado !== null} className="h-10 text-gray-500 hover:text-red-600 sm:h-8">
                   <Trash2 /> Eliminar cuota
                 </Button>
               ) : (
                 <span />
               )}
-              <Button type="submit" variant="outline" disabled={ocupado !== null}>
+              <Button type="submit" variant="outline" className="w-full sm:w-auto" disabled={ocupado !== null}>
                 {ocupado === 'ajuste' ? 'Guardando…' : 'Guardar'}
               </Button>
             </div>

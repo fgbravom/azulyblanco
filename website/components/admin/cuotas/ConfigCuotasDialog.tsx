@@ -57,11 +57,11 @@ export default function ConfigCuotasDialog({ serie, onClose }: { serie: SerieCuo
               className={textareaClass}
             />
           </Campo>
-          <div className="flex justify-end gap-2">
-            <Button type="button" variant="outline" onClick={onClose} disabled={guardando}>
+          <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+            <Button type="button" variant="outline" className="w-full sm:w-auto" onClick={onClose} disabled={guardando}>
               Cancelar
             </Button>
-            <Button type="submit" disabled={guardando}>
+            <Button type="submit" className="w-full sm:w-auto" disabled={guardando}>
               {guardando ? 'Guardando…' : 'Guardar'}
             </Button>
           </div>

@@ -93,12 +93,12 @@ export default function JugadorCuotasDialog({
         <div className="space-y-5">
           <Campo label="Link personal" ayuda="Muestra su estado de cuenta y los datos para pagar. Cualquiera con el link puede verlo.">
             <div className="flex gap-2">
-              <input readOnly value={link} onFocus={(e) => e.target.select()} className={`${inputClass} font-mono text-xs`} />
-              <Button variant="outline" size="icon" onClick={copiar} title="Copiar">
+              <input readOnly value={link} onFocus={(e) => e.target.select()} className={`${inputClass} min-w-0 font-mono text-xs`} />
+              <Button variant="outline" size="icon" onClick={copiar} title="Copiar" className="h-10 w-10 shrink-0">
                 <Copy />
               </Button>
             </div>
-            <div className="flex flex-wrap gap-2 pt-1">
+            <div className="flex flex-col gap-2 pt-1 sm:flex-row sm:flex-wrap [&>*]:w-full sm:[&>*]:w-auto">
               <Button size="sm" asChild className="bg-[#1fa855] hover:bg-[#178a45]">
                 <a href={whatsapp} target="_blank" rel="noreferrer">
                   <MessageCircle /> Enviar por WhatsApp

@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { CalendarPlus, Link2, Search, Settings, Wallet } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { PageHeader, Vacio, inputClass } from '@/components/admin/ui';
+import { FiltroChips, PageHeader, Vacio, inputClass } from '@/components/admin/ui';
 import { formatoCLP, nombreMes, periodoDe, type Cuota } from '@/lib/cuotas/tipos';
 import type { JugadorCuotas, Tablero } from '@/app/(admin)/admin/cuotas/actions';
 import CeldaCuota from './CeldaCuota';
@@ -105,32 +105,24 @@ export default function CuotasAdmin({ tablero }: { tablero: Tablero }) {
       />
 
       {/* Serie y año */}
-      <div className="flex flex-wrap items-center gap-2">
-        {series.map((s) => (
-          <button
-            key={s.equipo_id}
-            onClick={() => navegar({ serie: s.equipo_id })}
-            className={cn(
-              'rounded-full border px-3 py-1 text-sm',
-              s.equipo_id === serie.equipo_id
-                ? 'border-azul-primario bg-azul-primario text-white'
-                : 'border-gray-300 bg-white text-gray-700 hover:border-azul-claro'
-            )}
+      <FiltroChips
+        etiqueta="Serie"
+        opciones={series.map((s) => ({ valor: s.equipo_id, etiqueta: s.nombre }))}
+        valor={serie.equipo_id}
+        onChange={(equipoId) => navegar({ serie: equipoId })}
+        extra={
+          <select
+            value={anio}
+            onChange={(e) => navegar({ anio: Number(e.target.value) })}
+            className={cn(inputClass, 'h-10 w-auto sm:h-9')}
+            aria-label="Año"
           >
-            {s.nombre}
-          </button>
-        ))}
-        <select
-          value={anio}
-          onChange={(e) => navegar({ anio: Number(e.target.value) })}
-          className={cn(inputClass, 'ml-auto h-9 w-auto')}
-          aria-label="Año"
-        >
-          {anios.map((a) => (
-            <option key={a} value={a}>{a}</option>
-          ))}
-        </select>
-      </div>
+            {anios.map((a) => (
+              <option key={a} value={a}>{a}</option>
+            ))}
+          </select>
+        }
+      />
 
       {/* Resumen */}
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
@@ -166,8 +158,8 @@ export default function CuotasAdmin({ tablero }: { tablero: Tablero }) {
         />
       ) : (
         <section className="rounded-xl border border-gray-200 bg-white shadow-sm">
-          <div className="flex flex-wrap items-center gap-3 border-b border-gray-100 p-4">
-            <div className="relative min-w-48 flex-1">
+          <div className="flex flex-col gap-3 border-b border-gray-100 p-4 sm:flex-row sm:flex-wrap sm:items-center">
+            <div className="relative min-w-0 flex-1 sm:min-w-48">
               <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
               <input
                 value={busqueda}
@@ -176,21 +168,21 @@ export default function CuotasAdmin({ tablero }: { tablero: Tablero }) {
                 className={cn(inputClass, 'pl-9')}
               />
             </div>
-            <label className="flex items-center gap-2 text-sm text-gray-700">
-              <input type="checkbox" checked={soloDeuda} onChange={(e) => setSoloDeuda(e.target.checked)} className="h-4 w-4 accent-azul-primario" />
+            <label className="flex min-h-10 items-center gap-2 text-sm text-gray-700 sm:min-h-0">
+              <input type="checkbox" checked={soloDeuda} onChange={(e) => setSoloDeuda(e.target.checked)} className="h-5 w-5 accent-azul-primario sm:h-4 sm:w-4" />
               Solo con deuda
             </label>
           </div>
 
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto overscroll-x-contain">
             <table className="w-full border-collapse text-sm">
               <thead>
                 <tr className="border-b border-gray-200 bg-gray-50 text-xs uppercase tracking-wide text-gray-500">
-                  <th className="sticky left-0 z-10 bg-gray-50 px-4 py-3 text-left font-semibold">Jugador</th>
+                  <th className="sticky left-0 z-10 bg-gray-50 px-3 py-3 text-left font-semibold shadow-[6px_0_8px_-6px_rgba(0,0,0,0.18)] sm:px-4 sm:shadow-none">Jugador</th>
                   {meses.map((m) => (
                     <th key={m} className="px-1 py-3 text-center font-semibold">{nombreMes(m, 'short')}</th>
                   ))}
-                  <th className="px-4 py-3 text-right font-semibold">Deuda</th>
+                  <th className="hidden px-4 py-3 text-right font-semibold sm:table-cell">Deuda</th>
                 </tr>
               </thead>
               <tbody>
@@ -215,11 +207,11 @@ export default function CuotasAdmin({ tablero }: { tablero: Tablero }) {
               </tbody>
               <tfoot>
                 <tr className="border-t-2 border-gray-200 bg-gray-50 font-semibold text-azul-primario">
-                  <td className="sticky left-0 z-10 bg-gray-50 px-4 py-3">Total recaudado</td>
+                  <td className="sticky left-0 z-10 bg-gray-50 px-3 py-3 shadow-[6px_0_8px_-6px_rgba(0,0,0,0.18)] sm:px-4 sm:shadow-none">Total recaudado</td>
                   {meses.map((m) => (
                     <td key={m} className="whitespace-nowrap px-1 py-3 text-center text-xs">{formatoCLP(totalMes(m))}</td>
                   ))}
-                  <td className="whitespace-nowrap px-4 py-3 text-right text-red-600">{formatoCLP(resumen.porCobrar)}</td>
+                  <td className="hidden whitespace-nowrap px-4 py-3 text-right text-red-600 sm:table-cell">{formatoCLP(resumen.porCobrar)}</td>
                 </tr>
               </tfoot>
             </table>
@@ -255,9 +247,9 @@ export default function CuotasAdmin({ tablero }: { tablero: Tablero }) {
 
 function Indicador({ etiqueta, valor, alerta }: { etiqueta: string; valor: string; alerta?: boolean }) {
   return (
-    <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+    <div className="min-w-0 rounded-xl border border-gray-200 bg-white p-3 shadow-sm sm:p-4">
       <p className="text-xs font-medium uppercase tracking-wide text-gray-500">{etiqueta}</p>
-      <p className={cn('mt-1 font-heading text-xl font-bold sm:text-2xl', alerta ? 'text-red-600' : 'text-azul-primario')}>{valor}</p>
+      <p className={cn('mt-1 break-words font-heading text-lg font-bold sm:text-xl lg:text-2xl', alerta ? 'text-red-600' : 'text-azul-primario')}>{valor}</p>
     </div>
   );
 }
@@ -279,13 +271,17 @@ function Fila({
 }) {
   return (
     <tr className={cn('group border-b border-gray-100 hover:bg-gray-50/60', !jugador.activo && 'text-gray-400')}>
-      <td className="sticky left-0 z-10 bg-white px-4 py-1.5 group-hover:bg-gray-50">
-        <button onClick={onFicha} className="flex items-center gap-2 text-left hover:text-azul-claro" title="Condición y link personal">
-          <span className={cn('whitespace-nowrap font-medium', jugador.activo ? 'text-gray-900' : 'text-gray-400 line-through')}>
-            {jugador.nombre_completo}
+      <td className="sticky left-0 z-10 max-w-[8.5rem] bg-white px-3 py-1.5 shadow-[6px_0_8px_-6px_rgba(0,0,0,0.18)] group-hover:bg-gray-50 sm:max-w-none sm:px-4 sm:shadow-none">
+        <button onClick={onFicha} className="flex min-h-9 w-full min-w-0 items-center gap-2 text-left hover:text-azul-claro" title={`${jugador.nombre_completo} · condición y link personal`}>
+          <span className="min-w-0 sm:contents">
+            <span className={cn('block truncate font-medium sm:overflow-visible sm:whitespace-nowrap', jugador.activo ? 'text-gray-900' : 'text-gray-400 line-through')}>
+              {jugador.nombre_completo}
+            </span>
+            {/* En móvil la deuda va bajo el nombre, siempre visible al deslizar */}
+            {deuda > 0 && <span className="block text-[11px] font-semibold leading-tight text-red-600 sm:hidden">{formatoCLP(deuda)}</span>}
           </span>
           {jugador.cuota_condicion !== 'regular' && (
-            <span className="rounded bg-purple-50 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-purple-700">
+            <span className="shrink-0 rounded bg-purple-50 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-purple-700">
               {jugador.cuota_condicion}
             </span>
           )}
@@ -297,7 +293,7 @@ function Fila({
           <CeldaCuota cuota={cuota(m)} onClick={() => onCelda(m)} />
         </td>
       ))}
-      <td className={cn('whitespace-nowrap px-4 py-1.5 text-right font-semibold', deuda > 0 ? 'text-red-600' : 'text-gray-400')}>
+      <td className={cn('hidden whitespace-nowrap px-4 py-1.5 text-right font-semibold sm:table-cell', deuda > 0 ? 'text-red-600' : 'text-gray-400')}>
         {deuda > 0 ? formatoCLP(deuda) : '—'}
       </td>
     </tr>

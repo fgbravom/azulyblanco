@@ -44,11 +44,11 @@ export default function GenerarCuotasDialog({ serie, onClose }: { serie: SerieCu
           <Campo label="Mes" htmlFor="mes-generar">
             <input id="mes-generar" type="month" required value={mes} onChange={(e) => setMes(e.target.value)} className={inputClass} />
           </Campo>
-          <div className="flex justify-end gap-2">
-            <Button type="button" variant="outline" onClick={onClose} disabled={generando}>
+          <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+            <Button type="button" variant="outline" className="w-full sm:w-auto" onClick={onClose} disabled={generando}>
               Cancelar
             </Button>
-            <Button type="submit" disabled={generando || !mes}>
+            <Button type="submit" className="w-full sm:w-auto" disabled={generando || !mes}>
               {generando ? 'Generando…' : 'Generar'}
             </Button>
           </div>

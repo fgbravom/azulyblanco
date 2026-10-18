@@ -35,7 +35,7 @@ export default function CeldaCuota({ cuota, onClick }: { cuota?: Cuota; onClick:
     return (
       <button
         onClick={onClick}
-        className="h-8 w-full min-w-[4.5rem] rounded-md text-xs text-gray-300 hover:bg-gray-100 hover:text-gray-500"
+        className="h-10 w-full min-w-[4.5rem] rounded-md text-xs text-gray-300 sm:h-8 hover:bg-gray-100 hover:text-gray-500"
         title="Sin cuota este mes"
       >
         —
@@ -48,7 +48,7 @@ export default function CeldaCuota({ cuota, onClick }: { cuota?: Cuota; onClick:
       onClick={onClick}
       title={cuota.estado === 'parcial' ? `Abonó ${formatoCLP(cuota.pagado)} de ${formatoCLP(cuota.monto)}` : cuota.nota ?? undefined}
       className={cn(
-        'h-8 w-full min-w-[4.5rem] whitespace-nowrap rounded-md px-1.5 text-xs font-semibold transition-shadow hover:ring-2 hover:ring-azul-claro/40',
+        'h-10 w-full min-w-[4.5rem] whitespace-nowrap sm:h-8 rounded-md px-1.5 text-xs font-semibold transition-shadow hover:ring-2 hover:ring-azul-claro/40',
         estiloCuota(cuota)
       )}
     >
