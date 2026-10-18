@@ -84,19 +84,19 @@ export default async function AdminDashboard() {
           <Link
             key={t.titulo}
             href={t.href}
-            className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm transition-all hover:border-azul-claro/50 hover:shadow-md"
+            className="min-w-0 rounded-xl border border-gray-200 bg-white p-4 shadow-sm transition-all sm:p-5 hover:border-azul-claro/50 hover:shadow-md"
           >
-            <div className="flex items-center justify-between">
-              <p className="text-sm font-medium text-gray-600">{t.titulo}</p>
-              <t.icono className="h-5 w-5 text-azul-claro" />
+            <div className="flex items-start justify-between gap-2">
+              <p className="min-w-0 text-xs font-medium leading-tight text-gray-600 sm:text-sm">{t.titulo}</p>
+              <t.icono className="h-5 w-5 shrink-0 text-azul-claro" />
             </div>
-            <p className="mt-2 text-3xl font-bold text-azul-primario">{t.valor}</p>
-            <p className="mt-1 text-xs text-gray-500">{t.detalle}</p>
+            <p className="mt-2 text-2xl font-bold sm:text-3xl text-azul-primario">{t.valor}</p>
+            <p className="mt-1 truncate text-xs text-gray-500">{t.detalle}</p>
           </Link>
         ))}
       </div>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_380px]">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_380px]">
         <Panel
           titulo="Próximas actividades"
           acciones={<Link href="/admin/programacion" className="text-sm font-medium text-azul-claro hover:underline">Ver todas</Link>}
@@ -106,12 +106,12 @@ export default async function AdminDashboard() {
           ) : (
             <ul className="-my-2 divide-y divide-gray-100">
               {resumen.proximas.map((a) => (
-                <li key={a.id} className="flex items-center gap-4 py-3">
+                <li key={a.id} className="flex items-center gap-3 py-3 sm:gap-4">
                   <div className="w-14 shrink-0 rounded-lg bg-azul-primario py-1.5 text-center text-white">
                     <p className="text-[10px] font-semibold uppercase">{formatearFecha(a.fecha, { month: 'short' }).replace('.', '')}</p>
                     <p className="text-lg font-bold leading-none">{Number(a.fecha.slice(8))}</p>
                   </div>
-                  <div className="min-w-0">
+                  <div className="min-w-0 flex-1">
                     <p className="truncate font-medium text-gray-900">{nombreActividad(a)}</p>
                     <p className="flex flex-wrap gap-x-3 text-xs text-gray-500">
                       {a.hora_inicio && <span className="inline-flex items-center gap-1"><Clock className="h-3 w-3" />{horaCorta(a.hora_inicio)}</span>}
@@ -125,14 +125,14 @@ export default async function AdminDashboard() {
           )}
         </Panel>
 
-        <div className="space-y-6">
+        <div className="min-w-0 space-y-6">
           <Panel titulo="Accesos rápidos">
             <div className="grid grid-cols-1 gap-2">
               {accesos.map((a) => (
                 <Link
                   key={a.label}
                   href={a.href}
-                  className="flex items-center gap-3 rounded-lg border border-gray-200 px-3 py-2.5 text-sm font-medium text-gray-700 hover:border-azul-claro hover:text-azul-primario"
+                  className="flex min-h-11 items-center gap-3 rounded-lg border border-gray-200 px-3 py-2.5 text-sm font-medium text-gray-700 hover:border-azul-claro hover:text-azul-primario"
                 >
                   <Plus className="h-4 w-4 text-azul-claro" />
                   {a.label}
