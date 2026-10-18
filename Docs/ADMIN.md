@@ -7,7 +7,7 @@
 | Sección | Tabla / almacenamiento | Se ve en |
 |---|---|---|
 | Portada | `hero_fotos`, archivos en `medios/hero/<id>/` | Hero del inicio |
-| Programación | `programacion` | Inicio y `/partidos` |
+| Programación | `programacion`; goleadores y asistencias en `goles` | Inicio y `/partidos` |
 | Noticias | `noticias` (contenido en Markdown; un link de YouTube solo en su línea se incrusta como video); motivos de despublicación en `noticias_despublicaciones` | Inicio, `/noticias` |
 | Galerías | `albumes` + `fotos`, archivos en `medios/galeria/<album>/` | `/galeria` |
 | Redactores | `redactores` (nombre y avatar, de lectura pública) y `cuentas_redactores` (acceso al panel, solo servidor) | Firma de cada noticia |
@@ -142,6 +142,14 @@ El panel tiene dos roles. El **admin** (usuario `ab06`, contraseña de `ADMIN_PA
 **Despublicaciones.** Cada vez que una noticia publicada vuelve a borrador se guarda una fila en `noticias_despublicaciones` (`redactor_id` nulo si la despublicó el admin; motivo vacío si el admin no escribió uno). El admin ve en el listado y en el editor quién la despublicó, cuándo y por qué.
 
 **Migración 013.** Crea `cuentas_redactores` y `noticias_despublicaciones` (con RLS y sin políticas: solo `service_role`). **Debe aplicarse en producción antes de desplegar el código** (`npm run db:push`, con autorización), porque el login y el listado de redactores ya consultan esas tablas.
+
+## Goles y asistencias
+
+Al editar un partido con resultado, el formulario muestra una fila por cada gol de AYB (solo los lados que son de AYB; en un partido interno, de ambos). En cada fila se elige el goleador (o «Autogol del rival») y, opcionalmente, quien lo asistió. Los jugadores aparecen agrupados por serie, con las series del partido primero y los inactivos al final. Dejar un gol sin goleador es válido: simplemente no se muestra.
+
+Se guardan en `goles`, una fila por gol con su `lado` y `orden`. La tabla tiene RLS sin políticas (solo `service_role`); el sitio los lee desde `vista_goles_publico`, que trae únicamente nombre y apellidos de los jugadores y solo de partidos publicados. En el detalle del partido se muestran bajo cada equipo con nombre y primer apellido. Si el resultado se borra, se borran los goleadores; si se borra un jugador, su gol queda sin nombre y deja de mostrarse.
+
+**Migración 014.** Crea `goles` y `vista_goles_publico`. Conviene aplicarla en producción antes de desplegar (`npm run db:push`, con autorización): sin ella el sitio sigue funcionando, pero el admin no puede guardar partidos porque al guardar actualiza los goleadores.
 
 ## Seguridad
 
