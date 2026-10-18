@@ -52,3 +52,12 @@ INSERT INTO noticias (slug, titulo, bajada, contenido, categoria, autor, fecha, 
   ('noticia-de-prueba', 'Noticia de prueba', 'Bajada de ejemplo para el entorno local.',
    E'## Un subtítulo\n\nPárrafo con **negrita** y _cursiva_.\n\n- Punto uno\n- Punto dos', 'Institucional', 'Club Azul y Blanco', CURRENT_DATE, TRUE),
   ('borrador-de-prueba', 'Borrador de prueba', 'No debería verse en el sitio público.', 'Contenido en borrador.', 'Partidos', NULL, CURRENT_DATE, FALSE);
+
+-- Redactor de prueba: usuario "redactor", contraseña asd123 (solo local)
+WITH r AS (
+  INSERT INTO redactores (nombre) VALUES ('Redactor de Prueba')
+  ON CONFLICT DO NOTHING
+  RETURNING id
+)
+INSERT INTO cuentas_redactores (redactor_id, usuario, password_hash, debe_cambiar_password)
+SELECT id, 'redactor', '$2b$10$gE7l380JyOnYgDyV5QAFaOwPH4eO6kKVytaGuI.Geo8xvZDN0o5QK', FALSE FROM r;

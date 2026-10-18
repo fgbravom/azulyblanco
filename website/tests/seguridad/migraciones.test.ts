@@ -59,6 +59,13 @@ describe('permisos de la clave pública', () => {
     }
   })
 
+  it('cuentas_redactores y noticias_despublicaciones tienen RLS y ninguna política (solo service_role)', () => {
+    for (const tabla of ['cuentas_redactores', 'noticias_despublicaciones']) {
+      expect(activo, `${tabla} sin RLS`).toMatch(new RegExp(`ALTER TABLE ${tabla} ENABLE ROW LEVEL SECURITY`, 'i'))
+      expect(activo, `${tabla} con política`).not.toMatch(new RegExp(`CREATE POLICY "[^"]+" ON ${tabla}\\b`, 'i'))
+    }
+  })
+
   it('las vistas internas quedan fuera del alcance de anon y authenticated', () => {
     for (const vista of ['vista_jugadores_completa', 'vista_cuotas', 'vista_estadisticas_jugador', 'vista_partidos_completa']) {
       expect(activo, vista).toMatch(new RegExp(`REVOKE ALL ON ${vista} FROM anon, authenticated`, 'i'))
