@@ -3,11 +3,12 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { FileUp, Plus } from 'lucide-react';
+import { FileDown, FileUp, Plus } from 'lucide-react';
 import JugadoresTable from '@/components/admin/jugadores/JugadoresTable';
 import JugadorForm from '@/components/admin/jugadores/JugadorForm';
 import JugadorFicha from '@/components/admin/jugadores/JugadorFicha';
 import ImportarJugadoresDialog from '@/components/admin/jugadores/ImportarJugadoresDialog';
+import { jugadoresACsv } from '@/lib/jugadores/exportar-csv';
 import type { JugadorCompleto } from '@/types/database';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
@@ -48,6 +49,17 @@ export default function JugadoresPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Exporta lo que se está viendo: todo el plantel o solo la serie filtrada
+  const exportarCsv = () => {
+    const blob = new Blob([jugadoresACsv(visibles)], { type: 'text/csv;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `plantel-${serie === 'Todas' ? 'completo' : `serie-${serie}`}-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   const handleCreate = () => {
@@ -98,6 +110,9 @@ export default function JugadoresPage() {
           <div className="flex flex-wrap gap-2">
             <Button variant="outline" onClick={() => setImportarOpen(true)}>
               <FileUp /> Importar CSV
+            </Button>
+            <Button variant="outline" onClick={exportarCsv} disabled={loading || visibles.length === 0}>
+              <FileDown /> Exportar CSV
             </Button>
             <Button onClick={handleCreate}>
               <Plus /> Nuevo jugador
