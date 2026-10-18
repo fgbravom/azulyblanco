@@ -139,7 +139,7 @@ El panel tiene dos roles. El **admin** (usuario `ab06`, contraseña de `ADMIN_PA
 
 **Revocación de sesiones.** El token de sesión lleva el id del redactor y la `version_sesion` de su cuenta. En cada petición al servidor se compara con la base y se confirma que la cuenta siga activa. Restablecer la contraseña, desactivar la cuenta o que el propio redactor cambie su contraseña suben `version_sesion` y cierran sus demás sesiones (al cambiarla él mismo, su sesión actual se vuelve a emitir). El middleware no consulta la base: solo valida la firma.
 
-**Despublicaciones.** Cada vez que una noticia publicada vuelve a borrador con motivo, se guarda una fila en `noticias_despublicaciones` (`redactor_id` nulo si la despublicó el admin). El admin ve en el listado y en el editor quién la despublicó, cuándo y por qué.
+**Despublicaciones.** Cada vez que una noticia publicada vuelve a borrador se guarda una fila en `noticias_despublicaciones` (`redactor_id` nulo si la despublicó el admin; motivo vacío si el admin no escribió uno). El admin ve en el listado y en el editor quién la despublicó, cuándo y por qué.
 
 **Migración 013.** Crea `cuentas_redactores` y `noticias_despublicaciones` (con RLS y sin políticas: solo `service_role`). **Debe aplicarse en producción antes de desplegar el código** (`npm run db:push`, con autorización), porque el login y el listado de redactores ya consultan esas tablas.
 

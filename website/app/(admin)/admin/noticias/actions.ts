@@ -59,7 +59,8 @@ function comprobarPropiedad(sesion: Sesion, previa: FilaPrevia | null) {
 
 /**
  * Motivo a registrar cuando una noticia publicada pasa a borrador, o null si no
- * corresponde. El redactor debe escribirlo; el admin solo si quiere.
+ * corresponde. El redactor debe escribirlo; el admin solo si quiere (vacío si no:
+ * igual se registra, para que no quede a la vista un motivo de antes).
  */
 function motivoDespublicacion(sesion: Sesion, previa: FilaPrevia | null, publicado: boolean, motivo?: string): string | null {
   if (!previa?.publicado || publicado) return null
@@ -70,11 +71,11 @@ function motivoDespublicacion(sesion: Sesion, previa: FilaPrevia | null, publica
   }
   const parsed = motivoAdminSchema.safeParse(motivo ?? '')
   if (!parsed.success) throw new Error(parsed.error.issues[0]?.message ?? 'Motivo inválido')
-  return parsed.data || null
+  return parsed.data
 }
 
 async function registrarDespublicacion(supabase: Supabase, noticiaId: string, sesion: Sesion, motivo: string | null) {
-  if (!motivo) return
+  if (motivo === null) return
   const { error } = await supabase
     .from('noticias_despublicaciones')
     .insert({ noticia_id: noticiaId, redactor_id: idRedactor(sesion), motivo })

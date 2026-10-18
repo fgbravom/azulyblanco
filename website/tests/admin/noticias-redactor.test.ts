@@ -169,13 +169,18 @@ describe('noticias con sesión de admin', () => {
     await simularSesion('admin')
   })
 
-  it('despublica sin motivo y no registra nada', async () => {
+  it('despublica sin motivo y lo registra con el motivo vacío', async () => {
     const falso = conBase(noticiaPrevia({ redactor_id: AJENO, publicado: true }))
     await cambiarPublicacionNoticia('n1', false)
     await guardarNoticia('n1', { ...NOTICIA, publicado: false })
 
     expect(falso.a('noticias').filter((c) => uso(c, 'update'))).toHaveLength(2)
-    expect(falso.a('noticias_despublicaciones')).toHaveLength(0)
+    expect(falso.a('noticias_despublicaciones')).toHaveLength(2)
+    expect(argsDe(falso.a('noticias_despublicaciones')[0], 'insert')?.[0]).toEqual({
+      noticia_id: 'n1',
+      redactor_id: null,
+      motivo: '',
+    })
   })
 
   it('si escribe un motivo, se guarda con redactor_id null', async () => {

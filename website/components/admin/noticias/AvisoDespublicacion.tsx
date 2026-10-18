@@ -25,9 +25,11 @@ export default function AvisoDespublicacion({
       <p className="font-medium">
         Despublicada por {por} · {formatearFecha(fecha)}
       </p>
-      <p className={cn('mt-0.5 break-words', compacto && 'line-clamp-2')} title={compacto ? motivo : undefined}>
-        {motivo}
-      </p>
+      {motivo && (
+        <p className={cn('mt-0.5 break-words', compacto && 'line-clamp-2')} title={compacto ? motivo : undefined}>
+          {motivo}
+        </p>
+      )}
     </div>
   );
 }
