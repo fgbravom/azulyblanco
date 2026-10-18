@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import type { NoticiaDB } from '@/lib/contenido/tipos';
 import { cambiarPublicacionNoticia, eliminarNoticia } from '@/app/(admin)/admin/noticias/actions';
-import { EstadoBadge, Vacio, formatearFecha, inputClass } from '@/components/admin/ui';
+import { EstadoBadge, FiltroChips, MenuAcciones, Vacio, formatearFecha, inputClass } from '@/components/admin/ui';
 
 type Filtro = 'todas' | 'publicadas' | 'borradores';
 
@@ -71,20 +71,16 @@ export default function NoticiasAdmin({ iniciales }: { iniciales: NoticiaDB[] })
   return (
     <div className="space-y-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="inline-flex rounded-lg bg-white p-1 shadow-sm ring-1 ring-gray-200">
-          {(['todas', 'publicadas', 'borradores'] as Filtro[]).map((f) => (
-            <button
-              key={f}
-              onClick={() => setFiltro(f)}
-              className={cn(
-                'rounded-md px-3 py-1.5 text-sm font-medium capitalize',
-                filtro === f ? 'bg-azul-primario text-white' : 'text-gray-600 hover:text-gray-900'
-              )}
-            >
-              {f} <span className="opacity-70">({conteo[f]})</span>
-            </button>
-          ))}
-        </div>
+        <FiltroChips<Filtro>
+          etiqueta="Estado de las noticias"
+          valor={filtro}
+          onChange={setFiltro}
+          opciones={[
+            { valor: 'todas', etiqueta: 'Todas', cantidad: conteo.todas },
+            { valor: 'publicadas', etiqueta: 'Publicadas', cantidad: conteo.publicadas },
+            { valor: 'borradores', etiqueta: 'Borradores', cantidad: conteo.borradores },
+          ]}
+        />
         <div className="relative sm:w-72">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
           <input value={busqueda} onChange={(e) => setBusqueda(e.target.value)} placeholder="Buscar noticia" className={cn(inputClass, 'pl-9')} />
@@ -93,9 +89,9 @@ export default function NoticiasAdmin({ iniciales }: { iniciales: NoticiaDB[] })
 
       <ul className="divide-y divide-gray-100 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
         {visibles.map((n) => (
-          <li key={n.id} className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center">
-            <Link href={`/admin/noticias/${n.id}`} className="flex min-w-0 flex-1 items-center gap-4">
-              <div className="h-16 w-24 shrink-0 overflow-hidden rounded-md bg-gradient-to-br from-azul-primario to-azul-medio">
+          <li key={n.id} className="flex items-center gap-1 p-3 sm:gap-3 sm:p-4">
+            <Link href={`/admin/noticias/${n.id}`} className="flex min-w-0 flex-1 items-center gap-3 sm:gap-4">
+              <div className="h-14 w-20 shrink-0 sm:h-16 sm:w-24 overflow-hidden rounded-md bg-gradient-to-br from-azul-primario to-azul-medio">
                 {n.portada_url ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={n.portada_url} alt="" className="h-full w-full object-cover" />
@@ -106,7 +102,7 @@ export default function NoticiasAdmin({ iniciales }: { iniciales: NoticiaDB[] })
                 )}
               </div>
               <div className="min-w-0">
-                <p className="truncate font-semibold text-gray-900 hover:text-azul-primario">{n.titulo}</p>
+                <p className="line-clamp-2 font-semibold text-gray-900 hover:text-azul-primario sm:truncate">{n.titulo}</p>
                 <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-500">
                   <EstadoBadge publicado={n.publicado} />
                   <span>{n.categoria}</span>
@@ -115,7 +111,17 @@ export default function NoticiasAdmin({ iniciales }: { iniciales: NoticiaDB[] })
                 </div>
               </div>
             </Link>
-            <div className="flex items-center gap-1 sm:shrink-0">
+            <MenuAcciones
+              className="sm:hidden"
+              acciones={[
+                { etiqueta: n.publicado ? 'Despublicar' : 'Publicar', onSelect: () => alternarPublicacion(n) },
+                ...(n.publicado
+                  ? [{ etiqueta: 'Ver en el sitio', icono: ExternalLink, onSelect: () => window.open(`/noticias/${n.slug}`, '_blank', 'noopener') }]
+                  : []),
+                { etiqueta: 'Eliminar', icono: Trash2, peligro: true, onSelect: () => eliminar(n) },
+              ]}
+            />
+            <div className="hidden items-center gap-1 sm:flex sm:shrink-0">
               <Button variant="outline" size="sm" onClick={() => alternarPublicacion(n)}>
                 {n.publicado ? 'Despublicar' : 'Publicar'}
               </Button>

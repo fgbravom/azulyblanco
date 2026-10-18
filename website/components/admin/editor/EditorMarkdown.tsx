@@ -85,8 +85,8 @@ export default function EditorMarkdown({ value, onChange, filas = 18, placeholde
 
   return (
     <div className="overflow-hidden rounded-lg border border-gray-300 bg-white shadow-sm focus-within:border-azul-primario focus-within:ring-2 focus-within:ring-azul-primario">
-      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-gray-200 bg-gray-50 px-2 py-1.5">
-        <div className="flex flex-wrap gap-0.5">
+      <div className="flex items-center justify-between gap-2 border-b border-gray-200 bg-gray-50 px-2 py-1.5 sm:flex-wrap">
+        <div className="flex min-w-0 gap-0.5 overflow-x-auto [scrollbar-width:none] sm:flex-wrap sm:overflow-visible [&::-webkit-scrollbar]:hidden">
           {BOTONES.map(({ icono: Icono, titulo }) => (
             <button
               key={titulo}
@@ -95,19 +95,19 @@ export default function EditorMarkdown({ value, onChange, filas = 18, placeholde
               aria-label={titulo}
               disabled={vista === 'previa'}
               onClick={() => ejecutar(titulo)}
-              className="rounded p-1.5 text-gray-600 hover:bg-white hover:text-azul-primario disabled:opacity-40"
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded text-gray-600 hover:bg-white hover:text-azul-primario disabled:opacity-40 sm:h-auto sm:w-auto sm:p-1.5"
             >
               <Icono className="h-4 w-4" />
             </button>
           ))}
         </div>
-        <div className="inline-flex rounded-md bg-gray-200/70 p-0.5 text-xs font-medium">
+        <div className="inline-flex shrink-0 rounded-md bg-gray-200/70 p-0.5 text-xs font-medium">
           {(['escribir', 'previa'] as const).map((v) => (
             <button
               key={v}
               type="button"
               onClick={() => setVista(v)}
-              className={cn('rounded px-2.5 py-1', vista === v ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600')}
+              className={cn('min-h-9 rounded px-3 py-1 sm:min-h-0 sm:px-2.5', vista === v ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600')}
             >
               {v === 'escribir' ? 'Escribir' : 'Vista previa'}
             </button>
@@ -122,10 +122,10 @@ export default function EditorMarkdown({ value, onChange, filas = 18, placeholde
           onChange={(e) => onChange(e.target.value)}
           rows={filas}
           placeholder={placeholder}
-          className={cn(textareaClass, 'rounded-none border-0 font-mono text-[13px] leading-relaxed shadow-none focus-visible:ring-0')}
+          className={cn(textareaClass, 'rounded-none border-0 font-mono text-base leading-relaxed sm:text-[13px] shadow-none focus-visible:ring-0')}
         />
       ) : (
-        <div className="min-h-[300px] px-6 py-4">
+        <div className="min-h-[300px] px-4 py-4 sm:px-6">
           {value.trim() ? <MDXRenderer content={value} /> : <p className="text-sm text-gray-400">Nada que mostrar todavía.</p>}
         </div>
       )}

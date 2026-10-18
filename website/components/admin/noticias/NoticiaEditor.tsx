@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { CATEGORIAS_NOTICIA, type NoticiaDB, type NoticiaInput, type Redactor } from '@/lib/contenido/tipos';
 import { parseTags, slugify } from '@/lib/admin/slug';
 import { eliminarNoticia, guardarNoticia } from '@/app/(admin)/admin/noticias/actions';
-import { Campo, EstadoBadge, Interruptor, PageHeader, Panel, inputClass, textareaClass } from '@/components/admin/ui';
+import { BarraAcciones, Campo, EstadoBadge, Interruptor, PageHeader, Panel, inputClass, textareaClass } from '@/components/admin/ui';
 import SelectorImagen from '@/components/admin/medios/SelectorImagen';
 import EditorMarkdown from '@/components/admin/editor/EditorMarkdown';
 
@@ -111,7 +111,8 @@ export default function NoticiaEditor({ noticia, redactores }: { noticia: Notici
                 </a>
               </Button>
             )}
-            <Button type="submit" disabled={guardando}>
+            {/* En móvil el guardado vive en la barra fija del pie (BarraAcciones) */}
+            <Button type="submit" disabled={guardando} className="hidden sm:inline-flex">
               {guardando && <Loader2 className="animate-spin" />}
               Guardar{sinGuardar ? ' cambios' : ''}
             </Button>
@@ -163,7 +164,7 @@ export default function NoticiaEditor({ noticia, redactores }: { noticia: Notici
                 <input id="fecha" type="date" required value={datos.fecha} onChange={(e) => set('fecha', e.target.value)} className={inputClass} />
               </Campo>
               {!datos.publicado && (
-                <Button type="button" variant="secondary" className="w-full" disabled={guardando} onClick={() => guardar(true)}>
+                <Button type="button" variant="secondary" className="hidden w-full sm:inline-flex" disabled={guardando} onClick={() => guardar(true)}>
                   Guardar y publicar
                 </Button>
               )}
@@ -279,6 +280,18 @@ export default function NoticiaEditor({ noticia, redactores }: { noticia: Notici
           )}
         </aside>
       </div>
+
+      <BarraAcciones className="mt-6 sm:hidden">
+        {!datos.publicado && (
+          <Button type="button" variant="secondary" disabled={guardando} onClick={() => guardar(true)}>
+            Guardar y publicar
+          </Button>
+        )}
+        <Button type="submit" disabled={guardando}>
+          {guardando && <Loader2 className="animate-spin" />}
+          Guardar{sinGuardar ? ' cambios' : ''}
+        </Button>
+      </BarraAcciones>
     </form>
   );
 }
