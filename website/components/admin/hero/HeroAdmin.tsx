@@ -159,7 +159,7 @@ export default function HeroAdmin({ iniciales }: { iniciales: HeroFoto[] }) {
         }
       />
 
-      <div className="mb-5 inline-flex rounded-lg bg-white p-1 shadow-sm ring-1 ring-gray-200">
+      <div className="mb-5 flex w-full rounded-lg bg-white p-1 shadow-sm ring-1 ring-gray-200 sm:inline-flex sm:w-auto">
         {(Object.keys(VERSIONES) as Dispositivo[]).map((d) => {
           const { label, icono: Icono } = VERSIONES[d];
           const total = fotos.filter((f) => f.dispositivo === d && f.activo).length;
@@ -169,7 +169,7 @@ export default function HeroAdmin({ iniciales }: { iniciales: HeroFoto[] }) {
               onClick={() => setDispositivo(d)}
               disabled={Boolean(progreso)}
               className={cn(
-                'inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium',
+                'inline-flex min-h-10 flex-1 items-center justify-center gap-2 rounded-md px-3 py-2 text-sm font-medium sm:flex-none sm:px-4',
                 dispositivo === d ? 'bg-azul-primario text-white' : 'text-gray-600 hover:text-gray-900'
               )}
             >
@@ -183,9 +183,9 @@ export default function HeroAdmin({ iniciales }: { iniciales: HeroFoto[] }) {
       <Panel titulo={`Fotos para ${version.label.toLowerCase()} · ${visibles} visibles`} descripcion={version.ayuda}>
         <ZonaSubida onArchivos={subir} progreso={progreso} className="mb-5" />
 
-        <ul className={cn('grid gap-4', dispositivo === 'desktop' ? 'grid-cols-1 sm:grid-cols-2 xl:grid-cols-3' : 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5')}>
+        <ul className={cn('grid gap-4', dispositivo === 'desktop' ? 'grid-cols-1 sm:grid-cols-2 xl:grid-cols-3' : 'grid-cols-1 min-[560px]:grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5')}>
           {lista.map((foto, i) => (
-            <li key={foto.id} className="overflow-hidden rounded-lg border border-gray-200 bg-white">
+            <li key={foto.id} className={cn('mx-auto w-full overflow-hidden rounded-lg border border-gray-200 bg-white', dispositivo === 'mobile' && 'max-w-xs min-[560px]:max-w-none')}>
               <div className={cn('relative bg-gray-100', version.aspecto)}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
@@ -205,15 +205,15 @@ export default function HeroAdmin({ iniciales }: { iniciales: HeroFoto[] }) {
               </div>
               <div className="flex items-center justify-between gap-1 border-t border-gray-100 px-2 py-1.5">
                 <div className="flex">
-                  <button onClick={() => mover(i, -1)} disabled={i === 0 || Boolean(progreso)} aria-label="Mover antes" title="Mover antes" className="rounded p-1.5 text-gray-500 hover:bg-gray-100 disabled:opacity-30">
+                  <button onClick={() => mover(i, -1)} disabled={i === 0 || Boolean(progreso)} aria-label="Mover antes" title="Mover antes" className="flex h-10 w-10 items-center justify-center rounded text-gray-500 sm:h-7 sm:w-7 hover:bg-gray-100 disabled:opacity-30">
                     <ChevronLeft className="h-4 w-4" />
                   </button>
-                  <button onClick={() => mover(i, 1)} disabled={i === lista.length - 1 || Boolean(progreso)} aria-label="Mover después" title="Mover después" className="rounded p-1.5 text-gray-500 hover:bg-gray-100 disabled:opacity-30">
+                  <button onClick={() => mover(i, 1)} disabled={i === lista.length - 1 || Boolean(progreso)} aria-label="Mover después" title="Mover después" className="flex h-10 w-10 items-center justify-center rounded text-gray-500 sm:h-7 sm:w-7 hover:bg-gray-100 disabled:opacity-30">
                     <ChevronRight className="h-4 w-4" />
                   </button>
                 </div>
                 <div className="flex">
-                  <button onClick={() => alternarVisible(foto)} disabled={Boolean(progreso)} aria-label={foto.activo ? 'Ocultar' : 'Mostrar'} title={foto.activo ? 'Ocultar de la portada' : 'Mostrar en la portada'} className="rounded p-1.5 text-gray-500 hover:bg-gray-100 hover:text-azul-primario disabled:opacity-30">
+                  <button onClick={() => alternarVisible(foto)} disabled={Boolean(progreso)} aria-label={foto.activo ? 'Ocultar' : 'Mostrar'} title={foto.activo ? 'Ocultar de la portada' : 'Mostrar en la portada'} className="flex h-10 w-10 items-center justify-center rounded text-gray-500 sm:h-7 sm:w-7 hover:bg-gray-100 hover:text-azul-primario disabled:opacity-30">
                     {foto.activo ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
                   </button>
                   <button
@@ -224,11 +224,11 @@ export default function HeroAdmin({ iniciales }: { iniciales: HeroFoto[] }) {
                     disabled={Boolean(progreso)}
                     aria-label="Reemplazar"
                     title="Reemplazar por otra foto"
-                    className="rounded p-1.5 text-gray-500 hover:bg-gray-100 hover:text-azul-primario disabled:opacity-30"
+                    className="flex h-10 w-10 items-center justify-center rounded text-gray-500 sm:h-7 sm:w-7 hover:bg-gray-100 hover:text-azul-primario disabled:opacity-30"
                   >
                     <RefreshCw className="h-4 w-4" />
                   </button>
-                  <button onClick={() => eliminar(foto)} disabled={Boolean(progreso)} aria-label="Quitar" title="Quitar de la portada" className="rounded p-1.5 text-gray-500 hover:bg-red-50 hover:text-red-600 disabled:opacity-30">
+                  <button onClick={() => eliminar(foto)} disabled={Boolean(progreso)} aria-label="Quitar" title="Quitar de la portada" className="flex h-10 w-10 items-center justify-center rounded text-gray-500 sm:h-7 sm:w-7 hover:bg-red-50 hover:text-red-600 disabled:opacity-30">
                     <Trash2 className="h-4 w-4" />
                   </button>
                 </div>
