@@ -17,6 +17,13 @@ const nextConfig = {
       './node_modules/semver/**/*',
     ],
   },
+  // Next mete siempre unos polyfills (Array.at, flat, fromEntries, hasOwn, trimStart...) que
+  // todos los navegadores desde 2022 ya traen: se reemplazan por un módulo vacío (~14 KiB menos)
+  turbopack: {
+    resolveAlias: {
+      '../build/polyfills/polyfill-module': './lib/sin-polyfills.js',
+    },
+  },
   images: {
     // Imágenes subidas desde el admin (bucket público "medios" de Supabase Storage)
     remotePatterns: [
