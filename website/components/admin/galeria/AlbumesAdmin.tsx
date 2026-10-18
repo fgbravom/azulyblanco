@@ -7,11 +7,10 @@ import { toast } from 'sonner';
 import { Camera, Images, Loader2, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { cn } from '@/lib/utils';
 import { CATEGORIAS_ALBUM, type CategoriaAlbum } from '@/lib/contenido/tipos';
 import { slugify } from '@/lib/admin/slug';
 import { guardarAlbum, type AlbumConConteo } from '@/app/(admin)/admin/galeria/actions';
-import { Campo, EstadoBadge, PageHeader, Vacio, formatearFecha, inputClass } from '@/components/admin/ui';
+import { Campo, EstadoBadge, FiltroChips, PageHeader, Vacio, formatearFecha, inputClass } from '@/components/admin/ui';
 
 function NuevoAlbum({ onCancelar }: { onCancelar: () => void }) {
   const router = useRouter();
@@ -45,7 +44,7 @@ function NuevoAlbum({ onCancelar }: { onCancelar: () => void }) {
       <Campo label="Título *" htmlFor="titulo-album">
         <input id="titulo-album" required autoFocus value={titulo} onChange={(e) => setTitulo(e.target.value)} placeholder="AYB vs Unión Boldo" className={inputClass} />
       </Campo>
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Campo label="Categoría" htmlFor="categoria-album">
           <select id="categoria-album" value={categoria} onChange={(e) => setCategoria(e.target.value as CategoriaAlbum)} className={inputClass}>
             {CATEGORIAS_ALBUM.map((c) => (
@@ -58,9 +57,9 @@ function NuevoAlbum({ onCancelar }: { onCancelar: () => void }) {
         </Campo>
       </div>
       <p className="text-xs text-gray-500">El álbum se crea como borrador. En el siguiente paso subes las fotos y lo publicas.</p>
-      <div className="flex justify-end gap-2 border-t border-gray-200 pt-4">
-        <Button type="button" variant="outline" onClick={onCancelar}>Cancelar</Button>
-        <Button type="submit" disabled={creando}>
+      <div className="flex flex-col-reverse gap-2 border-t border-gray-200 pt-4 sm:flex-row sm:justify-end">
+        <Button type="button" variant="outline" onClick={onCancelar} className="w-full sm:w-auto">Cancelar</Button>
+        <Button type="submit" disabled={creando} className="w-full sm:w-auto">
           {creando && <Loader2 className="animate-spin" />} Crear y subir fotos
         </Button>
       </div>
@@ -98,19 +97,13 @@ export default function AlbumesAdmin({ albumes }: { albumes: AlbumConConteo[] })
         />
       ) : (
         <>
-          <div className="mb-5 flex flex-wrap gap-2">
-            {[{ value: 'todas' as const, label: 'Todas' }, ...CATEGORIAS_ALBUM].map((c) => (
-              <button
-                key={c.value}
-                onClick={() => setCategoria(c.value)}
-                className={cn(
-                  'rounded-full border px-3 py-1 text-sm',
-                  categoria === c.value ? 'border-azul-primario bg-azul-primario text-white' : 'border-gray-300 bg-white text-gray-700 hover:border-azul-claro'
-                )}
-              >
-                {c.label}
-              </button>
-            ))}
+          <div className="mb-5">
+            <FiltroChips<'todas' | CategoriaAlbum>
+              etiqueta="Categoría del álbum"
+              valor={categoria}
+              onChange={setCategoria}
+              opciones={[{ valor: 'todas', etiqueta: 'Todas' }, ...CATEGORIAS_ALBUM.map((c) => ({ valor: c.value, etiqueta: c.label }))]}
+            />
           </div>
           <ul className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
             {visibles.map((a) => (

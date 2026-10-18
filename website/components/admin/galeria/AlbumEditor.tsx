@@ -19,7 +19,7 @@ import {
   guardarAlbum,
   reordenarFotos,
 } from '@/app/(admin)/admin/galeria/actions';
-import { Campo, EstadoBadge, Interruptor, PageHeader, Panel, inputClass, textareaClass } from '@/components/admin/ui';
+import { BarraAcciones, Campo, EstadoBadge, Interruptor, PageHeader, Panel, inputClass, textareaClass } from '@/components/admin/ui';
 import ZonaSubida from '@/components/admin/medios/ZonaSubida';
 
 function desdeAlbum(a: AlbumDB): AlbumInput {
@@ -166,7 +166,7 @@ export default function AlbumEditor({ album: inicial, fotos: fotosIniciales }: {
               </Button>
             )}
             {!album.publicado && (
-              <Button onClick={() => guardar(true)} disabled={guardando || fotos.length === 0} title={fotos.length === 0 ? 'Sube al menos una foto' : undefined}>
+              <Button className="hidden sm:inline-flex" onClick={() => guardar(true)} disabled={guardando || fotos.length === 0} title={fotos.length === 0 ? 'Sube al menos una foto' : undefined}>
                 Publicar álbum
               </Button>
             )}
@@ -178,6 +178,7 @@ export default function AlbumEditor({ album: inicial, fotos: fotosIniciales }: {
         {/* Datos del álbum */}
         <Panel titulo="Datos del álbum" className="h-fit">
           <form
+            id="form-album"
             className="space-y-4"
             onSubmit={(e) => {
               e.preventDefault();
@@ -187,7 +188,7 @@ export default function AlbumEditor({ album: inicial, fotos: fotosIniciales }: {
             <Campo label="Título *" htmlFor="titulo">
               <input id="titulo" required value={datos.titulo} onChange={(e) => set('titulo', e.target.value)} className={inputClass} />
             </Campo>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:gap-3">
               <Campo label="Categoría" htmlFor="categoria">
                 <select id="categoria" value={datos.categoria} onChange={(e) => set('categoria', e.target.value as CategoriaAlbum)} className={inputClass}>
                   {CATEGORIAS_ALBUM.map((c) => (
@@ -215,7 +216,7 @@ export default function AlbumEditor({ album: inicial, fotos: fotosIniciales }: {
             </Campo>
             <Interruptor checked={datos.publicado} onChange={(v) => set('publicado', v)} label="Publicado" descripcion="Visible en la galería del sitio" />
             <div className="flex flex-col gap-2 border-t border-gray-200 pt-4">
-              <Button type="submit" disabled={guardando}>
+              <Button type="submit" disabled={guardando} className="hidden sm:inline-flex">
                 {guardando && <Loader2 className="animate-spin" />} Guardar datos
               </Button>
               <Button type="button" variant="ghost" onClick={borrarAlbum} className="text-red-600 hover:bg-red-50 hover:text-red-700">
@@ -231,7 +232,7 @@ export default function AlbumEditor({ album: inicial, fotos: fotosIniciales }: {
           descripcion="La estrella marca la portada. Las flechas cambian el orden en el sitio."
           acciones={
             seleccion.size > 0 && (
-              <div className="flex items-center gap-2">
+              <div className="flex w-full items-center gap-2 sm:w-auto">
                 <Button variant="ghost" size="sm" onClick={() => setSeleccion(new Set())}>Cancelar</Button>
                 <Button variant="destructive" size="sm" onClick={() => borrar(Array.from(seleccion))}>
                   <Trash2 /> Eliminar {seleccion.size}
@@ -243,7 +244,7 @@ export default function AlbumEditor({ album: inicial, fotos: fotosIniciales }: {
           <ZonaSubida onArchivos={subir} progreso={progreso} className="mb-5" />
 
           {fotos.length > 0 && (
-            <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 2xl:grid-cols-4">
+            <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 2xl:grid-cols-4">
               {fotos.map((foto, i) => {
                 const esPortada = album.portada_url === foto.url;
                 const seleccionada = seleccion.has(foto.id);
@@ -258,13 +259,13 @@ export default function AlbumEditor({ album: inicial, fotos: fotosIniciales }: {
                     <div className="group relative aspect-square bg-gray-100">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src={foto.url} alt={foto.descripcion ?? ''} loading="lazy" className="h-full w-full object-cover" />
-                      <label className="absolute left-2 top-2 flex h-6 w-6 cursor-pointer items-center justify-center rounded bg-white/90 shadow">
+                      <label className="absolute left-0 top-0 flex h-11 w-11 cursor-pointer items-center justify-center sm:left-2 sm:top-2 sm:h-6 sm:w-6 sm:rounded sm:bg-white/90 sm:shadow">
                         <input
                           type="checkbox"
                           checked={seleccionada}
                           onChange={() => alternarSeleccion(foto.id)}
                           aria-label="Seleccionar foto"
-                          className="h-4 w-4 accent-azul-claro"
+                          className="h-5 w-5 rounded accent-azul-claro shadow sm:h-4 sm:w-4 sm:shadow-none"
                         />
                       </label>
                       <button
@@ -272,22 +273,22 @@ export default function AlbumEditor({ album: inicial, fotos: fotosIniciales }: {
                         onClick={() => ponerPortada(foto)}
                         title={esPortada ? 'Portada del álbum' : 'Usar como portada'}
                         className={cn(
-                          'absolute right-2 top-2 rounded-full p-1.5 shadow',
-                          esPortada ? 'bg-yellow-400 text-white' : 'bg-white/90 text-gray-500 opacity-0 group-hover:opacity-100 focus-visible:opacity-100'
+                          'absolute right-1 top-1 flex h-10 w-10 items-center justify-center rounded-full shadow sm:right-2 sm:top-2 sm:h-auto sm:w-auto sm:p-1.5',
+                          esPortada ? 'bg-yellow-400 text-white' : 'bg-white/90 text-gray-500 sm:opacity-0 sm:group-hover:opacity-100 sm:focus-visible:opacity-100'
                         )}
                       >
                         <Star className={cn('h-4 w-4', esPortada && 'fill-current')} />
                       </button>
-                      <div className="absolute inset-x-2 bottom-2 flex justify-between opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100">
+                      <div className="absolute inset-x-1 bottom-1 flex justify-between transition-opacity sm:inset-x-2 sm:bottom-2 sm:opacity-0 sm:group-hover:opacity-100 sm:focus-within:opacity-100">
                         <div className="flex gap-1">
-                          <button type="button" onClick={() => mover(i, -1)} disabled={i === 0} aria-label="Mover antes" className="rounded bg-white/90 p-1 shadow disabled:opacity-40">
+                          <button type="button" onClick={() => mover(i, -1)} disabled={i === 0} aria-label="Mover antes" className="flex h-10 w-10 items-center justify-center rounded bg-white/90 shadow disabled:opacity-40 sm:h-auto sm:w-auto sm:p-1">
                             <ChevronLeft className="h-4 w-4" />
                           </button>
-                          <button type="button" onClick={() => mover(i, 1)} disabled={i === fotos.length - 1} aria-label="Mover después" className="rounded bg-white/90 p-1 shadow disabled:opacity-40">
+                          <button type="button" onClick={() => mover(i, 1)} disabled={i === fotos.length - 1} aria-label="Mover después" className="flex h-10 w-10 items-center justify-center rounded bg-white/90 shadow disabled:opacity-40 sm:h-auto sm:w-auto sm:p-1">
                             <ChevronRight className="h-4 w-4" />
                           </button>
                         </div>
-                        <button type="button" onClick={() => borrar([foto.id])} aria-label="Eliminar foto" className="rounded bg-white/90 p-1 text-red-600 shadow">
+                        <button type="button" onClick={() => borrar([foto.id])} aria-label="Eliminar foto" className="flex h-10 w-10 items-center justify-center rounded bg-white/90 text-red-600 shadow sm:h-auto sm:w-auto sm:p-1">
                           <Trash2 className="h-4 w-4" />
                         </button>
                       </div>
@@ -297,7 +298,7 @@ export default function AlbumEditor({ album: inicial, fotos: fotosIniciales }: {
                       onBlur={(e) => guardarDescripcion(foto, e.target.value)}
                       onKeyDown={(e) => e.key === 'Enter' && e.currentTarget.blur()}
                       placeholder="Agregar descripción…"
-                      className="w-full border-0 border-t border-gray-100 px-2.5 py-2 text-xs text-gray-700 placeholder:text-gray-400 focus:outline-none focus:ring-0 focus:bg-azul-pastel/10"
+                      className="w-full border-0 border-t border-gray-100 px-2.5 py-2.5 text-base sm:py-2 sm:text-xs text-gray-700 placeholder:text-gray-400 focus:outline-none focus:ring-0 focus:bg-azul-pastel/10"
                     />
                   </li>
                 );
@@ -306,6 +307,17 @@ export default function AlbumEditor({ album: inicial, fotos: fotosIniciales }: {
           )}
         </Panel>
       </div>
+
+      <BarraAcciones className="mt-6 sm:hidden">
+        {!album.publicado && (
+          <Button type="button" variant="secondary" onClick={() => guardar(true)} disabled={guardando || fotos.length === 0}>
+            Publicar álbum
+          </Button>
+        )}
+        <Button type="submit" form="form-album" disabled={guardando}>
+          {guardando && <Loader2 className="animate-spin" />} Guardar datos
+        </Button>
+      </BarraAcciones>
     </>
   );
 }
