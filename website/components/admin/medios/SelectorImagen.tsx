@@ -33,14 +33,14 @@ export default function SelectorImagen({ value, onChange, aspecto = 'video', cla
             <button
               type="button"
               onClick={() => setAbierto(true)}
-              className="inline-flex items-center gap-1.5 rounded-md bg-white/95 px-2.5 py-1.5 text-xs font-medium text-gray-800 hover:bg-white"
+              className="inline-flex min-h-10 items-center gap-1.5 rounded-md bg-white/95 px-3 py-1.5 text-xs font-medium text-gray-800 hover:bg-white sm:min-h-0 sm:px-2.5"
             >
               <Replace className="h-3.5 w-3.5" /> Cambiar
             </button>
             <button
               type="button"
               onClick={() => onChange(null)}
-              className="inline-flex items-center gap-1.5 rounded-md bg-white/95 px-2.5 py-1.5 text-xs font-medium text-red-600 hover:bg-white"
+              className="inline-flex min-h-10 items-center gap-1.5 rounded-md bg-white/95 px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-white sm:min-h-0 sm:px-2.5"
             >
               <X className="h-3.5 w-3.5" /> Quitar
             </button>

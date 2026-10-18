@@ -79,7 +79,7 @@ export default function Biblioteca({ modo, iniciales, onSeleccionar }: Props) {
     <div className="space-y-5">
       <ZonaSubida onArchivos={subir} multiple={modo === 'gestion'} progreso={progreso} />
 
-      <div className="relative max-w-xs">
+      <div className="relative sm:max-w-xs">
         <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
         <input
           value={busqueda}
@@ -134,7 +134,7 @@ export default function Biblioteca({ modo, iniciales, onSeleccionar }: Props) {
                   <div className="mt-2 flex gap-1">
                     <button
                       onClick={() => copiar(medio)}
-                      className="inline-flex flex-1 items-center justify-center gap-1 rounded-md border border-gray-200 px-2 py-1 text-xs text-gray-700 hover:border-azul-claro hover:text-azul-primario"
+                      className="inline-flex h-10 flex-1 items-center justify-center gap-1 rounded-md border border-gray-200 px-2 py-1 text-xs sm:h-auto text-gray-700 hover:border-azul-claro hover:text-azul-primario"
                     >
                       {copiado === medio.id ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
                       {copiado === medio.id ? 'Copiada' : 'Copiar URL'}
@@ -142,7 +142,7 @@ export default function Biblioteca({ modo, iniciales, onSeleccionar }: Props) {
                     <button
                       onClick={() => eliminar(medio)}
                       aria-label={`Eliminar ${medio.nombre}`}
-                      className="rounded-md border border-gray-200 px-2 py-1 text-gray-500 hover:border-red-300 hover:text-red-600"
+                      className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-gray-200 px-2 py-1 text-gray-500 hover:border-red-300 sm:h-auto sm:w-auto hover:text-red-600"
                     >
                       <Trash2 className="h-3.5 w-3.5" />
                     </button>

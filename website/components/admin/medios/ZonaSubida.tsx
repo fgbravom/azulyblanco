@@ -46,7 +46,7 @@ export default function ZonaSubida({ onArchivos, multiple = true, progreso, clas
         if (!ocupado) recibir(e.dataTransfer.files);
       }}
       className={cn(
-        'flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed px-6 py-8 text-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-azul-primario',
+        'flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed px-4 py-8 text-center sm:px-6 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-azul-primario',
         encima ? 'border-azul-claro bg-azul-pastel/30' : 'border-gray-300 bg-gray-50 hover:border-azul-claro hover:bg-azul-pastel/10',
         ocupado && 'cursor-wait opacity-80',
         className
