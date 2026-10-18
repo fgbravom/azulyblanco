@@ -129,9 +129,9 @@ El panel tiene dos roles. El **admin** (usuario `ab06`, contraseña de `ADMIN_PA
 | Noticias | Todas | Solo las suyas (`redactor_id` propio); firma siempre con su nombre |
 | Publicar / despublicar | Sí, sin motivo obligatorio | Sí; para despublicar debe escribir un motivo (10 a 500 caracteres) |
 | Eliminar noticias | Sí | No |
-| Imágenes | Biblioteca completa, puede eliminar | Subir a la biblioteca, listar y elegir; no eliminar ni subir a otros destinos |
+| Imágenes | Biblioteca completa, puede eliminar | Subir a la biblioteca y su avatar, listar y elegir; no eliminar ni subir a otros destinos |
 | Resto del panel y `/api/*` | Sí | No (el middleware redirige o responde 401, y cada acción lo vuelve a comprobar) |
-| Mi cuenta | No aplica (su contraseña es una variable de entorno) | Cambiar su contraseña |
+| Mi cuenta | No aplica (su contraseña es una variable de entorno) | Cambiar su contraseña y su avatar (este último, después de cambiar la temporal) |
 
 **Dar acceso a un redactor.** En `/admin/redactores`, botón «Acceso al panel» del redactor → «Crear acceso» con un usuario (3 a 32 caracteres: minúsculas, números, punto, guion y guion bajo; `ab06` está reservado). El panel muestra una contraseña temporal **una sola vez**: hay que entregársela al redactor. Al ingresar, el redactor es enviado a «Mi cuenta» y no puede usar nada más hasta cambiarla (mínimo 10 caracteres).
 
