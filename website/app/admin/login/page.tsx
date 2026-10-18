@@ -43,7 +43,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-azul-oscuro via-azul-primario to-azul-medio p-4">
+    <div className="min-h-dvh flex items-center justify-center bg-gradient-to-br from-azul-oscuro via-azul-primario to-azul-medio p-4">
       {/* Patrón de fondo sutil */}
       <div className="absolute inset-0 bg-[url('/images/patron-futbol.svg')] opacity-5"></div>
 
@@ -51,9 +51,9 @@ export default function LoginPage() {
         {/* Card principal */}
         <div className="bg-white rounded-2xl shadow-2xl overflow-hidden">
           {/* Header con logo */}
-          <div className="bg-gradient-to-r from-azul-primario to-azul-claro p-8 text-center">
+          <div className="bg-gradient-to-r from-azul-primario to-azul-claro p-6 text-center sm:p-8">
             <div className="flex justify-center mb-4">
-              <div className="relative w-32 h-32">
+              <div className="relative h-24 w-24 sm:h-32 sm:w-32">
                 <Image
                   src="/images/escudoazulyblanco.png"
                   alt="Escudo Azul y Blanco"
@@ -63,7 +63,7 @@ export default function LoginPage() {
                 />
               </div>
             </div>
-            <h1 className="text-2xl font-heading font-bold text-white mb-1">
+            <h1 className="text-xl sm:text-2xl font-heading font-bold text-white mb-1">
               Panel de Administración
             </h1>
             <p className="text-white/80 text-sm">
@@ -72,7 +72,7 @@ export default function LoginPage() {
           </div>
 
           {/* Formulario */}
-          <div className="p-8">
+          <div className="p-6 sm:p-8">
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-2">
                 <label htmlFor="password" className="text-sm font-medium text-gray-700 flex items-center gap-2">
@@ -88,7 +88,7 @@ export default function LoginPage() {
                     placeholder="Ingresa tu contraseña"
                     required
                     autoComplete="current-password"
-                    className="h-12 pr-12 border-2 border-gray-200 focus:border-azul-primario focus:ring-azul-primario transition-colors"
+                    className="h-12 pr-12 text-base sm:text-sm border-2 border-gray-200 focus:border-azul-primario focus:ring-azul-primario transition-colors"
                   />
                   <button
                     type="button"
