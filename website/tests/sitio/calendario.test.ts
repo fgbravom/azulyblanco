@@ -57,6 +57,13 @@ describe('actividadAEvento', () => {
     expect(actividadAEvento(actividad({})).resultado).toBeUndefined()
   })
 
+  it('incluye los goleadores solo si el partido tiene resultado', () => {
+    const goles = [{ lado: 'local' as const, autor: 'Juan Pérez', enContra: false }]
+    expect(actividadAEvento(actividad({ goles_local: 1, goles_visitante: 0 }), undefined, goles).goles).toEqual(goles)
+    expect(actividadAEvento(actividad({ goles_local: null, goles_visitante: null }), undefined, goles).goles).toBeUndefined()
+    expect(actividadAEvento(actividad({ goles_local: 0, goles_visitante: 0 }), undefined, []).goles).toBeUndefined()
+  })
+
   it('horaCorta sin hora devuelve undefined', () => {
     expect(horaCorta(null)).toBeUndefined()
   })

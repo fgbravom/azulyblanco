@@ -1,16 +1,17 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { ArrowLeftRight, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import type { Actividad, ActividadInput, Rival } from '@/lib/contenido/tipos';
+import type { Actividad, ActividadInput, GolInput, JugadorGoles, LadoPartido, Rival } from '@/lib/contenido/tipos';
 import { TIPOS_PARTIDO } from '@/lib/contenido/tipos';
 import type { TipoEvento } from '@/lib/types/calendario';
 import { esEquipoAYB } from '@/lib/utils/calendario';
-import { guardarActividad } from '@/app/(admin)/admin/programacion/actions';
+import { guardarActividad, obtenerGoles } from '@/app/(admin)/admin/programacion/actions';
 import { BarraAcciones, Campo, Interruptor, inputClass, textareaClass } from '@/components/admin/ui';
+import GolesPartido, { golesAGuardar, golVacio, type GolesPorLado } from './GolesPartido';
 
 export const SERIES_OPCIONES = ['Serie Primera', 'Serie Honor', 'Serie 35'];
 
@@ -57,14 +58,56 @@ interface Props {
   inicial: ActividadInput;
   lugares: string[];
   rivales: Rival[];
+  jugadores: JugadorGoles[];
   onGuardada: (actividad: Actividad) => void;
   onCancelar: () => void;
 }
 
-export default function ActividadForm({ id, inicial, lugares, rivales, onGuardada, onCancelar }: Props) {
+export default function ActividadForm({ id, inicial, lugares, rivales, jugadores, onGuardada, onCancelar }: Props) {
   const [datos, setDatos] = useState<ActividadInput>(inicial);
   const [[local, visita], setEquipos] = useState(() => separarEquipos(inicial.rival));
   const [guardando, setGuardando] = useState(false);
+  const [goles, setGoles] = useState<GolesPorLado>({ local: [], visitante: [] });
+  // 'error' = no se pudieron leer: al guardar no se tocan los goleadores que ya había
+  const [estadoGoles, setEstadoGoles] = useState<'cargando' | 'listo' | 'error'>(id ? 'cargando' : 'listo');
+
+  useEffect(() => {
+    if (!id) return;
+    obtenerGoles(id)
+      .then((lista) => {
+        setGoles({ local: lista.filter((g) => g.lado === 'local'), visitante: lista.filter((g) => g.lado === 'visitante') });
+        setEstadoGoles('listo');
+      })
+      .catch(() => {
+        toast.error('No se pudieron cargar los goleadores');
+        setEstadoGoles('error');
+      });
+  }, [id]);
+
+  const cambiarGol = (lado: LadoPartido, indice: number, gol: GolInput) =>
+    setGoles((g) => {
+      const lista = [...g[lado]];
+      while (lista.length < indice) lista.push(golVacio(lado));
+      lista[indice] = gol;
+      return { ...g, [lado]: lista };
+    });
+
+  // Los goleadores se registran solo para los lados que son de AYB
+  const ladosAYB = (
+    [
+      { lado: 'local', equipo: local, cantidad: datos.goles_local ?? 0 },
+      { lado: 'visitante', equipo: visita, cantidad: datos.goles_visitante ?? 0 },
+    ] as const
+  ).filter((l) => esEquipoAYB(l.equipo));
+
+  // Al intercambiar local y visita, cada gol sigue a su equipo
+  const intercambiar = () => {
+    setEquipos([visita, local]);
+    setGoles((g) => ({
+      local: g.visitante.map((x) => ({ ...x, lado: 'local' })),
+      visitante: g.local.map((x) => ({ ...x, lado: 'visitante' })),
+    }));
+  };
 
   const set = <K extends keyof ActividadInput>(campo: K, valor: ActividadInput[K]) =>
     setDatos((d) => ({ ...d, [campo]: valor }));
@@ -91,7 +134,8 @@ export default function ActividadForm({ id, inicial, lugares, rivales, onGuardad
       const elegido = rivales.find((r) => r.id === datos.rival_id);
       const siglaRival = (ladoRival === 'local' ? local : visita).trim().toUpperCase();
       const rival_id = elegido && elegido.sigla.toUpperCase() === siglaRival ? elegido.id : null;
-      const guardada = await guardarActividad(id, { ...datos, rival, rival_id, estadio: datos.estadio.toUpperCase() });
+      const detalleGoles = estadoGoles === 'listo' ? golesAGuardar(goles, ladosAYB) : null;
+      const guardada = await guardarActividad(id, { ...datos, rival, rival_id, estadio: datos.estadio.toUpperCase() }, detalleGoles);
       toast.success(id ? 'Actividad actualizada' : 'Actividad creada');
       onGuardada(guardada);
     } catch (error) {
@@ -150,7 +194,7 @@ export default function ActividadForm({ id, inicial, lugares, rivales, onGuardad
             </Campo>
             <button
               type="button"
-              onClick={() => setEquipos([visita, local])}
+              onClick={intercambiar}
               title="Intercambiar local y visita"
               className="mb-0.5 flex h-10 w-full items-center justify-center rounded-md border border-gray-300 text-gray-500 sm:h-auto sm:w-auto sm:p-2.5 hover:border-azul-claro hover:text-azul-primario"
             >
@@ -190,6 +234,16 @@ export default function ActividadForm({ id, inicial, lugares, rivales, onGuardad
               />
             </div>
           </Campo>
+          {datos.goles_local !== null && datos.goles_visitante !== null && (
+            <GolesPartido
+              lados={ladosAYB}
+              goles={goles}
+              onChange={cambiarGol}
+              jugadores={jugadores}
+              series={datos.series}
+              estado={estadoGoles}
+            />
+          )}
           <Campo label="Tipo de partido" htmlFor="tipo_partido">
             <select
               id="tipo_partido"

@@ -7,7 +7,7 @@
  * sitio nunca quede vacío durante la transición.
  */
 
-import type { EventoCalendario } from '@/lib/types/calendario'
+import type { EventoCalendario, GolPartido } from '@/lib/types/calendario'
 import { eventosDiciembrePasados, eventosEnero2026 } from '@/lib/data/eventos-enero'
 import {
   getAllNoticias as getNoticiasArchivo,
@@ -64,21 +64,69 @@ async function getRivales(): Promise<Rival[]> {
   }
 }
 
+interface FilaGol {
+  programacion_id: string
+  lado: GolPartido['lado']
+  en_contra: boolean
+  autor_nombre: string | null
+  autor_apellidos: string | null
+  asistencia_nombre: string | null
+  asistencia_apellidos: string | null
+}
+
+/** "Juan Andrés" + "Pérez Soto" → "Juan Pérez" */
+function nombreCorto(nombre: string | null, apellidos: string | null): string | undefined {
+  const partes = [nombre, apellidos].map((p) => p?.trim().split(/\s+/)[0]).filter(Boolean)
+  return partes.length > 0 ? partes.join(' ') : undefined
+}
+
+/** Goleadores de AYB por partido. Si la migración 014 aún no se aplica, los partidos se muestran sin goleadores. */
+async function getGoles(): Promise<Map<string, GolPartido[]>> {
+  const porPartido = new Map<string, GolPartido[]>()
+  try {
+    const { data, error } = await cliente()
+      .from('vista_goles_publico')
+      .select('programacion_id, lado, en_contra, autor_nombre, autor_apellidos, asistencia_nombre, asistencia_apellidos')
+      .order('lado')
+      .order('orden')
+    if (error) throw error
+    for (const g of data as FilaGol[]) {
+      const autor = nombreCorto(g.autor_nombre, g.autor_apellidos)
+      // Un gol cuyo jugador se borró queda sin nombre: no hay nada que mostrar
+      if (!autor && !g.en_contra) continue
+      const lista = porPartido.get(g.programacion_id) ?? []
+      lista.push({
+        lado: g.lado,
+        autor,
+        asistencia: nombreCorto(g.asistencia_nombre, g.asistencia_apellidos),
+        enContra: g.en_contra,
+      })
+      porPartido.set(g.programacion_id, lista)
+    }
+  } catch {
+    // sin goleadores
+  }
+  return porPartido
+}
+
 export async function getEventosCalendario(): Promise<EventoCalendario[]> {
   return conRespaldo(
     async () => {
       const supabase = cliente()
-      const [{ data, error }, rivales] = await Promise.all([
+      const [{ data, error }, rivales, goles] = await Promise.all([
         supabase
           .from('programacion')
           .select('*')
           .order('fecha', { ascending: true })
           .order('hora_inicio', { ascending: true, nullsFirst: true }),
         getRivales(),
+        getGoles(),
       ])
       if (error) throw error
       const porId = new Map(rivales.map((r) => [r.id, r]))
-      return (data as Actividad[]).map((a) => actividadAEvento(a, a.rival_id ? porId.get(a.rival_id) : undefined))
+      return (data as Actividad[]).map((a) =>
+        actividadAEvento(a, a.rival_id ? porId.get(a.rival_id) : undefined, goles.get(a.id))
+      )
     },
     () => [...eventosDiciembrePasados, ...eventosEnero2026]
   )

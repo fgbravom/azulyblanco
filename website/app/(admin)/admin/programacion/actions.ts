@@ -5,7 +5,7 @@ import { z } from 'zod'
 import { requireAdmin } from '@/lib/auth/session'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidarSitio } from '@/lib/admin/revalidar'
-import type { Actividad, ActividadInput } from '@/lib/contenido/tipos'
+import type { Actividad, ActividadInput, GolInput, JugadorGoles } from '@/lib/contenido/tipos'
 
 const textoOpcional = z
   .string()
@@ -43,6 +43,20 @@ const actividadSchema = z.object({
   publicado: z.boolean(),
 })
 
+const idJugador = z.number().int().positive().nullable()
+
+const golesSchema = z
+  .array(
+    z.object({
+      lado: z.enum(['local', 'visitante']),
+      autor_id: idJugador,
+      asistencia_id: idJugador,
+      en_contra: z.boolean(),
+    })
+  )
+  .refine((g) => g.every((x) => (x.en_contra ? x.autor_id === null : x.autor_id !== null)), 'Cada gol necesita su goleador')
+  .refine((g) => g.every((x) => x.asistencia_id === null || x.asistencia_id !== x.autor_id), 'Un jugador no puede asistirse a sí mismo')
+
 function cambios() {
   revalidatePath('/admin/programacion')
   revalidatePath('/admin')
@@ -60,17 +74,55 @@ export async function listarActividades(): Promise<Actividad[]> {
   return data as Actividad[]
 }
 
-export async function guardarActividad(id: string | null, input: ActividadInput): Promise<Actividad> {
+/** Jugadores que se pueden elegir como goleadores o asistentes, activos primero */
+export async function listarJugadoresGoles(): Promise<JugadorGoles[]> {
+  await requireAdmin()
+  const { data, error } = await createAdminClient()
+    .from('vista_jugadores_completa')
+    .select('id, nombre, apellidos, dorsal, categoria, activo')
+    .order('activo', { ascending: false })
+    .order('categoria')
+    .order('nombre')
+  if (error) throw new Error(error.message)
+  return data as JugadorGoles[]
+}
+
+/** Goles de un partido, en orden dentro de cada lado */
+export async function obtenerGoles(programacionId: string): Promise<GolInput[]> {
+  await requireAdmin()
+  const { data, error } = await createAdminClient()
+    .from('goles')
+    .select('lado, autor_id, asistencia_id, en_contra')
+    .eq('programacion_id', programacionId)
+    .order('lado')
+    .order('orden')
+  if (error) throw new Error(error.message)
+  return data as GolInput[]
+}
+
+/** goles null = no tocar los goleadores guardados (el formulario no alcanzó a cargarlos) */
+export async function guardarActividad(id: string | null, input: ActividadInput, goles: GolInput[] | null = []): Promise<Actividad> {
   await requireAdmin()
 
   const parsed = actividadSchema.safeParse(input)
   if (!parsed.success) throw new Error(parsed.error.issues[0]?.message ?? 'Datos inválidos')
+  const golesParsed = golesSchema.nullable().safeParse(goles)
+  if (!golesParsed.success) throw new Error(golesParsed.error.issues[0]?.message ?? 'Goles inválidos')
 
   const datos = parsed.data
   if (datos.tipo === 'partido' && !datos.rival) throw new Error('Indica los equipos del partido')
   if (datos.tipo === 'evento' && !datos.titulo) throw new Error('El evento necesita un título')
   if ((datos.goles_local === null) !== (datos.goles_visitante === null)) {
     throw new Error('Completa los goles de ambos equipos o deja el resultado vacío')
+  }
+  // Los goleadores solo se guardan con resultado, y nunca más que los goles de su lado
+  const conResultado = datos.tipo === 'partido' && datos.goles_local !== null
+  const detalle = golesParsed.data === null ? null : conResultado ? golesParsed.data : []
+  for (const lado of ['local', 'visitante'] as const) {
+    const marcador = lado === 'local' ? datos.goles_local : datos.goles_visitante
+    if (detalle && detalle.filter((g) => g.lado === lado).length > (marcador ?? 0)) {
+      throw new Error('Hay más goleadores que goles en el resultado')
+    }
   }
 
   // Se limpian los campos que no corresponden al tipo elegido
@@ -94,9 +146,22 @@ export async function guardarActividad(id: string | null, input: ActividadInput)
     : supabase.from('programacion').insert(fila)
   const { data, error } = await consulta.select().single()
   if (error) throw new Error(error.message)
+  const guardada = data as Actividad
+
+  // Los goles se reemplazan completos: es más simple que calcular qué cambió
+  if (detalle) {
+    const { error: errorBorrado } = await supabase.from('goles').delete().eq('programacion_id', guardada.id)
+    if (errorBorrado) throw new Error(`El partido se guardó, pero no los goleadores: ${errorBorrado.message}`)
+    if (detalle.length > 0) {
+      const orden = { local: 0, visitante: 0 }
+      const filas = detalle.map((g) => ({ ...g, programacion_id: guardada.id, orden: orden[g.lado]++ }))
+      const { error: errorGoles } = await supabase.from('goles').insert(filas)
+      if (errorGoles) throw new Error(`El partido se guardó, pero no los goleadores: ${errorGoles.message}`)
+    }
+  }
 
   cambios()
-  return data as Actividad
+  return guardada
 }
 
 export async function cambiarConfirmacion(id: string, confirmado: boolean) {

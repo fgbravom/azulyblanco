@@ -99,6 +99,43 @@ describe('programación desde la base', () => {
     const [evento] = await publico.getEventosCalendario()
     expect(evento).toMatchObject({ id: 'a1', dia: 'SÁBADO', diaMes: 7, mes: 'MARZO', horaInicio: '15:30', rival: 'AYB VS UNIÓN' })
   })
+
+  it('agrega los goleadores de vista_goles_publico con nombre y primer apellido', async () => {
+    const falso = conBase((c) =>
+      c.tabla === 'vista_goles_publico'
+        ? {
+            data: [
+              { programacion_id: 'a1', lado: 'local', en_contra: false, autor_nombre: 'Juan Andrés', autor_apellidos: 'Pérez Soto', asistencia_nombre: 'Pedro', asistencia_apellidos: 'Rojas' },
+              { programacion_id: 'a1', lado: 'local', en_contra: true, autor_nombre: null, autor_apellidos: null, asistencia_nombre: null, asistencia_apellidos: null },
+              // El jugador se borró: el gol queda sin nombre y no se muestra
+              { programacion_id: 'a1', lado: 'local', en_contra: false, autor_nombre: null, autor_apellidos: null, asistencia_nombre: null, asistencia_apellidos: null },
+            ],
+          }
+        : c.tabla === 'programacion'
+          ? { data: [{ id: 'a1', tipo: 'partido', fecha: '2026-03-07', rival: 'AYB VS UNIÓN', series: [], goles_local: 3, goles_visitante: 0 }] }
+          : { data: [] }
+    )
+    const [evento] = await publico.getEventosCalendario()
+
+    expect(evento.goles).toEqual([
+      { lado: 'local', autor: 'Juan Pérez', asistencia: 'Pedro Rojas', enContra: false },
+      { lado: 'local', autor: undefined, asistencia: undefined, enContra: true },
+    ])
+    for (const col of columnas(argsDe(falso.a('vista_goles_publico')[0], 'select')?.[0])) {
+      expect(SENSIBLES).not.toContain(col)
+    }
+  })
+
+  it('si la vista de goles falla, el partido se muestra sin goleadores', async () => {
+    conBase((c) =>
+      c.tabla === 'vista_goles_publico'
+        ? { error: { message: 'relation does not exist' } }
+        : { data: c.tabla === 'programacion' ? [{ id: 'a1', tipo: 'partido', fecha: '2026-03-07', series: [], goles_local: 1, goles_visitante: 0 }] : [] }
+    )
+    const [evento] = await publico.getEventosCalendario()
+    expect(evento.resultado).toEqual({ local: 1, visitante: 0 })
+    expect(evento.goles).toBeUndefined()
+  })
 })
 
 describe('noticias', () => {

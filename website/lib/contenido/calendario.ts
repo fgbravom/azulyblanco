@@ -1,4 +1,4 @@
-import type { EventoCalendario } from '@/lib/types/calendario'
+import type { EventoCalendario, GolPartido } from '@/lib/types/calendario'
 import type { Actividad, Rival } from './tipos'
 
 const DIAS = ['DOMINGO', 'LUNES', 'MARTES', 'MIÉRCOLES', 'JUEVES', 'VIERNES', 'SÁBADO']
@@ -16,8 +16,14 @@ export function horaCorta(hora: string | null): string | undefined {
  * Convierte una fila de la tabla programacion al formato que consumen los componentes
  * de components/calendario (el mismo de los antiguos lib/data/eventos-*.ts).
  * `rival` es el equipo del catálogo (tabla rivales) al que apunta rival_id, si existe.
+ * `goles` son los goleadores de AYB de ese partido (tabla goles).
  */
-export function actividadAEvento(a: Actividad, rival?: Rival): EventoCalendario {
+export function actividadAEvento(a: Actividad, rival?: Rival, goles?: GolPartido[]): EventoCalendario {
+  const resultado =
+    a.goles_local != null && a.goles_visitante != null
+      ? { local: a.goles_local, visitante: a.goles_visitante }
+      : undefined
+
   const [anio, mes, dia] = a.fecha.split('-').map(Number)
   const fecha = new Date(Date.UTC(anio, mes - 1, dia))
 
@@ -45,10 +51,8 @@ export function actividadAEvento(a: Actividad, rival?: Rival): EventoCalendario 
     precioEntrada: a.precio_entrada ?? undefined,
     edadGratis: a.edad_gratis ?? undefined,
     // Sin la migración 012 las columnas no vienen (undefined) y el partido queda sin resultado
-    resultado:
-      a.goles_local != null && a.goles_visitante != null
-        ? { local: a.goles_local, visitante: a.goles_visitante }
-        : undefined,
+    resultado,
+    goles: resultado && goles && goles.length > 0 ? goles : undefined,
   }
 }
 

@@ -72,9 +72,24 @@ describe('permisos de la clave pública', () => {
     }
   })
 
-  it('solo vista_plantel_publico se concede a anon', () => {
+  it('solo vista_plantel_publico y vista_goles_publico se conceden a anon', () => {
     const concedidas = [...activo.matchAll(/GRANT SELECT ON (\w+) TO anon/gi)].map((m) => m[1])
-    expect(new Set(concedidas)).toEqual(new Set(['vista_plantel_publico']))
+    expect(new Set(concedidas)).toEqual(new Set(['vista_plantel_publico', 'vista_goles_publico']))
+  })
+
+  it('vista_goles_publico solo trae el nombre de los jugadores y de partidos publicados', () => {
+    const { columnas, resto } = ultimaDefinicion('vista_goles_publico')
+    for (const col of columnas) {
+      const nombre = col.split(/\s+as\s+|\./).at(-1)!
+      expect(SENSIBLES, `columna sensible: ${col}`).not.toContain(nombre)
+      expect(col).not.toMatch(/\*/)
+    }
+    expect(resto).toMatch(/WHERE\s+p\.publicado/i)
+  })
+
+  it('goles tiene RLS y ninguna política (solo service_role)', () => {
+    expect(activo).toMatch(/ALTER TABLE goles ENABLE ROW LEVEL SECURITY/i)
+    expect(activo).not.toMatch(/CREATE POLICY "[^"]+" ON goles\b/i)
   })
 
   it('equipos se lee por columnas y sin los datos de pago', () => {

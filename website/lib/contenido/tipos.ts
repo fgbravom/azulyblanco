@@ -32,6 +32,27 @@ export interface Actividad {
 
 export type ActividadInput = Omit<Actividad, 'id' | 'legacy_id' | 'created_at' | 'updated_at'>
 
+/** Lado del partido en el orden del texto del rival ("AYB VS SM" → AYB es 'local') */
+export type LadoPartido = 'local' | 'visitante'
+
+/** Un gol de AYB (supabase/migrations/20260101000014_goles.sql) */
+export interface GolInput {
+  lado: LadoPartido
+  autor_id: number | null
+  asistencia_id: number | null
+  en_contra: boolean // autogol del rival: sin autor
+}
+
+/** Jugador que se puede elegir como goleador o asistente */
+export interface JugadorGoles {
+  id: number
+  nombre: string
+  apellidos: string
+  dorsal: number | null
+  categoria: string
+  activo: boolean
+}
+
 /** Equipo rival del catálogo (supabase/migrations/20260101000010_rivales.sql) */
 export interface Rival {
   id: string

@@ -1,5 +1,5 @@
 import Image from 'next/image'
-import { EventoCalendario } from '@/lib/types/calendario'
+import { EventoCalendario, type GolPartido } from '@/lib/types/calendario'
 import { desenlaceAYB, type EquipoPartido } from '@/lib/utils/calendario'
 import { cn } from '@/lib/utils'
 
@@ -50,6 +50,21 @@ function Equipo({ equipo, compacto }: { equipo: EquipoPartido; compacto: boolean
   )
 }
 
+/** Goleadores de un equipo, uno por gol, con su asistencia debajo */
+function Goleadores({ goles }: { goles: GolPartido[] }) {
+  if (goles.length === 0) return null
+  return (
+    <ul className="mt-3 space-y-1.5 text-center" aria-label="Goles">
+      {goles.map((g, i) => (
+        <li key={i} className="leading-tight">
+          <p className="text-xs font-semibold text-gray-800">{g.enContra ? 'Autogol' : g.autor}</p>
+          {g.asistencia && <p className="text-[11px] text-gray-500">Asist. {g.asistencia}</p>}
+        </li>
+      ))}
+    </ul>
+  )
+}
+
 interface MarcadorProps {
   evento: EventoCalendario
   equipos: { local: EquipoPartido; visitante: EquipoPartido }
@@ -58,13 +73,17 @@ interface MarcadorProps {
   className?: string
 }
 
-/** Local, resultado (o VS y hora) y visita, alineados sobre el mismo eje central */
+/** Local, resultado (o VS y hora) y visita, alineados sobre el mismo eje central. Sin `compacto`, con los goleadores bajo cada equipo. */
 export function Marcador({ evento, equipos, compacto = false, className }: MarcadorProps) {
   const desenlace = evento.tipo === 'partido' ? desenlaceAYB(evento) : undefined
+  const goles = !compacto && evento.resultado ? evento.goles ?? [] : []
 
   return (
     <div className={cn('grid grid-cols-[1fr_auto_1fr] items-start gap-3', className)}>
-      <Equipo equipo={equipos.local} compacto={compacto} />
+      <div>
+        <Equipo equipo={equipos.local} compacto={compacto} />
+        <Goleadores goles={goles.filter((g) => g.lado === 'local')} />
+      </div>
       <div className={cn('flex flex-col items-center gap-1.5', compacto ? 'pt-2' : 'pt-4')}>
         {evento.resultado ? (
           <>
@@ -92,7 +111,10 @@ export function Marcador({ evento, equipos, compacto = false, className }: Marca
           </>
         )}
       </div>
-      <Equipo equipo={equipos.visitante} compacto={compacto} />
+      <div>
+        <Equipo equipo={equipos.visitante} compacto={compacto} />
+        <Goleadores goles={goles.filter((g) => g.lado === 'visitante')} />
+      </div>
     </div>
   )
 }

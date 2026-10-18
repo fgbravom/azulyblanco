@@ -1,6 +1,14 @@
 export type TipoEvento = 'partido' | 'entrenamiento' | 'evento'
 export type TipoPartido = 'Amistoso' | 'Oficial' | 'Torneo' | 'Copa'
 
+/** Gol de AYB con su goleador y asistente, ya con los nombres para mostrar */
+export interface GolPartido {
+  lado: 'local' | 'visitante' // en el orden de `rival`
+  autor?: string // "Juan Pérez"; vacío si es autogol
+  asistencia?: string
+  enContra: boolean // autogol del rival
+}
+
 export interface EventoCalendario {
   id: string
   fecha: string // formato: "2024-12-11"
@@ -25,4 +33,5 @@ export interface EventoCalendario {
   precioEntrada?: string // precio de entrada para eventos
   edadGratis?: string // edad hasta la cual no se paga
   resultado?: { local: number; visitante: number } // goles, en el orden de `rival`
+  goles?: GolPartido[] // goleadores de AYB, solo si hay resultado
 }
