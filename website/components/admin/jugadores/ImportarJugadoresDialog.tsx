@@ -221,10 +221,10 @@ export default function ImportarJugadoresDialog({
             )}
 
             <div className="flex flex-col-reverse gap-2 border-t border-gray-100 pt-4 sm:flex-row sm:justify-end">
-              <Button variant="outline" onClick={reiniciar} disabled={cargando}>
+              <Button variant="outline" onClick={reiniciar} disabled={cargando} className="w-full sm:w-auto">
                 Elegir otro archivo
               </Button>
-              <Button onClick={importar} disabled={cargando || accion.length === 0}>
+              <Button onClick={importar} disabled={cargando || accion.length === 0} className="w-full sm:w-auto">
                 {cargando && <Loader2 className="animate-spin" />}
                 {accion.length === 0
                   ? 'No hay nada que importar'

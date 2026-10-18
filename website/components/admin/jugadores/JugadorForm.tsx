@@ -21,6 +21,7 @@ import type { JugadorCompleto, EquipoPublico, Posicion } from '@/types/database'
 import { Loader2, Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import { BarraAcciones } from '@/components/admin/ui';
 import SelectorImagen from '@/components/admin/medios/SelectorImagen';
 
 /** Campo numérico opcional: vacío se guarda como null (valueAsNumber daba NaN y la validación fallaba) */
@@ -162,16 +163,16 @@ export default function JugadorForm({ jugador, onSave, onCancel }: Props) {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       <Tabs defaultValue="personal" className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="personal">Personal</TabsTrigger>
-          <TabsTrigger value="deportiva">Deportiva</TabsTrigger>
-          <TabsTrigger value="contacto">Contacto</TabsTrigger>
-          <TabsTrigger value="medica">Médica</TabsTrigger>
+        <TabsList className="grid h-auto w-full grid-cols-4">
+          <TabsTrigger value="personal" className="px-1 text-xs sm:px-4 sm:text-sm">Personal</TabsTrigger>
+          <TabsTrigger value="deportiva" className="px-1 text-xs sm:px-4 sm:text-sm">Deportiva</TabsTrigger>
+          <TabsTrigger value="contacto" className="px-1 text-xs sm:px-4 sm:text-sm">Contacto</TabsTrigger>
+          <TabsTrigger value="medica" className="px-1 text-xs sm:px-4 sm:text-sm">Médica</TabsTrigger>
         </TabsList>
 
         {/* Tab Personal */}
         <TabsContent value="personal" className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <Label htmlFor="nombre">Nombre *</Label>
               <Input id="nombre" {...register('nombre')} />
@@ -217,7 +218,7 @@ export default function JugadorForm({ jugador, onSave, onCancel }: Props) {
               <Label htmlFor="dni">DNI/NIE</Label>
               <Input id="dni" {...register('dni')} />
             </div>
-            <div className="col-span-2">
+            <div className="sm:col-span-2">
               <Label>Foto</Label>
               <SelectorImagen
                 aspecto="cuadrado"
@@ -234,8 +235,8 @@ export default function JugadorForm({ jugador, onSave, onCancel }: Props) {
 
         {/* Tab Deportiva */}
         <TabsContent value="deportiva" className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="col-span-2">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div className="sm:col-span-2">
               <Label>Posiciones *</Label>
               <p className="text-xs text-gray-500 mt-0.5">
                 Marca una o más. La primera es la principal: agrupa al jugador en la página de la serie. Usa la estrella para cambiarla.
@@ -260,7 +261,7 @@ export default function JugadorForm({ jugador, onSave, onCancel }: Props) {
                         type="button"
                         aria-pressed={activa}
                         onClick={() => elegir(activa ? seleccion.filter((id) => id !== posicion.id) : [...seleccion, posicion.id])}
-                        className="px-3 py-1"
+                        className="px-3 py-2 sm:py-1"
                       >
                         {posicion.nombre} <span className="opacity-70">({posicion.abreviatura})</span>
                       </button>
@@ -386,7 +387,7 @@ export default function JugadorForm({ jugador, onSave, onCancel }: Props) {
 
         {/* Tab Contacto */}
         <TabsContent value="contacto" className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <Label htmlFor="email">Email</Label>
               <Input id="email" type="email" {...register('email')} />
@@ -398,7 +399,7 @@ export default function JugadorForm({ jugador, onSave, onCancel }: Props) {
               <Label htmlFor="telefono">Teléfono</Label>
               <Input id="telefono" type="tel" {...register('telefono')} />
             </div>
-            <div className="col-span-2">
+            <div className="sm:col-span-2">
               <Label htmlFor="direccion">Dirección</Label>
               <Textarea id="direccion" {...register('direccion')} rows={3} />
             </div>
@@ -407,7 +408,7 @@ export default function JugadorForm({ jugador, onSave, onCancel }: Props) {
 
         {/* Tab Médica */}
         <TabsContent value="medica" className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <Label htmlFor="tipo_sangre">Tipo de Sangre</Label>
               <Input id="tipo_sangre" placeholder="A+, B-, O+, etc." {...register('tipo_sangre')} />
@@ -420,11 +421,11 @@ export default function JugadorForm({ jugador, onSave, onCancel }: Props) {
               <Label htmlFor="telefono_emergencia">Teléfono de Emergencia</Label>
               <Input id="telefono_emergencia" type="tel" {...register('telefono_emergencia')} />
             </div>
-            <div className="col-span-2">
+            <div className="sm:col-span-2">
               <Label htmlFor="alergias">Alergias</Label>
               <Textarea id="alergias" {...register('alergias')} rows={2} />
             </div>
-            <div className="col-span-2">
+            <div className="sm:col-span-2">
               <Label htmlFor="lesiones_cronicas">Lesiones Crónicas</Label>
               <Textarea id="lesiones_cronicas" {...register('lesiones_cronicas')} rows={2} />
             </div>
@@ -433,7 +434,7 @@ export default function JugadorForm({ jugador, onSave, onCancel }: Props) {
       </Tabs>
 
       {/* Botones */}
-      <div className="flex justify-end gap-4 pt-4 border-t border-gray-200">
+      <BarraAcciones dialogo className="sm:gap-4">
         <Button type="button" variant="outline" onClick={onCancel} disabled={loading}>
           Cancelar
         </Button>
@@ -449,7 +450,7 @@ export default function JugadorForm({ jugador, onSave, onCancel }: Props) {
             'Crear Jugador'
           )}
         </Button>
-      </div>
+      </BarraAcciones>
     </form>
   );
 }

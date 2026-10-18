@@ -44,9 +44,9 @@ export default function JugadorFicha({ jugador, open, onClose }: Props) {
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-white">
         <DialogHeader>
-          <div className="flex items-start justify-between">
-            <div className="flex-1">
-              <DialogTitle className="flex items-center gap-3 text-3xl text-azul-primario mb-2">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0 flex-1">
+              <DialogTitle className="flex items-center gap-3 flex-wrap text-2xl text-azul-primario mb-2 sm:text-3xl">
                 {jugador.nombre_completo}
                 {pais && <Bandera codigo={pais} className="h-6 w-9" />}
               </DialogTitle>
@@ -71,35 +71,35 @@ export default function JugadorFicha({ jugador, open, onClose }: Props) {
               <img
                 src={jugador.foto_url}
                 alt={jugador.nombre_completo}
-                className="w-24 h-24 rounded-full object-cover border-4 border-azul-primario"
+                className="h-16 w-16 shrink-0 rounded-full object-cover border-4 sm:h-24 sm:w-24 border-azul-primario"
               />
             )}
           </div>
         </DialogHeader>
 
         <Tabs defaultValue="personal" className="w-full mt-6">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="personal">
-              <User className="h-4 w-4 mr-2" />
+          <TabsList className="grid h-auto w-full grid-cols-4">
+            <TabsTrigger value="personal" className="px-1 text-xs sm:px-4 sm:text-sm">
+              <User className="mr-2 hidden h-4 w-4 sm:block" />
               Personal
             </TabsTrigger>
-            <TabsTrigger value="deportiva">
-              <Shield className="h-4 w-4 mr-2" />
+            <TabsTrigger value="deportiva" className="px-1 text-xs sm:px-4 sm:text-sm">
+              <Shield className="mr-2 hidden h-4 w-4 sm:block" />
               Deportiva
             </TabsTrigger>
-            <TabsTrigger value="contacto">
-              <Mail className="h-4 w-4 mr-2" />
+            <TabsTrigger value="contacto" className="px-1 text-xs sm:px-4 sm:text-sm">
+              <Mail className="mr-2 hidden h-4 w-4 sm:block" />
               Contacto
             </TabsTrigger>
-            <TabsTrigger value="medica">
-              <Heart className="h-4 w-4 mr-2" />
+            <TabsTrigger value="medica" className="px-1 text-xs sm:px-4 sm:text-sm">
+              <Heart className="mr-2 hidden h-4 w-4 sm:block" />
               Médica
             </TabsTrigger>
           </TabsList>
 
           {/* Tab Personal */}
           <TabsContent value="personal" className="space-y-4 mt-6">
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6">
               <InfoField
                 label="Nombre"
                 value={jugador.nombre}
@@ -128,7 +128,7 @@ export default function JugadorFicha({ jugador, open, onClose }: Props) {
 
           {/* Tab Deportiva */}
           <TabsContent value="deportiva" className="space-y-4 mt-6">
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6">
               <InfoField
                 label="Equipo"
                 value={jugador.categoria || '-'}
@@ -154,7 +154,7 @@ export default function JugadorFicha({ jugador, open, onClose }: Props) {
 
           {/* Tab Contacto */}
           <TabsContent value="contacto" className="space-y-4 mt-6">
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6">
               <InfoField
                 label="Email"
                 value={jugador.email || '-'}
@@ -165,7 +165,7 @@ export default function JugadorFicha({ jugador, open, onClose }: Props) {
                 value={jugador.telefono || '-'}
                 icon={<Phone className="h-4 w-4" />}
               />
-              <div className="col-span-2">
+              <div className="sm:col-span-2">
                 <InfoField
                   label="Dirección"
                   value={jugador.direccion || '-'}
@@ -177,7 +177,7 @@ export default function JugadorFicha({ jugador, open, onClose }: Props) {
 
           {/* Tab Médica */}
           <TabsContent value="medica" className="space-y-4 mt-6">
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6">
               <InfoField
                 label="Tipo de Sangre"
                 value={jugador.tipo_sangre || '-'}
@@ -193,13 +193,13 @@ export default function JugadorFicha({ jugador, open, onClose }: Props) {
                 value={jugador.telefono_emergencia || '-'}
                 icon={<Phone className="h-4 w-4" />}
               />
-              <div className="col-span-2">
+              <div className="sm:col-span-2">
                 <InfoField
                   label="Alergias"
                   value={jugador.alergias || 'Ninguna registrada'}
                 />
               </div>
-              <div className="col-span-2">
+              <div className="sm:col-span-2">
                 <InfoField
                   label="Lesiones Crónicas"
                   value={jugador.lesiones_cronicas || 'Ninguna registrada'}
@@ -232,7 +232,7 @@ function InfoField({
         {icon}
         <span>{label}</span>
       </div>
-      <p className="flex items-center gap-2 text-base text-gray-900 pl-6">
+      <p className="flex items-center gap-2 break-words text-base text-gray-900 pl-6">
         {adorno}
         {value}
       </p>

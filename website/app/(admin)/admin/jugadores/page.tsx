@@ -11,8 +11,7 @@ import ImportarJugadoresDialog from '@/components/admin/jugadores/ImportarJugado
 import { jugadoresACsv } from '@/lib/jugadores/exportar-csv';
 import type { JugadorCompleto } from '@/types/database';
 import { toast } from 'sonner';
-import { cn } from '@/lib/utils';
-import { PageHeader } from '@/components/admin/ui';
+import { FiltroChips, PageHeader } from '@/components/admin/ui';
 
 export default function JugadoresPage() {
   const [jugadores, setJugadores] = useState<JugadorCompleto[]>([]);
@@ -107,7 +106,7 @@ export default function JugadoresPage() {
         titulo="Plantel"
         descripcion="Ficha completa de los jugadores de cada serie. La foto, el dorsal y la posición se muestran en la página de la serie."
         acciones={
-          <div className="flex flex-wrap gap-2">
+          <>
             <Button variant="outline" onClick={() => setImportarOpen(true)}>
               <FileUp /> Importar CSV
             </Button>
@@ -117,28 +116,21 @@ export default function JugadoresPage() {
             <Button onClick={handleCreate}>
               <Plus /> Nuevo jugador
             </Button>
-          </div>
+          </>
         }
       />
 
       {series.length > 2 && (
-        <div className="flex flex-wrap gap-2">
-          {series.map((s) => (
-            <button
-              key={s}
-              onClick={() => setSerie(s)}
-              className={cn(
-                'rounded-full border px-3 py-1 text-sm',
-                serie === s ? 'border-azul-primario bg-azul-primario text-white' : 'border-gray-300 bg-white text-gray-700 hover:border-azul-claro'
-              )}
-            >
-              {s === 'Todas' ? 'Todas las series' : `Serie ${s}`}
-              <span className="ml-1 opacity-70">
-                ({s === 'Todas' ? jugadores.length : jugadores.filter((j) => j.categoria === s).length})
-              </span>
-            </button>
-          ))}
-        </div>
+        <FiltroChips
+          etiqueta="Filtrar por serie"
+          valor={serie}
+          onChange={setSerie}
+          opciones={series.map((s) => ({
+            valor: s,
+            etiqueta: s === 'Todas' ? 'Todas las series' : `Serie ${s}`,
+            cantidad: s === 'Todas' ? jugadores.length : jugadores.filter((j) => j.categoria === s).length,
+          }))}
+        />
       )}
 
       <JugadoresTable
