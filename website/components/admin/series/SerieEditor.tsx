@@ -12,7 +12,7 @@ import {
   type SerieAdmin,
   type SerieInput,
 } from '@/app/(admin)/admin/series/actions';
-import { Campo, PageHeader, Panel, inputClass, textareaClass } from '@/components/admin/ui';
+import { BarraAcciones, Campo, PageHeader, Panel, inputClass, textareaClass } from '@/components/admin/ui';
 import SelectorImagen from '@/components/admin/medios/SelectorImagen';
 import EditorMarkdown from '@/components/admin/editor/EditorMarkdown';
 
@@ -103,12 +103,12 @@ export default function SerieEditor({ serie }: { serie: SerieAdmin }) {
         }
       />
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_340px]">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
         <form onSubmit={guardarDatos}>
           <Panel
             titulo="Información de la serie"
             acciones={
-              <Button type="submit" size="sm" disabled={guardando === 'serie'}>
+              <Button type="submit" size="sm" disabled={guardando === 'serie'} className="hidden lg:inline-flex">
                 {guardando === 'serie' && <Loader2 className="animate-spin" />} Guardar
               </Button>
             }
@@ -138,9 +138,15 @@ export default function SerieEditor({ serie }: { serie: SerieAdmin }) {
               </Campo>
             </div>
           </Panel>
+          {/* En móvil el guardado queda fijo al pie; en escritorio está en la cabecera del panel */}
+          <BarraAcciones className="lg:hidden">
+            <Button type="submit" disabled={guardando === 'serie'}>
+              {guardando === 'serie' && <Loader2 className="animate-spin" />} Guardar
+            </Button>
+          </BarraAcciones>
         </form>
 
-        <aside className="space-y-5">
+        <aside className="min-w-0 space-y-5">
           <Panel titulo="Imagen de cabecera" descripcion="Foto del equipo. Se muestra detrás del título.">
             <SelectorImagen value={datos.imagen_url} onChange={(url) => set('imagen_url', url)} />
             <p className="mt-2 text-xs text-gray-500">Recuerda guardar la información de la serie después de cambiarla.</p>

@@ -33,20 +33,20 @@ export default async function SeriesPage() {
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={s.imagen_url} alt="" className="h-full w-full object-cover opacity-60" />
                   )}
-                  <p className="absolute bottom-3 left-4 font-heading text-xl font-bold text-white">{s.titulo || `Serie ${s.nombre}`}</p>
+                  <p className="absolute bottom-3 left-4 right-4 line-clamp-2 font-heading text-xl font-bold text-white">{s.titulo || `Serie ${s.nombre}`}</p>
                 </div>
-                <div className="flex items-center justify-between p-4">
-                  <div className="space-y-1 text-sm text-gray-600">
+                <div className="flex items-center justify-between gap-3 p-4">
+                  <div className="min-w-0 space-y-1 text-sm text-gray-600">
                     <p className="flex items-center gap-1.5">
                       <Users className="h-4 w-4 text-gray-400" />
                       {s.total_jugadores} jugadores activos
                     </p>
-                    <p className="text-xs text-gray-500">
+                    <p className="truncate text-xs text-gray-500">
                       {s.equipo ? `Temporada ${s.equipo.temporada}` : 'Sin equipo activo'}
                       {s.equipo?.entrenador ? ` · DT ${s.equipo.entrenador}` : ''}
                     </p>
                   </div>
-                  <ChevronRight className="h-5 w-5 text-gray-400 transition-transform group-hover:translate-x-0.5" />
+                  <ChevronRight className="h-5 w-5 shrink-0 text-gray-400 transition-transform group-hover:translate-x-0.5" />
                 </div>
               </Link>
             </li>
