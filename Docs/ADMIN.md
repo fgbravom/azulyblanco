@@ -121,7 +121,8 @@ Una server action o ruta `/api` nueva queda cubierta sola por las pruebas de pro
 
 ## Seguridad
 
-- La sesión es una cookie `httpOnly` firmada con HMAC (`SESSION_SECRET`) que expira a las 8 horas.
+- La sesión es una cookie `httpOnly` firmada con HMAC (`SESSION_SECRET`) que expira a las 8 horas. El token lleva el rol (admin o redactor) y, para un redactor, su id y la versión de su sesión.
+- El admin entra con el usuario `ab06` y la contraseña de `ADMIN_PASSWORD_HASH`. Los redactores entran con la cuenta de la tabla `cuentas_redactores` (RLS sin políticas: solo `service_role`); subir su `version_sesion` o desactivarla cierra sus sesiones. Un redactor solo ve `/admin/noticias` y `/admin/cuenta`, y `requireAdmin()` y las rutas `/api` lo rechazan.
 - Tras 10 intentos fallidos de login desde una IP, el login responde 429 durante 15 minutos (tabla `login_intentos`).
 - El middleware protege `/admin/*` y todas las `/api/*` salvo login/logout: esas APIs devuelven datos personales del plantel. Además, cada ruta revisa la sesión por su cuenta (`rechazarSinSesion()`), por si el middleware fallara.
 - `/cuotas/<código>` (solo con las cuotas activadas) es público a propósito: el código (128 bits aleatorios) es la llave. No se indexa ni manda referrer, y se puede regenerar desde el admin.

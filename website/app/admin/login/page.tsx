@@ -5,9 +5,10 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import Image from 'next/image';
-import { Lock, AlertCircle, Eye, EyeOff } from 'lucide-react';
+import { Lock, User, AlertCircle, Eye, EyeOff } from 'lucide-react';
 
 export default function LoginPage() {
+  const [usuario, setUsuario] = useState('');
   const [password, setPassword] = useState('');
   const [mostrar, setMostrar] = useState(false);
   const [error, setError] = useState('');
@@ -23,16 +24,16 @@ export default function LoginPage() {
       const res = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password }),
+        body: JSON.stringify({ usuario, password }),
       });
 
       const data = await res.json();
 
       if (res.ok) {
-        router.push('/admin');
+        router.push(data.rol === 'redactor' ? '/admin/noticias' : '/admin');
         router.refresh();
       } else {
-        setError(data.error || 'Contraseña incorrecta');
+        setError(data.error || 'Usuario o contraseña incorrectos');
       }
     } catch (err) {
       console.error('Error al iniciar sesión:', err);
@@ -74,6 +75,26 @@ export default function LoginPage() {
           {/* Formulario */}
           <div className="p-6 sm:p-8">
             <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="space-y-2">
+                <label htmlFor="usuario" className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                  <User className="w-4 h-4 text-azul-primario" />
+                  Usuario
+                </label>
+                <Input
+                  id="usuario"
+                  type="text"
+                  value={usuario}
+                  onChange={(e) => setUsuario(e.target.value)}
+                  placeholder="Ingresa tu usuario"
+                  required
+                  autoComplete="username"
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  spellCheck={false}
+                  className="h-12 text-base sm:text-sm border-2 border-gray-200 focus:border-azul-primario focus:ring-azul-primario transition-colors"
+                />
+              </div>
+
               <div className="space-y-2">
                 <label htmlFor="password" className="text-sm font-medium text-gray-700 flex items-center gap-2">
                   <Lock className="w-4 h-4 text-azul-primario" />

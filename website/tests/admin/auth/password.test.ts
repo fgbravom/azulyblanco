@@ -1,6 +1,17 @@
 import bcrypt from 'bcryptjs'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { verifyPassword } from '@/lib/auth/password'
+import { crearSupabaseFalso } from '../../helpers/supabase-falso'
+import {
+  ADMIN_USUARIO,
+  generarPasswordTemporal,
+  hashPassword,
+  validarPasswordNueva,
+  verificarCredenciales,
+  verifyPassword,
+} from '@/lib/auth/password'
+
+vi.mock('@/lib/supabase/admin', () => ({ createAdminClient: vi.fn() }))
+const { createAdminClient } = await import('@/lib/supabase/admin')
 
 // Costo bajo: la seguridad del hash no es lo que se prueba aquí
 const HASH = bcrypt.hashSync('clave-larga-del-club', 4)
@@ -44,5 +55,69 @@ describe('verifyPassword', () => {
     vi.stubEnv('ADMIN_PASSWORD_HASH', HASH)
     vi.stubEnv('NODE_ENV', 'production')
     expect(await verifyPassword('asd123')).toBe(false)
+  })
+})
+
+describe('hashPassword y validarPasswordNueva', () => {
+  it('hashPassword genera un bcrypt de costo 10 que verifica la contraseña', async () => {
+    const hash = await hashPassword('una-clave-larga')
+    expect(hash).toMatch(/^\$2[aby]\$10\$/)
+    expect(await bcrypt.compare('una-clave-larga', hash)).toBe(true)
+  })
+
+  it('exige al menos 10 caracteres', () => {
+    expect(validarPasswordNueva('123456789')).toMatch(/al menos 10 caracteres/)
+    expect(validarPasswordNueva('1234567890')).toBeNull()
+  })
+})
+
+describe('generarPasswordTemporal', () => {
+  it('genera 12 caracteres legibles, sin 0, O, l ni 1, y distintos cada vez', () => {
+    const claves = Array.from({ length: 50 }, generarPasswordTemporal)
+    for (const clave of claves) expect(clave).toMatch(/^[^0Ol1]{12}$/)
+    expect(new Set(claves).size).toBe(50)
+    expect(validarPasswordNueva(claves[0])).toBeNull()
+  })
+})
+
+describe('verificarCredenciales', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    vi.stubEnv('ADMIN_PASSWORD_HASH', HASH)
+  })
+
+  function baseCon(cuenta: object | null) {
+    const base = crearSupabaseFalso(() => ({ data: cuenta }))
+    vi.mocked(createAdminClient).mockReturnValue(base.cliente)
+    return base
+  }
+
+  it('el usuario del admin es ab06 y solo vale con la contraseña del admin', async () => {
+    expect(ADMIN_USUARIO).toBe('ab06')
+    expect(await verificarCredenciales('Ab06', 'clave-larga-del-club')).toEqual({ rol: 'admin' })
+    expect(await verificarCredenciales('ab06', 'otra')).toBeNull()
+    expect(createAdminClient).not.toHaveBeenCalled()
+  })
+
+  it('un usuario inexistente igual ejecuta una comparación bcrypt (mismo tiempo que uno real)', async () => {
+    baseCon(null)
+    const comparar = vi.spyOn(bcrypt, 'compare')
+    expect(await verificarCredenciales('nadie', 'clave-larga-del-club')).toBeNull()
+    expect(comparar).toHaveBeenCalledOnce()
+  })
+
+  it('una cuenta inactiva no entra aunque la contraseña sea correcta', async () => {
+    baseCon({ redactor_id: 'r1', password_hash: HASH, activa: false, version_sesion: 0 })
+    expect(await verificarCredenciales('redactor1', 'clave-larga-del-club')).toBeNull()
+  })
+
+  it('una cuenta activa con la contraseña correcta entra con su id y versión', async () => {
+    const base = baseCon({ redactor_id: 'r1', password_hash: HASH, activa: true, version_sesion: 4 })
+    expect(await verificarCredenciales('redactor1', 'clave-larga-del-club')).toEqual({
+      rol: 'redactor',
+      redactorId: 'r1',
+      version: 4,
+    })
+    expect(base.a('cuentas_redactores').some((c) => c.ops.some((o) => o.metodo === 'update'))).toBe(true)
   })
 })

@@ -1,4 +1,18 @@
 import bcrypt from 'bcryptjs';
+import { randomInt } from 'node:crypto';
+import { createAdminClient } from '@/lib/supabase/admin';
+import type { DatosToken } from './token';
+
+/** Usuario del administrador (su contraseña es ADMIN_PASSWORD_HASH). Ningún redactor puede usarlo. */
+export const ADMIN_USUARIO = 'ab06';
+
+// Hash sin dueño: se compara cuando el usuario no existe para que la respuesta
+// tarde lo mismo y no revele qué usuarios hay
+const HASH_FICTICIO = '$2b$10$hcyRwU3SaT0FCFvjJ9GO7OBDPLj8vCddLFrohU7v2tW7GCrI01y1m';
+
+const PASSWORD_MINIMO = 10;
+// Sin 0/O/l/1/I para que se pueda dictar o copiar a mano
+const LEGIBLES = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789';
 
 // Solo para desarrollo local (contraseña: asd123). En producción no hay
 // respaldo: sin ADMIN_PASSWORD_HASH nadie entra, porque esta contraseña es pública.
@@ -25,4 +39,52 @@ export async function verifyPassword(inputPassword: string): Promise<boolean> {
     return false;
   }
   return bcrypt.compare(inputPassword, hash);
+}
+
+/** Hash bcrypt (costo 10) de una contraseña nueva */
+export async function hashPassword(password: string): Promise<string> {
+  return bcrypt.hash(password, 10);
+}
+
+/** Mensaje de error si la contraseña nueva no sirve, o null si está bien */
+export function validarPasswordNueva(password: string): string | null {
+  if (password.length < PASSWORD_MINIMO) {
+    return `La contraseña debe tener al menos ${PASSWORD_MINIMO} caracteres`;
+  }
+  return null;
+}
+
+/** Contraseña temporal de 12 caracteres legibles, para que el admin la entregue a un redactor */
+export function generarPasswordTemporal(): string {
+  return Array.from({ length: 12 }, () => LEGIBLES[randomInt(LEGIBLES.length)]).join('');
+}
+
+/**
+ * Valida usuario y contraseña. Devuelve los datos para firmar la sesión, o null
+ * si no calzan (usuario inexistente, cuenta inactiva o contraseña mala).
+ */
+export async function verificarCredenciales(usuario: string, password: string): Promise<DatosToken | null> {
+  const nombre = usuario.trim().toLowerCase();
+
+  if (nombre === ADMIN_USUARIO) {
+    return (await verifyPassword(password)) ? { rol: 'admin' } : null;
+  }
+
+  const supabase = createAdminClient();
+  // El usuario se guarda en minúscula (CHECK en la tabla), así que basta comparar con igualdad
+  const { data: cuenta } = await supabase
+    .from('cuentas_redactores')
+    .select('redactor_id, password_hash, activa, version_sesion')
+    .eq('usuario', nombre)
+    .maybeSingle();
+
+  const coincide = await bcrypt.compare(password, cuenta?.password_hash ?? HASH_FICTICIO);
+  if (!cuenta || !coincide || !cuenta.activa) return null;
+
+  await supabase
+    .from('cuentas_redactores')
+    .update({ ultimo_ingreso: new Date().toISOString() })
+    .eq('redactor_id', cuenta.redactor_id);
+
+  return { rol: 'redactor', redactorId: cuenta.redactor_id, version: cuenta.version_sesion };
 }

@@ -1,15 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { verifyPassword } from '@/lib/auth/password';
+import { verificarCredenciales } from '@/lib/auth/password';
 import { createSession } from '@/lib/auth/session';
 import { ipDe, limpiarIntentos, loginBloqueado, registrarFallo } from '@/lib/auth/intentos';
 
 export async function POST(request: NextRequest) {
   try {
-    const { password } = await request.json();
+    const { usuario, password } = await request.json();
 
-    if (typeof password !== 'string' || !password) {
+    if (typeof usuario !== 'string' || !usuario.trim() || typeof password !== 'string' || !password) {
       return NextResponse.json(
-        { error: 'Contraseña requerida' },
+        { error: 'Usuario y contraseña requeridos' },
         { status: 400 }
       );
     }
@@ -22,20 +22,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const isValid = await verifyPassword(password);
+    const datos = await verificarCredenciales(usuario, password);
 
-    if (!isValid) {
+    if (!datos) {
       await registrarFallo(ip);
       return NextResponse.json(
-        { error: 'Contraseña incorrecta' },
+        { error: 'Usuario o contraseña incorrectos' },
         { status: 401 }
       );
     }
 
     await limpiarIntentos(ip);
-    await createSession({ rol: 'admin' });
+    await createSession(datos);
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true, rol: datos.rol });
   } catch (error) {
     console.error('Error en login:', error);
     return NextResponse.json(

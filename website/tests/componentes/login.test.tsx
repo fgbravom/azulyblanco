@@ -42,27 +42,46 @@ describe('página de login del admin', () => {
   })
 
   it('envía la contraseña y entra al panel si es correcta', async () => {
-    fetchFalso.mockResolvedValue(respuesta(200, { success: true }))
+    fetchFalso.mockResolvedValue(respuesta(200, { success: true, rol: 'admin' }))
     const usuario = userEvent.setup()
     render(<LoginPage />)
 
+    await usuario.type(screen.getByLabelText('Usuario'), 'ab06')
     await usuario.type(screen.getByLabelText(/contraseña de acceso/i), 'clave-correcta')
     await usuario.click(screen.getByRole('button', { name: 'Iniciar Sesión' }))
 
     await waitFor(() => expect(router.push).toHaveBeenCalledWith('/admin'))
     expect(fetchFalso).toHaveBeenCalledWith('/api/auth/login', expect.objectContaining({ method: 'POST' }))
-    expect(JSON.parse(fetchFalso.mock.calls[0][1].body)).toEqual({ password: 'clave-correcta' })
+    expect(JSON.parse(fetchFalso.mock.calls[0][1].body)).toEqual({ usuario: 'ab06', password: 'clave-correcta' })
   })
 
-  it('muestra el error del servidor y no entra', async () => {
-    fetchFalso.mockResolvedValue(respuesta(401, { error: 'Contraseña incorrecta' }))
+  it('un redactor entra directo a las noticias', async () => {
+    fetchFalso.mockResolvedValue(respuesta(200, { success: true, rol: 'redactor' }))
     const usuario = userEvent.setup()
     render(<LoginPage />)
 
+    await usuario.type(screen.getByLabelText('Usuario'), 'redactor1')
+    await usuario.type(screen.getByLabelText(/contraseña de acceso/i), 'clave')
+    await usuario.click(screen.getByRole('button', { name: 'Iniciar Sesión' }))
+
+    await waitFor(() => expect(router.push).toHaveBeenCalledWith('/admin/noticias'))
+  })
+
+  it('el campo de usuario ayuda al gestor de contraseñas', () => {
+    render(<LoginPage />)
+    expect(screen.getByLabelText('Usuario')).toHaveAttribute('autocomplete', 'username')
+  })
+
+  it('muestra el error del servidor y no entra', async () => {
+    fetchFalso.mockResolvedValue(respuesta(401, { error: 'Usuario o contraseña incorrectos' }))
+    const usuario = userEvent.setup()
+    render(<LoginPage />)
+
+    await usuario.type(screen.getByLabelText('Usuario'), 'ab06')
     await usuario.type(screen.getByLabelText(/contraseña de acceso/i), 'mala')
     await usuario.click(screen.getByRole('button', { name: 'Iniciar Sesión' }))
 
-    expect(await screen.findByText('Contraseña incorrecta')).toBeInTheDocument()
+    expect(await screen.findByText('Usuario o contraseña incorrectos')).toBeInTheDocument()
     expect(router.push).not.toHaveBeenCalled()
   })
 
@@ -71,6 +90,7 @@ describe('página de login del admin', () => {
     const usuario = userEvent.setup()
     render(<LoginPage />)
 
+    await usuario.type(screen.getByLabelText('Usuario'), 'ab06')
     await usuario.type(screen.getByLabelText(/contraseña de acceso/i), 'x')
     await usuario.click(screen.getByRole('button', { name: 'Iniciar Sesión' }))
 
@@ -83,6 +103,7 @@ describe('página de login del admin', () => {
     const usuario = userEvent.setup()
     render(<LoginPage />)
 
+    await usuario.type(screen.getByLabelText('Usuario'), 'ab06')
     await usuario.type(screen.getByLabelText(/contraseña de acceso/i), 'x')
     await usuario.click(screen.getByRole('button', { name: 'Iniciar Sesión' }))
 
