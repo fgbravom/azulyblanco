@@ -59,6 +59,8 @@ export async function HeroSection() {
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src="/images/hero/escudo-384.webp"
+          srcSet="/images/hero/escudo-192.webp 192w, /images/hero/escudo-288.webp 288w, /images/hero/escudo-384.webp 384w"
+          sizes="(min-width: 1024px) 192px, 144px"
           alt=""
           width={192}
           height={192}
