@@ -128,7 +128,8 @@ function Navegacion({ onNavigate, cuotas }: { onNavigate?: () => void; cuotas: b
   );
 }
 
-export default function AdminSidebar({ cuotas }: { cuotas: boolean }) {
+// rol: la fase siguiente filtra los ítems según quién ingresó
+export default function AdminSidebar({ cuotas }: { cuotas: boolean; rol?: 'admin' | 'redactor' }) {
   const [abierto, setAbierto] = useState(false);
 
   return (

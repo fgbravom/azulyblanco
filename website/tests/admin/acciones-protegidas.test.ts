@@ -75,3 +75,32 @@ describe('server actions del admin sin sesión', () => {
     }
   )
 })
+
+// Acciones que además puede usar un redactor (requireEditorNoticias). Vacía por ahora:
+// agregar una acá debe justificarse en la revisión del PR.
+const ACCIONES_REDACTOR = new Set<string>([])
+
+describe('server actions del admin con sesión de redactor', () => {
+  let base: Awaited<ReturnType<typeof simularSesion>>['base']
+
+  beforeEach(async () => {
+    vi.clearAllMocks()
+    base = (await simularSesion('redactor')).base
+  })
+
+  it('la lista blanca no se queda con nombres que ya no existen', () => {
+    for (const permitida of ACCIONES_REDACTOR) {
+      expect(acciones.some((a) => a.accion === permitida)).toBe(true)
+    }
+  })
+
+  it.each(acciones.filter((a) => !ACCIONES_PUBLICAS.has(a.accion) && !ACCIONES_REDACTOR.has(a.accion)))(
+    '$accion se rechaza',
+    async ({ fn }) => {
+      await expect(fn(...ARGS)).rejects.toThrow('No autorizado')
+      // Lo único que puede consultarse es la cuenta del redactor, nunca contenido
+      expect(base!.consultas.every((c) => c.tabla === 'cuentas_redactores')).toBe(true)
+      expect(cargarSharp).not.toHaveBeenCalled()
+    }
+  )
+})

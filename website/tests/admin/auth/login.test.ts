@@ -39,7 +39,7 @@ describe('POST /api/auth/login', () => {
     expect(cookies.set).toHaveBeenCalledOnce()
     const [nombre, valor, opciones] = cookies.set.mock.calls[0]
     expect(nombre).toBe(SESSION_COOKIE)
-    expect(await verificarToken(valor, process.env.SESSION_SECRET)).toBe(true)
+    expect(await verificarToken(valor, process.env.SESSION_SECRET)).toEqual({ rol: 'admin' })
     expect(opciones).toMatchObject({ httpOnly: true, sameSite: 'strict', path: '/', maxAge: SESSION_MAX_AGE })
     expect(intentos.limpiarIntentos).toHaveBeenCalledWith('1.1.1.1')
   })

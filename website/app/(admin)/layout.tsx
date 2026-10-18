@@ -1,8 +1,9 @@
 export const dynamic = 'force-dynamic';
 
 import type { Metadata } from 'next';
+import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { verifySession } from '@/lib/auth/session';
+import { obtenerSesion } from '@/lib/auth/session';
 import AdminSidebar from '@/components/admin/layout/AdminSidebar';
 import { cuotasHabilitadas } from '@/lib/cuotas/habilitado';
 
@@ -16,15 +17,21 @@ export default async function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const isAuthenticated = await verifySession();
+  const sesion = await obtenerSesion();
 
-  if (!isAuthenticated) {
+  if (!sesion) {
     redirect('/admin/login');
+  }
+
+  // Con contraseña temporal, el redactor solo puede cambiarla (x-pathname lo pone el middleware)
+  if (sesion.rol === 'redactor' && sesion.debeCambiarPassword) {
+    const pathname = (await headers()).get('x-pathname');
+    if (pathname !== '/admin/cuenta') redirect('/admin/cuenta');
   }
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <AdminSidebar cuotas={cuotasHabilitadas()} />
+      <AdminSidebar cuotas={cuotasHabilitadas()} rol={sesion.rol} />
 
       {/* Área principal con margen para el sidebar */}
       <div className="lg:pl-64">

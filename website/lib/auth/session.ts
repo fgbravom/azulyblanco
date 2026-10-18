@@ -1,11 +1,17 @@
+import { cache } from 'react';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
-import { SESSION_COOKIE, SESSION_MAX_AGE, firmarToken, verificarToken } from './token';
+import { createAdminClient } from '@/lib/supabase/admin';
+import { SESSION_COOKIE, SESSION_MAX_AGE, firmarToken, verificarToken, type DatosToken } from './token';
+
+export type Sesion =
+  | { rol: 'admin' }
+  | { rol: 'redactor'; redactorId: string; nombre: string; debeCambiarPassword: boolean };
 
 /**
- * Crea una sesión de administrador
+ * Crea la sesión de un administrador o de un redactor
  */
-export async function createSession() {
+export async function createSession(datos: DatosToken) {
   const sessionSecret = process.env.SESSION_SECRET;
 
   if (!sessionSecret) {
@@ -13,7 +19,7 @@ export async function createSession() {
   }
 
   const cookieStore = await cookies();
-  cookieStore.set(SESSION_COOKIE, await firmarToken(sessionSecret), {
+  cookieStore.set(SESSION_COOKIE, await firmarToken(sessionSecret, datos), {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'strict',
@@ -24,11 +30,40 @@ export async function createSession() {
 }
 
 /**
+ * Sesión vigente o null. Sin cookie válida no toca la base; para un redactor
+ * confirma que la cuenta exista, esté activa y su versión de sesión coincida
+ * (subirla en la base cierra todas sus sesiones). Se memoiza por petición.
+ */
+export const obtenerSesion = cache(async (): Promise<Sesion | null> => {
+  const cookieStore = await cookies();
+  const datos = await verificarToken(cookieStore.get(SESSION_COOKIE)?.value, process.env.SESSION_SECRET);
+  if (!datos) return null;
+  if (datos.rol === 'admin') return { rol: 'admin' };
+
+  const { data } = await createAdminClient()
+    .from('cuentas_redactores')
+    .select('activa, version_sesion, debe_cambiar_password, redactores(nombre)')
+    .eq('redactor_id', datos.redactorId)
+    .maybeSingle();
+
+  if (!data || !data.activa || data.version_sesion !== datos.version) return null;
+
+  const redactor = Array.isArray(data.redactores) ? data.redactores[0] : data.redactores;
+  return {
+    rol: 'redactor',
+    redactorId: datos.redactorId,
+    nombre: redactor?.nombre ?? '',
+    debeCambiarPassword: data.debe_cambiar_password,
+  };
+});
+
+/**
  * Verifica si existe una sesión válida de administrador
  */
 export async function verifySession(): Promise<boolean> {
   const cookieStore = await cookies();
-  return verificarToken(cookieStore.get(SESSION_COOKIE)?.value, process.env.SESSION_SECRET);
+  const datos = await verificarToken(cookieStore.get(SESSION_COOKIE)?.value, process.env.SESSION_SECRET);
+  return datos?.rol === 'admin';
 }
 
 /**
@@ -41,7 +76,17 @@ export async function requireAdmin() {
 }
 
 /**
- * Para las rutas /api: respuesta 401 si no hay sesión, null si la hay.
+ * Corta la ejecución si no hay sesión de administrador ni de un redactor activo.
+ * Devuelve la sesión para saber quién escribe.
+ */
+export async function requireEditorNoticias(): Promise<Sesion> {
+  const sesion = await obtenerSesion();
+  if (!sesion) throw new Error('No autorizado');
+  return sesion;
+}
+
+/**
+ * Para las rutas /api: respuesta 401 si no hay sesión de administrador, null si la hay.
  * El middleware ya las protege; esto cubre un eventual bypass del middleware.
  */
 export async function rechazarSinSesion(): Promise<NextResponse | null> {

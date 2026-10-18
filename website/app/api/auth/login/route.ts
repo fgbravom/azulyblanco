@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
     }
 
     await limpiarIntentos(ip);
-    await createSession();
+    await createSession({ rol: 'admin' });
 
     return NextResponse.json({ success: true });
   } catch (error) {

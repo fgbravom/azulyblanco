@@ -2,6 +2,16 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { SESSION_COOKIE, verificarToken } from '@/lib/auth/token';
 
+// Lo único del panel que ve un redactor
+const REDACTOR_RUTAS = ['/admin/noticias', '/admin/cuenta'];
+
+// Deja pasar la petición con la ruta en un header, para que el layout sepa dónde está
+function pasar(request: NextRequest) {
+  const headers = new Headers(request.headers);
+  headers.set('x-pathname', request.nextUrl.pathname);
+  return NextResponse.next({ request: { headers } });
+}
+
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
@@ -10,13 +20,24 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  const autenticado = await verificarToken(
+  const sesion = await verificarToken(
     request.cookies.get(SESSION_COOKIE)?.value,
     process.env.SESSION_SECRET
   );
 
-  if (autenticado) {
-    return NextResponse.next();
+  if (sesion?.rol === 'admin') {
+    return pasar(request);
+  }
+
+  if (sesion?.rol === 'redactor') {
+    // Las APIs son solo del admin
+    if (pathname.startsWith('/api/')) {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+    }
+    if (REDACTOR_RUTAS.some((ruta) => pathname === ruta || pathname.startsWith(`${ruta}/`))) {
+      return pasar(request);
+    }
+    return NextResponse.redirect(new URL('/admin/noticias', request.url));
   }
 
   // Las APIs solo las usa el admin: exponen datos personales del plantel
