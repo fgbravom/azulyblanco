@@ -4,9 +4,9 @@ export type TipoPartido = 'Amistoso' | 'Oficial' | 'Torneo' | 'Copa'
 /** Gol de AYB con su goleador y asistente, ya con los nombres para mostrar */
 export interface GolPartido {
   lado: 'local' | 'visitante' // en el orden de `rival`
-  autor?: string // "Juan Pérez"; vacío si es autogol
+  autor?: string // "Juan Pérez"; vacío si es autogol del rival
   asistencia?: string
-  enContra: boolean // autogol del rival
+  enContra: boolean // autogol: del rival en el lado de AYB, o de un jugador de AYB en el lado del rival
 }
 
 export interface EventoCalendario {

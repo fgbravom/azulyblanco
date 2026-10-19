@@ -5,6 +5,7 @@ import { z } from 'zod'
 import { requireAdmin } from '@/lib/auth/session'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidarSitio } from '@/lib/admin/revalidar'
+import { formatearNombrePartido } from '@/lib/utils/calendario'
 import type { Actividad, ActividadInput, GolInput, JugadorGoles } from '@/lib/contenido/tipos'
 
 const textoOpcional = z
@@ -54,7 +55,6 @@ const golesSchema = z
       en_contra: z.boolean(),
     })
   )
-  .refine((g) => g.every((x) => (x.en_contra ? x.autor_id === null : x.autor_id !== null)), 'Cada gol necesita su goleador')
   .refine((g) => g.every((x) => x.asistencia_id === null || x.asistencia_id !== x.autor_id), 'Un jugador no puede asistirse a sí mismo')
 
 function cambios() {
@@ -118,11 +118,22 @@ export async function guardarActividad(id: string | null, input: ActividadInput,
   // Los goleadores solo se guardan con resultado, y nunca más que los goles de su lado
   const conResultado = datos.tipo === 'partido' && datos.goles_local !== null
   const detalle = golesParsed.data === null ? null : conResultado ? golesParsed.data : []
+  const partido = formatearNombrePartido(datos.rival ?? '')
+  const esAYB = { local: partido.esAyBLocal, visitante: partido.esAyBVisitante }
   for (const lado of ['local', 'visitante'] as const) {
     const marcador = lado === 'local' ? datos.goles_local : datos.goles_visitante
     if (detalle && detalle.filter((g) => g.lado === lado).length > (marcador ?? 0)) {
       throw new Error('Hay más goleadores que goles en el resultado')
     }
+  }
+  for (const g of detalle ?? []) {
+    // Lado de AYB: gol de un jugador, o autogol del rival (sin autor).
+    // Lado del rival: solo se registran autogoles de jugadores de AYB.
+    const valido = esAYB[g.lado]
+      ? g.en_contra ? g.autor_id === null : g.autor_id !== null
+      : g.en_contra && g.autor_id !== null
+    if (!valido) throw new Error(esAYB[g.lado] ? 'Cada gol necesita su goleador' : 'En los goles del rival solo se registran autogoles de AYB')
+    if (g.en_contra && g.asistencia_id !== null) throw new Error('Un autogol no lleva asistencia')
   }
 
   // Se limpian los campos que no corresponden al tipo elegido

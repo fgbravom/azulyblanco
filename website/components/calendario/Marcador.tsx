@@ -57,7 +57,10 @@ function Goleadores({ goles }: { goles: GolPartido[] }) {
     <ul className="mt-3 space-y-1.5 text-center" aria-label="Goles">
       {goles.map((g, i) => (
         <li key={i} className="leading-tight">
-          <p className="text-xs font-semibold text-gray-800">{g.enContra ? 'Autogol' : g.autor}</p>
+          <p className="text-xs font-semibold text-gray-800">
+            {/* Sin autor: autogol del rival. Con autor: autogol de un jugador de AYB, bajo el rival */}
+            {g.enContra ? (g.autor ? `${g.autor} (autogol)` : 'Autogol') : g.autor}
+          </p>
           {g.asistencia && <p className="text-[11px] text-gray-500">Asist. {g.asistencia}</p>}
         </li>
       ))}

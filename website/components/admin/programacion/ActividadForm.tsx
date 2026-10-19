@@ -92,13 +92,13 @@ export default function ActividadForm({ id, inicial, lugares, rivales, jugadores
       return { ...g, [lado]: lista };
     });
 
-  // Los goleadores se registran solo para los lados que son de AYB
-  const ladosAYB = (
+  // Goleadores en los lados de AYB; en el rival, solo sus autogoles de AYB
+  const ladosGoles = (
     [
       { lado: 'local', equipo: local, cantidad: datos.goles_local ?? 0 },
       { lado: 'visitante', equipo: visita, cantidad: datos.goles_visitante ?? 0 },
     ] as const
-  ).filter((l) => esEquipoAYB(l.equipo));
+  ).map((l) => ({ ...l, esAYB: esEquipoAYB(l.equipo) }));
 
   // Al intercambiar local y visita, cada gol sigue a su equipo
   const intercambiar = () => {
@@ -134,7 +134,7 @@ export default function ActividadForm({ id, inicial, lugares, rivales, jugadores
       const elegido = rivales.find((r) => r.id === datos.rival_id);
       const siglaRival = (ladoRival === 'local' ? local : visita).trim().toUpperCase();
       const rival_id = elegido && elegido.sigla.toUpperCase() === siglaRival ? elegido.id : null;
-      const detalleGoles = estadoGoles === 'listo' ? golesAGuardar(goles, ladosAYB) : null;
+      const detalleGoles = estadoGoles === 'listo' ? golesAGuardar(goles, ladosGoles) : null;
       const guardada = await guardarActividad(id, { ...datos, rival, rival_id, estadio: datos.estadio.toUpperCase() }, detalleGoles);
       toast.success(id ? 'Actividad actualizada' : 'Actividad creada');
       onGuardada(guardada);
@@ -236,7 +236,7 @@ export default function ActividadForm({ id, inicial, lugares, rivales, jugadores
           </Campo>
           {datos.goles_local !== null && datos.goles_visitante !== null && (
             <GolesPartido
-              lados={ladosAYB}
+              lados={ladosGoles}
               goles={goles}
               onChange={cambiarGol}
               jugadores={jugadores}

@@ -49,6 +49,17 @@ describe('guardarActividad con goleadores', () => {
     ])
   })
 
+  it('guarda el autogol de un jugador de AYB en el lado del rival', async () => {
+    const falso = conBase()
+    await guardarActividad('p1', partido({ goles_local: 0, goles_visitante: 1 }), [
+      gol({ lado: 'visitante', autor_id: 7, en_contra: true }),
+    ])
+
+    expect(argsDe(falso.a('goles')[1], 'insert')?.[0]).toEqual([
+      { lado: 'visitante', autor_id: 7, asistencia_id: null, en_contra: true, programacion_id: 'p1', orden: 0 },
+    ])
+  })
+
   it('sin resultado borra los goleadores', async () => {
     const falso = conBase()
     await guardarActividad('p1', partido({ goles_local: null, goles_visitante: null }), [gol({ autor_id: 7 })])
@@ -68,7 +79,10 @@ describe('guardarActividad con goleadores', () => {
     ['más goleadores que goles', [gol({ autor_id: 1 }), gol({ autor_id: 2 }), gol({ autor_id: 3 })], /más goleadores/],
     ['un gol sin goleador', [gol({})], /goleador/],
     ['un jugador que se asiste a sí mismo', [gol({ autor_id: 4, asistencia_id: 4 })], /sí mismo/],
-    ['un autogol con autor', [gol({ autor_id: 4, en_contra: true })], /goleador/],
+    ['un autogol del rival con autor en el lado de AYB', [gol({ autor_id: 4, en_contra: true })], /goleador/],
+    ['un gol normal en el lado del rival', [gol({ lado: 'visitante', autor_id: 4 })], /solo se registran autogoles/],
+    ['un autogol sin autor en el lado del rival', [gol({ lado: 'visitante', en_contra: true })], /solo se registran autogoles/],
+    ['un autogol con asistencia', [gol({ lado: 'visitante', autor_id: 4, asistencia_id: 5, en_contra: true })], /asistencia/],
   ])('rechaza %s sin guardar nada', async (_caso, goles, mensaje) => {
     const falso = conBase()
     await expect(guardarActividad('p1', partido(), goles)).rejects.toThrow(mensaje)

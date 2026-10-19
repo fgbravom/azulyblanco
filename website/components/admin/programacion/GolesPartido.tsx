@@ -15,7 +15,7 @@ export function golVacio(lado: LadoPartido): GolInput {
   return { lado, autor_id: null, asistencia_id: null, en_contra: false };
 }
 
-/** Lo que se guarda: solo las filas de los lados de AYB que tienen goleador o son autogol */
+/** Lo que se guarda: las filas con goleador o que son autogol (en el rival, solo autogoles de AYB) */
 export function golesAGuardar(goles: GolesPorLado, lados: { lado: LadoPartido; cantidad: number }[]): GolInput[] {
   return lados.flatMap(({ lado, cantidad }) =>
     goles[lado].slice(0, cantidad).filter((g) => g.en_contra || g.autor_id !== null)
@@ -39,13 +39,22 @@ function agrupar(jugadores: JugadorGoles[], series: string[]) {
   return [...grupos.entries()].sort(([a], [b]) => peso(a) - peso(b));
 }
 
-function OpcionesJugadores({ grupos, excluir }: { grupos: [string, JugadorGoles[]][]; excluir?: number | null }) {
+function OpcionesJugadores({
+  grupos,
+  excluir,
+  prefijo = '',
+}: {
+  grupos: [string, JugadorGoles[]][];
+  excluir?: number | null;
+  prefijo?: string;
+}) {
   return grupos.map(([grupo, lista]) => (
     <optgroup key={grupo} label={grupo}>
       {lista
         .filter((j) => j.id !== excluir)
         .map((j) => (
           <option key={j.id} value={j.id}>
+            {prefijo}
             {nombreJugador(j)}
           </option>
         ))}
@@ -54,8 +63,8 @@ function OpcionesJugadores({ grupos, excluir }: { grupos: [string, JugadorGoles[
 }
 
 interface Props {
-  /** Lados de AYB con sus goles en el resultado */
-  lados: { lado: LadoPartido; equipo: string; cantidad: number }[];
+  /** Lados del partido con sus goles en el resultado; en el rival solo se eligen autogoles de AYB */
+  lados: { lado: LadoPartido; equipo: string; cantidad: number; esAYB: boolean }[];
   goles: GolesPorLado;
   onChange: (lado: LadoPartido, indice: number, gol: GolInput) => void;
   jugadores: JugadorGoles[];
@@ -88,13 +97,38 @@ export default function GolesPartido({ lados, goles, onChange, jugadores, series
       ) : jugadores.length === 0 ? (
         <p className="text-sm text-gray-500">No hay jugadores en el plantel para elegir.</p>
       ) : (
-        conGoles.map(({ lado, equipo, cantidad }) => (
+        conGoles.map(({ lado, equipo, cantidad, esAYB }) => (
           <div key={lado} className="space-y-2">
-            {varios && <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">{equipo}</p>}
+            {(varios || !esAYB) && (
+              <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                {esAYB ? equipo : `Goles de ${equipo}`}
+                {!esAYB && <span className="ml-1 font-normal normal-case tracking-normal">· solo si fue autogol de AYB</span>}
+              </p>
+            )}
             {Array.from({ length: Math.min(cantidad, MAX_FILAS) }, (_, i) => {
               const gol = goles[lado][i] ?? golVacio(lado);
-              const autor = gol.en_contra ? AUTOGOL : gol.autor_id?.toString() ?? '';
               const n = i + 1;
+              if (!esAYB) {
+                return (
+                  <div key={i} className="grid grid-cols-[1.75rem_1fr] items-center gap-2 sm:grid-cols-[1.75rem_1fr_1fr]">
+                    <span className="flex h-7 w-7 items-center justify-center rounded-full bg-gray-100 text-xs font-bold text-gray-500">
+                      {n}
+                    </span>
+                    <select
+                      aria-label={`Gol ${n} de ${equipo}`}
+                      value={gol.autor_id?.toString() ?? ''}
+                      onChange={(e) =>
+                        onChange(lado, i, e.target.value ? { ...golVacio(lado), autor_id: Number(e.target.value), en_contra: true } : golVacio(lado))
+                      }
+                      className={inputClass}
+                    >
+                      <option value="">Gol del rival</option>
+                      <OpcionesJugadores grupos={grupos} prefijo="Autogol de " />
+                    </select>
+                  </div>
+                );
+              }
+              const autor = gol.en_contra ? AUTOGOL : gol.autor_id?.toString() ?? '';
               return (
                 <div key={i} className="grid grid-cols-[1.75rem_1fr] items-center gap-2 sm:grid-cols-[1.75rem_1fr_1fr]">
                   <span className="flex h-7 w-7 items-center justify-center rounded-full bg-azul-primario/10 text-xs font-bold text-azul-primario">
