@@ -145,9 +145,11 @@ El panel tiene dos roles. El **admin** (usuario `ab06`, contraseña de `ADMIN_PA
 
 ## Goles y asistencias
 
-Al editar un partido con resultado, el formulario muestra una fila por cada gol de AYB (solo los lados que son de AYB; en un partido interno, de ambos). En cada fila se elige el goleador (o «Autogol del rival») y, opcionalmente, quien lo asistió. Los jugadores aparecen agrupados por serie, con las series del partido primero y los inactivos al final. Dejar un gol sin goleador es válido: simplemente no se muestra.
+Al editar un partido con resultado, el formulario muestra una fila por cada gol de AYB (solo los lados que son de AYB; en un partido interno, de ambos). En cada fila se elige el goleador (o «Autogol del rival») y, opcionalmente, quien lo asistió. Los jugadores aparecen agrupados por serie, con las series del partido primero y los inactivos al final. Dejar un gol sin goleador es válido: simplemente no se muestra. Si el rival hizo goles, aparece también una fila por cada uno para marcar si fue autogol de un jugador de AYB; se guarda en el lado del rival y el sitio lo muestra bajo el rival como «Nombre Apellido (autogol)».
 
 Se guardan en `goles`, una fila por gol con su `lado` y `orden`. La tabla tiene RLS sin políticas (solo `service_role`); el sitio los lee desde `vista_goles_publico`, que trae únicamente nombre y apellidos de los jugadores y solo de partidos publicados. En el detalle del partido se muestran bajo cada equipo con nombre y primer apellido. Si el resultado se borra, se borran los goleadores; si se borra un jugador, su gol queda sin nombre y deja de mostrarse.
+
+**Migración 015.** Permite que un autogol tenga autor (el jugador de AYB que lo hizo) y exige que un autogol no tenga asistencia. Hay que aplicarla en producción antes de desplegar: sin ella, guardar un autogol de AYB falla.
 
 **Migración 014.** Crea `goles` y `vista_goles_publico`. Conviene aplicarla en producción antes de desplegar (`npm run db:push`, con autorización): sin ella el sitio sigue funcionando, pero el admin no puede guardar partidos porque al guardar actualiza los goleadores.
 
