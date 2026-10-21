@@ -8,7 +8,7 @@ Todo texto para el usuario, comentarios y mensajes de commit van en español.
 
 - `website/` es la aplicación: Next.js 16 (App Router), React 19, TypeScript, Tailwind v4, shadcn/ui, Supabase y Vitest. Casi todo el trabajo ocurre aquí.
 - `website-v2/` es un experimento ignorado por git. No tocarlo salvo que se pida.
-- `database/` y la mayoría de `Docs/` son de etapas anteriores y pueden estar desactualizados. Vigentes: [Docs/ADMIN.md](Docs/ADMIN.md) (panel, migraciones, seguridad) y [Docs/CUOTAS.md](Docs/CUOTAS.md).
+- `database/` y la mayoría de `Docs/` son de etapas anteriores y pueden estar desactualizados. Vigentes: [Docs/ADMIN.md](Docs/ADMIN.md) (panel, migraciones, seguridad), [Docs/CUOTAS.md](Docs/CUOTAS.md) y [Docs/POSICIONES.md](Docs/POSICIONES.md) (tabla ANFA, actualización desde la imagen oficial).
 - Acceso a datos en `website/lib/data/`, tipos de la base en `website/types/database.ts`, panel de administración en `website/app/(admin)/`.
 
 ## Comandos (desde `website/`)

@@ -1,0 +1,106 @@
+{
+  "campeonato": "Campeonato ANFA 2026",
+  "torneo": "Clausura",
+  "organizador": "Asociación de Fútbol Curicó Aguas Negras",
+  "fecha_numero": 23,
+  "fuente": "Imágenes oficiales de ANFA con las tablas de posiciones, transcritas a mano",
+  "leyenda": {
+    "pos": "Posición",
+    "equipo": "Equipo",
+    "pts": "Puntos",
+    "pj": "Partidos jugados",
+    "g": "Ganados",
+    "e": "Empatados",
+    "p": "Perdidos",
+    "gf": "Goles a favor",
+    "gc": "Goles en contra",
+    "dg": "Diferencia de gol (tal como figura en la imagen)"
+  },
+  "series": [
+    {
+      "slug": "35",
+      "nombre": "Serie Senior 35 años",
+      "tabla": [
+        { "pos": 1, "equipo": "Real Curicó", "pts": 9, "pj": 3, "g": 3, "e": 0, "p": 0, "gf": 8, "gc": 2, "dg": 6 },
+        { "pos": 2, "equipo": "Curicó Unido Amateur", "pts": 6, "pj": 2, "g": 2, "e": 0, "p": 0, "gf": 8, "gc": 0, "dg": 8 },
+        { "pos": 3, "equipo": "Andres Negrete", "pts": 6, "pj": 2, "g": 2, "e": 0, "p": 0, "gf": 4, "gc": 0, "dg": 4 },
+        { "pos": 4, "equipo": "J. Valvanera", "pts": 4, "pj": 3, "g": 1, "e": 1, "p": 1, "gf": 6, "gc": 5, "dg": 1 },
+        { "pos": 5, "equipo": "San Martin", "pts": 4, "pj": 2, "g": 1, "e": 1, "p": 0, "gf": 3, "gc": 2, "dg": 1 },
+        { "pos": 6, "equipo": "Colo Colo", "pts": 3, "pj": 2, "g": 1, "e": 0, "p": 1, "gf": 5, "gc": 4, "dg": 1 },
+        { "pos": 7, "equipo": "Patricio Gutierrez", "pts": 3, "pj": 2, "g": 1, "e": 0, "p": 1, "gf": 3, "gc": 4, "dg": -1 },
+        { "pos": 8, "equipo": "Orilla de Martinez", "pts": 2, "pj": 2, "g": 0, "e": 2, "p": 0, "gf": 2, "gc": 2, "dg": 0 },
+        { "pos": 9, "equipo": "Azul y Blanco", "pts": 2, "pj": 2, "g": 0, "e": 1, "p": 1, "gf": 1, "gc": 2, "dg": -1, "es_ayb": true },
+        { "pos": 10, "equipo": "Samuel Reyes", "pts": 1, "pj": 3, "g": 0, "e": 1, "p": 2, "gf": 2, "gc": 12, "dg": -10 },
+        { "pos": 11, "equipo": "21 de Mayo", "pts": 0, "pj": 1, "g": 0, "e": 0, "p": 1, "gf": 1, "gc": 3, "dg": -2 },
+        { "pos": 12, "equipo": "Barrio Colón", "pts": 0, "pj": 2, "g": 0, "e": 0, "p": 2, "gf": 0, "gc": 3, "dg": -3 },
+        { "pos": 13, "equipo": "J. Aguas Negras", "pts": 0, "pj": 2, "g": 0, "e": 0, "p": 2, "gf": 1, "gc": 5, "dg": -4 }
+      ]
+    },
+    {
+      "slug": "honor",
+      "nombre": "Serie Honor",
+      "tabla": [
+        { "pos": 1, "equipo": "San Martin", "pts": 7, "pj": 3, "g": 2, "e": 1, "p": 0, "gf": 6, "gc": 2, "dg": 4 },
+        { "pos": 2, "equipo": "Andres Negrete", "pts": 6, "pj": 2, "g": 2, "e": 0, "p": 0, "gf": 10, "gc": 1, "dg": 9 },
+        { "pos": 3, "equipo": "Orilla de Martinez", "pts": 6, "pj": 2, "g": 2, "e": 0, "p": 0, "gf": 5, "gc": 1, "dg": 4 },
+        { "pos": 4, "equipo": "Real Curicó", "pts": 6, "pj": 3, "g": 2, "e": 0, "p": 1, "gf": 3, "gc": 3, "dg": 0 },
+        { "pos": 5, "equipo": "J. Valvanera", "pts": 5, "pj": 3, "g": 1, "e": 2, "p": 0, "gf": 6, "gc": 2, "dg": 4 },
+        { "pos": 6, "equipo": "Samuel Reyes", "pts": 3, "pj": 3, "g": 1, "e": 0, "p": 2, "gf": 3, "gc": 7, "dg": -4 },
+        { "pos": 7, "equipo": "Luna FC", "pts": 0, "pj": 1, "g": 0, "e": 0, "p": 1, "gf": 1, "gc": 2, "dg": -1 },
+        { "pos": 8, "equipo": "Colo Colo", "pts": 0, "pj": 2, "g": 0, "e": 0, "p": 2, "gf": 0, "gc": 3, "dg": -3 },
+        { "pos": 9, "equipo": "Azul y Blanco", "pts": 0, "pj": 2, "g": 0, "e": 0, "p": 2, "gf": 1, "gc": 5, "dg": -4, "es_ayb": true },
+        { "pos": 10, "equipo": "J. Aguas Negras", "pts": 0, "pj": 2, "g": 0, "e": 0, "p": 2, "gf": 1, "gc": 7, "dg": -6 },
+        { "pos": 11, "equipo": "Gonzalo Reyes", "pts": 0, "pj": 0, "g": 0, "e": 0, "p": 0, "gf": 0, "gc": 0, "dg": -6 }
+      ]
+    },
+    {
+      "slug": "primera",
+      "nombre": "Serie Primera",
+      "tabla": [
+        { "pos": 1, "equipo": "J. Valvanera", "pts": 7, "pj": 3, "g": 2, "e": 1, "p": 0, "gf": 4, "gc": 0, "dg": 4 },
+        { "pos": 2, "equipo": "Samuel Reyes", "pts": 6, "pj": 2, "g": 2, "e": 0, "p": 0, "gf": 7, "gc": 3, "dg": 4 },
+        { "pos": 3, "equipo": "Orilla de Martinez", "pts": 6, "pj": 2, "g": 2, "e": 0, "p": 0, "gf": 4, "gc": 1, "dg": 3 },
+        { "pos": 4, "equipo": "D. Liceo", "pts": 4, "pj": 2, "g": 1, "e": 1, "p": 0, "gf": 2, "gc": 1, "dg": 1 },
+        { "pos": 5, "equipo": "21 de Mayo", "pts": 3, "pj": 1, "g": 1, "e": 0, "p": 0, "gf": 3, "gc": 0, "dg": 3 },
+        { "pos": 6, "equipo": "Colo Colo", "pts": 3, "pj": 2, "g": 1, "e": 0, "p": 1, "gf": 4, "gc": 4, "dg": 0 },
+        { "pos": 7, "equipo": "Curicó Unido Amateur", "pts": 3, "pj": 2, "g": 1, "e": 0, "p": 1, "gf": 1, "gc": 3, "dg": -2 },
+        { "pos": 8, "equipo": "Andres Negrete", "pts": 1, "pj": 1, "g": 0, "e": 0, "p": 1, "gf": 3, "gc": 4, "dg": -1 },
+        { "pos": 9, "equipo": "J. Aguas Negras", "pts": 1, "pj": 2, "g": 0, "e": 1, "p": 1, "gf": 1, "gc": 2, "dg": -1 },
+        { "pos": 10, "equipo": "Azul y Blanco", "pts": 1, "pj": 2, "g": 0, "e": 1, "p": 1, "gf": 0, "gc": 1, "dg": -1, "es_ayb": true },
+        { "pos": 11, "equipo": "San Martin", "pts": 1, "pj": 2, "g": 0, "e": 1, "p": 1, "gf": 0, "gc": 3, "dg": -3 },
+        { "pos": 12, "equipo": "Barrio Colon", "pts": 0, "pj": 2, "g": 0, "e": 0, "p": 2, "gf": 1, "gc": 3, "dg": -2 },
+        { "pos": 13, "equipo": "U de Chile", "pts": 0, "pj": 3, "g": 0, "e": 0, "p": 3, "gf": 3, "gc": 9, "dg": -6 }
+      ]
+    }
+  ],
+  "equivalencias_catalogo": {
+    "Andres Negrete": "CSD Andres Negrete",
+    "Colo Colo": "Colo-Colo",
+    "D. Liceo": "Liceo",
+    "J. Aguas Negras": "Juventud Aguas Negras",
+    "J. Valvanera": "CD Valvanera"
+  },
+  "notas": [
+    "Los datos reproducen las imágenes tal cual; no se corrigió ninguna cifra aunque sea incoherente.",
+    "Los nombres de equipo están tal como figuran en cada imagen salvo erratas evidentes ('SAN MARTN' en Serie 35 → 'San Martin'; 'J.VALVANERA' → 'J. Valvanera'). Ojo: 'Barrio Colón' (Serie 35) y 'Barrio Colon' (Primera), y 'San Martin' en las tres series, son los mismos clubes; unificar al cruzar con la tabla de equipos.",
+    "Inconsistencias detectadas en las imágenes de origen: ver 'inconsistencias'. Confirmar con ANFA antes de mostrarlas como definitivas.",
+    "Hay equipos sin PJ homogéneos (algunos con 1 partido y otros con 3 en la misma 'Fecha 23'): la numeración refleja la fecha del torneo, no partidos jugados por equipo."
+  ],
+  "inconsistencias": [
+    {
+      "serie": "35",
+      "equipo": "Azul y Blanco",
+      "detalle": "PJ 2, 0 G, 1 E, 1 P pero PTS 2 (debería ser 1)."
+    },
+    {
+      "serie": "honor",
+      "equipo": "Gonzalo Reyes",
+      "detalle": "PJ 0, GF 0, GC 0 pero DG -6 (con 0 goles el DG debería ser 0). Posible W.O. o error de la imagen."
+    },
+    {
+      "serie": "primera",
+      "equipo": "Andres Negrete",
+      "detalle": "PJ 1, 0 G, 0 E, 1 P pero PTS 1 (una derrota debería sumar 0)."
+    }
+  ]
+}

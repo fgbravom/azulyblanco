@@ -23,6 +23,7 @@ import {
 import { createPublicClient } from '@/lib/supabase/public'
 import { codigoPais, PAISES, type CodigoPais } from '@/lib/jugadores/paises'
 import { HERO_FOTOS_REPO, type HeroFotos } from '@/components/hero/hero-boot'
+import { claveEquipo } from '@/lib/data/posiciones'
 import { actividadAEvento } from './calendario'
 import type { Actividad, AlbumDB, Foto, HeroFoto, NoticiaDB, Rival, SerieInfo } from './tipos'
 
@@ -62,6 +63,16 @@ async function getRivales(): Promise<Rival[]> {
   } catch {
     return []
   }
+}
+
+/** Logo de cada rival del catálogo, por nombre normalizado (ver claveEquipo), para la tabla de posiciones. */
+export async function getEscudosRivales(): Promise<Record<string, string>> {
+  const rivales = await getRivales()
+  const escudos: Record<string, string> = {}
+  for (const r of rivales) {
+    if (r.logo_url) escudos[claveEquipo(r.nombre)] = r.logo_url
+  }
+  return escudos
 }
 
 interface FilaGol {

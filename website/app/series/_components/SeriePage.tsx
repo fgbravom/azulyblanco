@@ -1,12 +1,15 @@
 import { Header } from '@/components/layout/Header'
 import { Footer } from '@/components/layout/Footer'
 import { Card, CardContent } from '@/components/ui/card'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { getCategoriaByNombre } from '@/lib/data/equipos'
 import { getEquiposByCategoria } from '@/lib/data/equipos'
-import { getPlantelPublico, getSerieInfo, type PlantelJugador } from '@/lib/contenido/publico'
+import { getEscudosRivales, getPlantelPublico, getSerieInfo, type PlantelJugador } from '@/lib/contenido/publico'
+import { getPosicionesSerie } from '@/lib/data/posiciones'
 import { MDXRenderer } from '@/components/mdx/MDXRenderer'
 import { PlantelGrid } from './PlantelGrid'
 import { FichaPersona } from './FichaPersona'
+import { TablaPosiciones } from './TablaPosiciones'
 import type { EquipoPublico } from '@/types/database'
 import Image from 'next/image'
 import { CalendarClock, MapPin, Trophy } from 'lucide-react'
@@ -32,6 +35,9 @@ export default async function SeriePage({ slug, categoriaNombre, titulo: tituloB
   const info = await getSerieInfo(slug)
   const titulo = info?.titulo || tituloBase
   const descripcion = info?.descripcion || descripcionBase
+  // Tabla del Campeonato ANFA transcrita desde la imagen oficial (sin base de datos)
+  const tablaPosiciones = getPosicionesSerie(slug)
+  const escudos = tablaPosiciones ? await getEscudosRivales() : {}
   const datos = [
     { icono: Trophy, etiqueta: 'Competencia', valor: info?.competencia },
     { icono: CalendarClock, etiqueta: 'Entrenamientos', valor: info?.horario_entrenamiento },
@@ -107,45 +113,67 @@ export default async function SeriePage({ slug, categoriaNombre, titulo: tituloB
           </section>
         )}
 
-        {/* Plantel */}
-        <section className="py-16 px-4">
-          <div className="container mx-auto max-w-6xl">
-            <h2 className="text-3xl font-bold mb-10 text-center text-azul-primario">Plantel</h2>
-
-            {jugadores.length === 0 ? (
-              <Card>
-                <CardContent className="p-12 text-center text-gray-500">
-                  <p className="text-lg">El plantel se publicará próximamente.</p>
-                </CardContent>
-              </Card>
-            ) : (
-              <PlantelGrid jugadores={jugadores} />
-            )}
-          </div>
-        </section>
-
-        {/* Cuerpo Técnico */}
-        {cuerpoTecnico.length > 0 && (
-          <section className="py-16 px-4 bg-gray-50">
-            <div className="container mx-auto max-w-6xl">
-              <h2 className="text-3xl font-bold mb-10 text-center text-azul-primario">Cuerpo Técnico</h2>
-              {/* Mismo ancho que las columnas del plantel, pero centradas */}
-              <div className="flex flex-wrap justify-center gap-4 md:gap-6">
-                {cuerpoTecnico.map(({ nombre, foto, cargo }) => {
-                  const partes = separarNombre(nombre)
-                  return (
-                    <div
-                      key={cargo}
-                      className="w-[calc(50%-0.5rem)] sm:w-[calc((100%-2rem)/3)] md:w-[calc((100%-3rem)/3)] lg:w-[calc((100%-4.5rem)/4)]"
-                    >
-                      <FichaPersona foto={foto} alt={nombre} {...partes} detalle={cargo} />
-                    </div>
-                  )
-                })}
-              </div>
+        {/* Plantel, cuerpo técnico y tabla de posiciones (la pestaña de tabla solo existe si hay tabla publicada) */}
+        <Tabs defaultValue="plantel">
+          {tablaPosiciones && (
+            <div className="px-4 pt-10 flex justify-center">
+              <TabsList>
+                <TabsTrigger value="plantel">Plantel</TabsTrigger>
+                <TabsTrigger value="posiciones">Tabla de posiciones</TabsTrigger>
+              </TabsList>
             </div>
-          </section>
-        )}
+          )}
+
+          <TabsContent value="plantel" className="mt-0">
+            <section className="py-16 px-4">
+              <div className="container mx-auto max-w-6xl">
+                <h2 className="text-3xl font-bold mb-10 text-center text-azul-primario">Plantel</h2>
+
+                {jugadores.length === 0 ? (
+                  <Card>
+                    <CardContent className="p-12 text-center text-gray-500">
+                      <p className="text-lg">El plantel se publicará próximamente.</p>
+                    </CardContent>
+                  </Card>
+                ) : (
+                  <PlantelGrid jugadores={jugadores} />
+                )}
+              </div>
+            </section>
+
+            {cuerpoTecnico.length > 0 && (
+              <section className="py-16 px-4 bg-gray-50">
+                <div className="container mx-auto max-w-6xl">
+                  <h2 className="text-3xl font-bold mb-10 text-center text-azul-primario">Cuerpo Técnico</h2>
+                  {/* Mismo ancho que las columnas del plantel, pero centradas */}
+                  <div className="flex flex-wrap justify-center gap-4 md:gap-6">
+                    {cuerpoTecnico.map(({ nombre, foto, cargo }) => {
+                      const partes = separarNombre(nombre)
+                      return (
+                        <div
+                          key={cargo}
+                          className="w-[calc(50%-0.5rem)] sm:w-[calc((100%-2rem)/3)] md:w-[calc((100%-3rem)/3)] lg:w-[calc((100%-4.5rem)/4)]"
+                        >
+                          <FichaPersona foto={foto} alt={nombre} {...partes} detalle={cargo} />
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              </section>
+            )}
+          </TabsContent>
+
+          {tablaPosiciones && (
+            <TabsContent value="posiciones" className="mt-0">
+              <section className="py-16 px-4">
+                <div className="container mx-auto max-w-4xl">
+                  <TablaPosiciones tabla={tablaPosiciones} escudos={escudos} />
+                </div>
+              </section>
+            </TabsContent>
+          )}
+        </Tabs>
       </main>
       <Footer />
     </>
