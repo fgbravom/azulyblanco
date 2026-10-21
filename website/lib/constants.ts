@@ -1,3 +1,8 @@
+// Tablas publicadas del Campeonato ANFA: la sección "Tabla de posiciones" solo
+// se lista si la serie tiene tabla (misma regla que SeriePage). Se lee el JSON
+// crudo para no arrastrar zod al bundle del cliente, que importa este módulo
+import posicionesDatos from './data/posiciones.json'
+
 export const SITE_CONFIG = {
   name: 'Azul y Blanco',
   description:
@@ -31,7 +36,33 @@ export const SITE_CONFIG = {
   },
 }
 
-export const NAVIGATION_ITEMS = [
+export interface NavItem {
+  title: string
+  href: string
+  submenu?: NavItem[]
+}
+
+// Cada serie despliega sus secciones; la página de la serie abre la pestaña que
+// corresponde (ver PestanasSerie). La serie misma se alcanza por "Plantel", su
+// pestaña por defecto
+const SUBMENUS_SERIES: NavItem[] = (
+  [
+    { slug: 'primera', title: 'SERIE PRIMERA' },
+    { slug: 'honor', title: 'SERIE HONOR' },
+    { slug: '35', title: 'SERIE 35' },
+  ] as const
+).map(({ slug, title }) => ({
+  title,
+  href: `/series/${slug}`,
+  submenu: [
+    { title: 'PLANTEL', href: `/series/${slug}` },
+    ...(posicionesDatos.series.some((serie) => serie.slug === slug)
+      ? [{ title: 'TABLA DE POSICIONES', href: `/series/${slug}?tab=posiciones` }]
+      : []),
+  ],
+}))
+
+export const NAVIGATION_ITEMS: NavItem[] = [
   {
     title: 'CLUB',
     href: '/club/historia',
@@ -44,11 +75,7 @@ export const NAVIGATION_ITEMS = [
   {
     title: 'SERIES',
     href: '/series/primera',
-    submenu: [
-      { title: 'SERIE PRIMERA', href: '/series/primera' },
-      { title: 'SERIE HONOR', href: '/series/honor' },
-      { title: 'SERIE 35', href: '/series/35' },
-    ],
+    submenu: SUBMENUS_SERIES,
   },
   {
     title: 'NOTICIAS',

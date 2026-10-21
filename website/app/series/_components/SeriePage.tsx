@@ -1,13 +1,14 @@
 import { Header } from '@/components/layout/Header'
 import { Footer } from '@/components/layout/Footer'
 import { Card, CardContent } from '@/components/ui/card'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { getCategoriaByNombre } from '@/lib/data/equipos'
 import { getEquiposByCategoria } from '@/lib/data/equipos'
 import { getEscudosRivales, getPlantelPublico, getSerieInfo, type PlantelJugador } from '@/lib/contenido/publico'
 import { getPosicionesSerie } from '@/lib/data/posiciones'
 import { MDXRenderer } from '@/components/mdx/MDXRenderer'
 import { PlantelGrid } from './PlantelGrid'
+import { PestanasSerie } from './PestanasSerie'
 import { FichaPersona } from './FichaPersona'
 import { TablaPosiciones } from './TablaPosiciones'
 import type { EquipoPublico } from '@/types/database'
@@ -114,7 +115,7 @@ export default async function SeriePage({ slug, categoriaNombre, titulo: tituloB
         )}
 
         {/* Plantel, cuerpo técnico y tabla de posiciones (la pestaña de tabla solo existe si hay tabla publicada) */}
-        <Tabs defaultValue="plantel">
+        <PestanasSerie tieneTabla={!!tablaPosiciones}>
           {tablaPosiciones && (
             <div className="px-4 pt-10 flex justify-center">
               <TabsList>
@@ -173,7 +174,7 @@ export default async function SeriePage({ slug, categoriaNombre, titulo: tituloB
               </section>
             </TabsContent>
           )}
-        </Tabs>
+        </PestanasSerie>
       </main>
       <Footer />
     </>

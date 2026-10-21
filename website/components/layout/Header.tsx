@@ -9,6 +9,9 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { ChevronDown, LogIn } from 'lucide-react'
@@ -24,6 +27,8 @@ const suscribirNada = () => () => {}
 export function Header({ isHome = false, hideInitially = false }: HeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [openSubmenu, setOpenSubmenu] = useState<string | null>(null)
+  // Serie desplegada dentro del menú móvil (SERIES → serie → secciones)
+  const [openSerie, setOpenSerie] = useState<string | null>(null)
   const [openDesktopMenu, setOpenDesktopMenu] = useState<string | null>(null)
   // false en el servidor y en la hidratación, true ya montado en el cliente
   const mounted = useSyncExternalStore(suscribirNada, () => true, () => false)
@@ -114,15 +119,37 @@ export function Header({ isHome = false, hideInitially = false }: HeaderProps) {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="start" className="min-w-[180px] bg-azul-primario border-0 p-0 overflow-hidden">
                       {item.submenu.map((subitem) => (
-                        <DropdownMenuItem key={subitem.href} asChild className="focus:bg-white focus:text-azul-primario p-0 m-0 rounded-none">
-                          <Link
-                            href={subitem.href}
-                            className="w-full cursor-pointer text-white hover:text-azul-primario hover:bg-white transition-colors px-4 py-2.5 block"
-                            onClick={() => setOpenDesktopMenu(null)}
-                          >
-                            {subitem.title}
-                          </Link>
-                        </DropdownMenuItem>
+                        subitem.submenu ? (
+                          // Serie con secciones: submenú lateral con Plantel y Tabla de posiciones
+                          <DropdownMenuSub key={subitem.href}>
+                            <DropdownMenuSubTrigger className="cursor-pointer rounded-none px-4 py-2.5 text-white hover:bg-white hover:text-azul-primario focus:bg-white focus:text-azul-primario data-[state=open]:bg-white data-[state=open]:text-azul-primario">
+                              {subitem.title}
+                            </DropdownMenuSubTrigger>
+                            <DropdownMenuSubContent className="min-w-[180px] bg-azul-primario border-0 p-0 overflow-hidden">
+                              {subitem.submenu.map((seccion) => (
+                                <DropdownMenuItem key={seccion.href} asChild className="focus:bg-white focus:text-azul-primario p-0 m-0 rounded-none">
+                                  <Link
+                                    href={seccion.href}
+                                    className="w-full cursor-pointer text-white hover:text-azul-primario hover:bg-white transition-colors px-4 py-2.5 block"
+                                    onClick={() => setOpenDesktopMenu(null)}
+                                  >
+                                    {seccion.title}
+                                  </Link>
+                                </DropdownMenuItem>
+                              ))}
+                            </DropdownMenuSubContent>
+                          </DropdownMenuSub>
+                        ) : (
+                          <DropdownMenuItem key={subitem.href} asChild className="focus:bg-white focus:text-azul-primario p-0 m-0 rounded-none">
+                            <Link
+                              href={subitem.href}
+                              className="w-full cursor-pointer text-white hover:text-azul-primario hover:bg-white transition-colors px-4 py-2.5 block"
+                              onClick={() => setOpenDesktopMenu(null)}
+                            >
+                              {subitem.title}
+                            </Link>
+                          </DropdownMenuItem>
+                        )
                       ))}
                     </DropdownMenuContent>
                   </DropdownMenu>
@@ -210,7 +237,10 @@ export function Header({ isHome = false, hideInitially = false }: HeaderProps) {
             item.submenu ? (
               <div key={item.href}>
                 <button
-                  onClick={() => setOpenSubmenu(openSubmenu === item.title ? null : item.title)}
+                  onClick={() => {
+                    if (openSubmenu === item.title) setOpenSerie(null)
+                    setOpenSubmenu(openSubmenu === item.title ? null : item.title)
+                  }}
                   className="w-[60%] flex items-center justify-between text-xl font-semibold text-azul-primario hover:text-azul-claro transition-colors py-3"
                 >
                   {item.title}
@@ -223,17 +253,52 @@ export function Header({ isHome = false, hideInitially = false }: HeaderProps) {
                 {openSubmenu === item.title && (
                   <div className="ml-6 mt-3 flex flex-col gap-3 w-[60%]">
                     {item.submenu.map((subitem) => (
-                      <Link
-                        key={subitem.href}
-                        href={subitem.href}
-                        className="text-lg font-medium text-azul-primario/80 hover:text-azul-claro transition-colors py-2"
-                        onClick={() => {
-                          setMobileMenuOpen(false)
-                          setOpenSubmenu(null)
-                        }}
-                      >
-                        {subitem.title}
-                      </Link>
+                      subitem.submenu ? (
+                        // Serie con secciones: Plantel y Tabla de posiciones
+                        <div key={subitem.href}>
+                          <button
+                            onClick={() => setOpenSerie(openSerie === subitem.title ? null : subitem.title)}
+                            className="w-full flex items-center justify-between text-lg font-medium text-azul-primario/80 hover:text-azul-claro transition-colors py-2"
+                          >
+                            {subitem.title}
+                            <ChevronDown
+                              className={`h-4 w-4 transition-transform ${
+                                openSerie === subitem.title ? 'rotate-180' : ''
+                              }`}
+                            />
+                          </button>
+                          {openSerie === subitem.title && (
+                            <div className="ml-5 mt-1 flex flex-col gap-1">
+                              {subitem.submenu.map((seccion) => (
+                                <Link
+                                  key={seccion.href}
+                                  href={seccion.href}
+                                  className="text-base font-medium text-azul-primario/70 hover:text-azul-claro transition-colors py-1.5"
+                                  onClick={() => {
+                                    setMobileMenuOpen(false)
+                                    setOpenSubmenu(null)
+                                    setOpenSerie(null)
+                                  }}
+                                >
+                                  {seccion.title}
+                                </Link>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <Link
+                          key={subitem.href}
+                          href={subitem.href}
+                          className="text-lg font-medium text-azul-primario/80 hover:text-azul-claro transition-colors py-2"
+                          onClick={() => {
+                            setMobileMenuOpen(false)
+                            setOpenSubmenu(null)
+                          }}
+                        >
+                          {subitem.title}
+                        </Link>
+                      )
                     ))}
                   </div>
                 )}
