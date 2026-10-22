@@ -6,6 +6,8 @@ interface FichaPersonaProps {
   alt: string
   nombre: string
   apellidos: string
+  /** Encuadre de la foto (object-position); sin ajuste, se muestra desde arriba */
+  foco?: string
   // Línea azul bajo el nombre: posiciones del jugador o cargo del técnico
   detalle?: string
   // Va a la derecha del detalle (la bandera del jugador)
@@ -14,7 +16,7 @@ interface FichaPersonaProps {
   children?: ReactNode
 }
 
-export function FichaPersona({ foto, alt, nombre, apellidos, detalle, marca, children }: FichaPersonaProps) {
+export function FichaPersona({ foto, alt, nombre, apellidos, foco, detalle, marca, children }: FichaPersonaProps) {
   return (
     <article className="group relative aspect-[3/4] rounded-2xl overflow-hidden bg-gradient-to-b from-azul-claro to-azul-primario shadow-sm hover:shadow-xl transition-shadow">
       {foto ? (
@@ -24,6 +26,7 @@ export function FichaPersona({ foto, alt, nombre, apellidos, detalle, marca, chi
           fill
           sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw"
           className="object-cover object-top transition-transform duration-500 group-hover:scale-105"
+          style={{ objectPosition: foco }}
         />
       ) : (
         <Image

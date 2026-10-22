@@ -12,6 +12,7 @@ import { PestanasSerie } from './PestanasSerie'
 import { FichaPersona } from './FichaPersona'
 import { TablaPosiciones } from './TablaPosiciones'
 import type { EquipoPublico } from '@/types/database'
+import { posicionCSS } from '@/lib/contenido/foco'
 import Image from 'next/image'
 import { CalendarClock, MapPin, Trophy } from 'lucide-react'
 
@@ -65,10 +66,10 @@ export default async function SeriePage({ slug, categoriaNombre, titulo: tituloB
 
   const cuerpoTecnico = equipo
     ? [
-        { nombre: equipo.entrenador, foto: equipo.entrenador_foto_url, cargo: 'Director Técnico' },
-        { nombre: equipo.asistente_tecnico, foto: equipo.asistente_tecnico_foto_url, cargo: 'Asistente Técnico' },
-        { nombre: equipo.preparador_fisico, foto: equipo.preparador_fisico_foto_url, cargo: 'Preparador Físico' },
-      ].filter((m): m is { nombre: string; foto: string | null; cargo: string } => !!m.nombre)
+        { nombre: equipo.entrenador, foto: equipo.entrenador_foto_url, foco: posicionCSS({ x: equipo.entrenador_foco_x, y: equipo.entrenador_foco_y }), cargo: 'Director Técnico' },
+        { nombre: equipo.asistente_tecnico, foto: equipo.asistente_tecnico_foto_url, foco: posicionCSS({ x: equipo.asistente_tecnico_foco_x, y: equipo.asistente_tecnico_foco_y }), cargo: 'Asistente Técnico' },
+        { nombre: equipo.preparador_fisico, foto: equipo.preparador_fisico_foto_url, foco: posicionCSS({ x: equipo.preparador_fisico_foco_x, y: equipo.preparador_fisico_foco_y }), cargo: 'Preparador Físico' },
+      ].filter((m): m is { nombre: string; foto: string | null; foco: string | undefined; cargo: string } => !!m.nombre)
     : []
 
   return (
@@ -148,14 +149,14 @@ export default async function SeriePage({ slug, categoriaNombre, titulo: tituloB
                   <h2 className="text-3xl font-bold mb-10 text-center text-azul-primario">Cuerpo Técnico</h2>
                   {/* Mismo ancho que las columnas del plantel, pero centradas */}
                   <div className="flex flex-wrap justify-center gap-4 md:gap-6">
-                    {cuerpoTecnico.map(({ nombre, foto, cargo }) => {
+                    {cuerpoTecnico.map(({ nombre, foto, foco, cargo }) => {
                       const partes = separarNombre(nombre)
                       return (
                         <div
                           key={cargo}
                           className="w-[calc(50%-0.5rem)] sm:w-[calc((100%-2rem)/3)] md:w-[calc((100%-3rem)/3)] lg:w-[calc((100%-4.5rem)/4)]"
                         >
-                          <FichaPersona foto={foto} alt={nombre} {...partes} detalle={cargo} />
+                          <FichaPersona foto={foto} alt={nombre} {...partes} foco={foco} detalle={cargo} />
                         </div>
                       )
                     })}

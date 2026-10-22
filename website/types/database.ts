@@ -77,6 +77,13 @@ export interface Equipo {
   entrenador_foto_url: string | null;
   asistente_tecnico_foto_url: string | null;
   preparador_fisico_foto_url: string | null;
+  /** Encuadre de cada foto, de 0 a 100 por eje (migración 018); null = sin ajustar */
+  entrenador_foco_x: number | null;
+  entrenador_foco_y: number | null;
+  asistente_tecnico_foco_x: number | null;
+  asistente_tecnico_foco_y: number | null;
+  preparador_fisico_foco_x: number | null;
+  preparador_fisico_foco_y: number | null;
   /** Cuota mensual y datos de transferencia (migración 004) */
   cuota_monto: number;
   cuota_datos_pago: string | null;
@@ -119,6 +126,9 @@ export interface Jugador {
   nacionalidad: string;
   dni: string | null;
   foto_url: string | null;
+  /** Encuadre de la foto, de 0 a 100 por eje (migración 018); null = sin ajustar */
+  foto_foco_x: number | null;
+  foto_foco_y: number | null;
 
   // Información deportiva
   equipo_id: number;
@@ -168,6 +178,8 @@ export interface JugadorInsert {
   nacionalidad?: string;
   dni?: string;
   foto_url?: string;
+  foto_foco_x?: number | null;
+  foto_foco_y?: number | null;
 
   // Información deportiva
   dorsal?: number;
@@ -201,6 +213,8 @@ export interface JugadorUpdate {
   nacionalidad?: string;
   dni?: string;
   foto_url?: string;
+  foto_foco_x?: number | null;
+  foto_foco_y?: number | null;
   equipo_id?: number;
   posicion_id?: number;
   dorsal?: number;

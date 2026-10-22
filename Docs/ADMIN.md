@@ -163,13 +163,17 @@ El sitio público muestra el lugar tal como se escribe en la actividad, y en la 
 
 **Migración 016.** Crea `estadios` (con lectura pública por RLS; la escritura es solo `service_role`), agrega `programacion.estadio_id` y siembra los lugares que ya aparecen en las programaciones. **Debe aplicarse en producción antes de desplegar el código** (`npm run db:push`, con autorización): guardar una actividad ya manda `estadio_id` y falla sin la columna.
 
-## Encuadre de la portada de noticias
+## Encuadre de las fotos
 
-Al editar una noticia, el panel «Portada» permite mover la foto dentro de dos marcos con la proporción real del artículo (16/9) y de las tarjetas del inicio (3/4). Se arrastra la foto con el mouse o el dedo (con el teclado, las flechas) para elegir qué parte se ve, y «Centrar» la devuelve al medio. Los marcos muestran el recorte tal como quedará en el sitio, y cambian al instante.
+El admin deja mover una foto dentro de marcos con la proporción real de cada lugar donde se muestra: se arrastra la foto con el mouse o el dedo (con el teclado, las flechas) para elegir qué parte se ve, y los marcos cambian al instante. En un eje donde la foto no sobra el marco no hay nada que mover, así que ahí arrastrarla no cambia nada.
 
-El encuadre se guarda como un punto de 0 a 100 en cada eje (`noticias.portada_foco_x/y`, ver `lib/contenido/foco.ts`) y se aplica como `object-position` en el artículo, el listado de noticias, las tarjetas del inicio y el listado del admin. En un eje donde la foto no sobra el marco no hay nada que mover, así que ahí arrastrarla no cambia nada.
+**Portada de noticia** (panel «Portada» del editor): los marcos son el artículo (16/9) y las tarjetas del inicio (3/4), y «Centrar» devuelve la foto al medio. El encuadre se guarda como un punto de 0 a 100 en cada eje (`noticias.portada_foco_x/y`, ver `lib/contenido/foco.ts`) y se aplica como `object-position` en el artículo, el listado de noticias, las tarjetas del inicio y el listado del admin.
+
+**Fotos del plantel y del cuerpo técnico** (formulario del jugador y panel «Cuerpo técnico» de cada serie): los marcos son la ficha de la serie (3/4) y el avatar redondo del admin. El encuadre se guarda en `jugadores.foto_foco_x/y` y en `equipos.<cargo>_foco_x/y`, y se aplica en las fichas de las series y en los avatares del admin. Estas fotos **pueden quedar sin ajustar** (columnas anulables): mientras nadie mueva la foto, cada lugar muestra su recorte de siempre (la ficha de la serie desde arriba, los avatares al centro). «Quitar ajuste» vuelve a eso, y cambiar la foto también.
 
 **Migración 017.** Agrega `portada_foco_x` y `portada_foco_y` a `noticias`, con `DEFAULT 50`: las portadas ya guardadas quedan recortadas como hasta ahora. **Debe aplicarse en producción antes de desplegar el código** (`npm run db:push`, con autorización): sin ella, guardar una noticia falla porque el formulario ya manda el encuadre.
+
+**Migración 018.** Agrega `foto_foco_x/y` a `jugadores` y seis columnas de encuadre a `equipos` (una por foto del cuerpo técnico), con permiso de lectura por columna para la clave pública, y recrea `vista_jugadores_completa` y `vista_plantel_publico` (como en la migración 004) para exponer el encuadre. **Debe aplicarse en producción antes de desplegar el código** (`npm run db:push`, con autorización): sin ella, guardar un jugador falla y las series se quedan sin plantel, porque la vista ya no coincide con lo que el sitio le pide.
 
 ## Seguridad
 

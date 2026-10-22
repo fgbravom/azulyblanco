@@ -13,9 +13,15 @@ import { BarraAcciones, Campo, EstadoBadge, Interruptor, PageHeader, Panel, inpu
 import AvisoDespublicacion from './AvisoDespublicacion';
 import MotivoDespublicacion from './MotivoDespublicacion';
 import SelectorImagen from '@/components/admin/medios/SelectorImagen';
+import Encuadre, { type MarcoEncuadre } from '@/components/admin/medios/Encuadre';
 import EditorMarkdown from '@/components/admin/editor/EditorMarkdown';
-import AjustePortada from './AjustePortada';
 import { FOCO_CENTRO, posicionCSS } from '@/lib/contenido/foco';
+
+/** Lugares donde se recorta la portada de una noticia, con su proporción real */
+const MARCOS_PORTADA: MarcoEncuadre[] = [
+  { etiqueta: 'En el artículo', clase: 'aspect-video rounded-lg' },
+  { etiqueta: 'En las tarjetas del inicio', clase: 'aspect-[3/4] rounded-lg', ancho: 'w-28' },
+];
 
 function desdeNoticia(n: NoticiaDB | null): NoticiaInput {
   if (n) {
@@ -221,13 +227,14 @@ export default function NoticiaEditor({ noticia, redactores, rol = 'admin', nomb
               }}
             />
             {datos.portada_url && (
-              <AjustePortada
+              <Encuadre
                 url={datos.portada_url}
                 foco={{ x: datos.portada_foco_x, y: datos.portada_foco_y }}
                 onChange={(foco) => {
                   set('portada_foco_x', foco.x);
                   set('portada_foco_y', foco.y);
                 }}
+                marcos={MARCOS_PORTADA}
               />
             )}
           </Panel>

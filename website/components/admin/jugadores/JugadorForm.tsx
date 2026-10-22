@@ -23,9 +23,17 @@ import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { BarraAcciones } from '@/components/admin/ui';
 import SelectorImagen from '@/components/admin/medios/SelectorImagen';
+import Encuadre, { type MarcoEncuadre } from '@/components/admin/medios/Encuadre';
+import { focoDe, FOCO_ARRIBA, posicionCSS } from '@/lib/contenido/foco';
 
 /** Campo numérico opcional: vacío se guarda como null (valueAsNumber daba NaN y la validación fallaba) */
 const numeroOpcional = (valor: unknown) => (valor === '' || valor == null ? null : Number(valor));
+
+/** Lugares donde se recorta la foto del jugador, con su proporción real */
+const MARCOS_FOTO: MarcoEncuadre[] = [
+  { etiqueta: 'En la ficha de la serie', clase: 'aspect-[3/4] rounded-2xl', defecto: FOCO_ARRIBA },
+  { etiqueta: 'Avatar', clase: 'aspect-square rounded-full', ancho: 'w-24' },
+];
 
 interface Props {
   jugador: JugadorCompleto | null;
@@ -59,6 +67,8 @@ export default function JugadorForm({ jugador, onSave, onCancel }: Props) {
           nacionalidad: nombrePais(jugador.nacionalidad) ?? 'Chile',
           dni: jugador.dni,
           foto_url: jugador.foto_url,
+          foto_foco_x: jugador.foto_foco_x,
+          foto_foco_y: jugador.foto_foco_y,
           altura_cm: jugador.altura_cm,
           peso_kg: jugador.peso_kg,
           pie_preferido: jugador.pie_preferido,
@@ -152,6 +162,21 @@ export default function JugadorForm({ jugador, onSave, onCancel }: Props) {
     }
   }, [errors]);
 
+  // Encuadre de la foto: null es "sin ajustar" y cada lugar usa su recorte automático
+  const fotoUrl = watch('foto_url') || null;
+  const foto = focoDe(watch('foto_foco_x'), watch('foto_foco_y'));
+
+  const setFoco = (foco: { x: number; y: number } | null) => {
+    setValue('foto_foco_x', foco?.x ?? null, { shouldDirty: true });
+    setValue('foto_foco_y', foco?.y ?? null, { shouldDirty: true });
+  };
+
+  const setFoto = (url: string | null) => {
+    setValue('foto_url', url ?? '', { shouldValidate: true, shouldDirty: true });
+    // Una foto nueva vuelve al recorte automático
+    setFoco(null);
+  };
+
   if (loadingData) {
     return (
       <div className="flex justify-center py-12">
@@ -223,9 +248,11 @@ export default function JugadorForm({ jugador, onSave, onCancel }: Props) {
               <SelectorImagen
                 aspecto="cuadrado"
                 className="mt-1.5"
+                posicion={posicionCSS(foto)}
                 value={watch('foto_url')}
-                onChange={(url) => setValue('foto_url', url ?? '', { shouldValidate: true, shouldDirty: true })}
+                onChange={setFoto}
               />
+              {fotoUrl && <Encuadre url={fotoUrl} foco={foto} onChange={setFoco} onQuitar={() => setFoco(null)} marcos={MARCOS_FOTO} />}
               {errors.foto_url && (
                 <p className="text-sm text-red-500 mt-1">{errors.foto_url.message}</p>
               )}

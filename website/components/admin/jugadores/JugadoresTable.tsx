@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Edit, Trash2, Loader2, Eye } from 'lucide-react';
 import { MenuAcciones } from '@/components/admin/ui';
 import type { JugadorCompleto } from '@/types/database';
+import { posicionCSS } from '@/lib/contenido/foco';
 
 interface Props {
   jugadores: JugadorCompleto[];
@@ -73,6 +74,7 @@ export default function JugadoresTable({ jugadores, loading, onView, onEdit, onD
                   src={jugador.foto_url}
                   alt={jugador.nombre_completo}
                   className="h-12 w-12 shrink-0 rounded-full border-2 border-azul-primario/20 object-cover"
+                  style={{ objectPosition: posicionCSS({ x: jugador.foto_foco_x, y: jugador.foto_foco_y }) }}
                 />
               ) : (
                 <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-gray-100 font-mono font-bold text-gray-700">
@@ -125,6 +127,7 @@ export default function JugadoresTable({ jugadores, loading, onView, onEdit, onD
                     src={jugador.foto_url}
                     alt={jugador.nombre_completo}
                     className="w-10 h-10 rounded-full object-cover border-2 border-azul-primario/20 mx-auto"
+                    style={{ objectPosition: posicionCSS({ x: jugador.foto_foco_x, y: jugador.foto_foco_y }) }}
                   />
                 ) : (
                   <span className="font-mono font-bold">{jugador.dorsal || '-'}</span>

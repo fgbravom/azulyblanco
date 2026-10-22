@@ -12,9 +12,17 @@ export interface FocoPortada {
 /** Encuadre sin ajustar: el centro de la foto */
 export const FOCO_CENTRO: FocoPortada = { x: 50, y: 50 }
 
+/** Recorte automático de las fichas de persona (object-top): desde arriba */
+export const FOCO_ARRIBA: FocoPortada = { x: 50, y: 0 }
+
+/** Encuadre guardado en la base, o null si la foto está sin ajustar */
+export function focoDe(x: number | null | undefined, y: number | null | undefined): FocoPortada | null {
+  return typeof x === 'number' && typeof y === 'number' ? { x, y } : null
+}
+
 /** Valor de object-position para el encuadre, p. ej. "35% 80%".
- *  Undefined si no hay encuadre (una fila anterior a la migración 017). */
-export function posicionCSS(foco: Partial<FocoPortada> | null | undefined): string | undefined {
+ *  Undefined si no hay encuadre (una foto sin ajustar o una fila anterior a la migración). */
+export function posicionCSS(foco: { x?: number | null; y?: number | null } | null | undefined): string | undefined {
   if (typeof foco?.x !== 'number' || typeof foco?.y !== 'number') return undefined
   return `${foco.x}% ${foco.y}%`
 }

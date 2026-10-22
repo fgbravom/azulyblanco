@@ -15,6 +15,9 @@ export const jugadorSchema = z.object({
   nacionalidad: z.enum(NACIONALIDADES).optional().nullable(),
   dni: z.string().optional().nullable(),
   foto_url: z.url({ protocol: /^https?$/, error: 'Debe ser una URL válida' }).optional().nullable().or(z.literal('')),
+  /** Encuadre de la foto, de 0 a 100 por eje; null o ausente = sin ajustar */
+  foto_foco_x: z.number().int('El encuadre debe ser un número entero').min(0, 'El encuadre debe estar entre 0 y 100').max(100, 'El encuadre debe estar entre 0 y 100').optional().nullable(),
+  foto_foco_y: z.number().int('El encuadre debe ser un número entero').min(0, 'El encuadre debe estar entre 0 y 100').max(100, 'El encuadre debe estar entre 0 y 100').optional().nullable(),
 
   // Información deportiva
   dorsal: z.number().int().min(1).max(99).optional().nullable(),

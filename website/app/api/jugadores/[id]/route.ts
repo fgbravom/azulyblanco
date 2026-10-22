@@ -114,6 +114,8 @@ export async function PATCH(
       nacionalidad: body.nacionalidad,
       dni: body.dni,
       foto_url: body.foto_url,
+      foto_foco_x: body.foto_foco_x,
+      foto_foco_y: body.foto_foco_y,
       equipo_id: body.equipo_id,
       posicion_id: posicionesIds?.[0] ?? body.posicion_id,
       dorsal: body.dorsal,

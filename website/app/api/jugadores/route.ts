@@ -117,6 +117,8 @@ export async function POST(request: NextRequest) {
       nacionalidad: body.nacionalidad,
       dni: body.dni,
       foto_url: body.foto_url,
+      foto_foco_x: body.foto_foco_x ?? null,
+      foto_foco_y: body.foto_foco_y ?? null,
       dorsal: body.dorsal,
       altura_cm: body.altura_cm,
       peso_kg: body.peso_kg,

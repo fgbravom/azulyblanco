@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import type { JugadorCompleto } from '@/types/database';
 import { codigoPais } from '@/lib/jugadores/paises';
+import { posicionCSS } from '@/lib/contenido/foco';
 import Bandera from '@/components/ui/bandera';
 import { User, Shield, Mail, Heart, Calendar, MapPin, Phone } from 'lucide-react';
 
@@ -72,6 +73,7 @@ export default function JugadorFicha({ jugador, open, onClose }: Props) {
                 src={jugador.foto_url}
                 alt={jugador.nombre_completo}
                 className="h-16 w-16 shrink-0 rounded-full object-cover border-4 sm:h-24 sm:w-24 border-azul-primario"
+                style={{ objectPosition: posicionCSS({ x: jugador.foto_foco_x, y: jugador.foto_foco_y }) }}
               />
             )}
           </div>

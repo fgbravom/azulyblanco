@@ -2,7 +2,7 @@ import { revalidatePath } from 'next/cache'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { revalidarSitio } from '@/lib/admin/revalidar'
 import { parseTags, slugify } from '@/lib/admin/slug'
-import { arrastrarFoco, desbordeImagen, FOCO_CENTRO, posicionCSS } from '@/lib/contenido/foco'
+import { arrastrarFoco, desbordeImagen, focoDe, FOCO_CENTRO, posicionCSS } from '@/lib/contenido/foco'
 import { jugadorSchema, parsePosiciones } from '@/lib/validations/jugador'
 
 describe('slugify', () => {
@@ -54,6 +54,8 @@ describe('jugadorSchema', () => {
     ['dorsal 100', { dorsal: 100 }],
     ['email inválido', { email: 'no-es-email' }],
     ['foto que no es URL', { foto_url: 'javascript:alert(1)' }],
+    ['encuadre de la foto fuera de rango', { foto_foco_x: 101 }],
+    ['encuadre de la foto con decimales', { foto_foco_y: 12.5 }],
     ['estado desconocido', { estado: 'Retirado' }],
     ['nacionalidad fuera del listado', { nacionalidad: 'España' }],
   ])('rechaza %s', (_caso, cambio) => {
@@ -63,9 +65,20 @@ describe('jugadorSchema', () => {
   it('permite dejar email y foto vacíos', () => {
     expect(jugadorSchema.safeParse({ ...VALIDO, email: '', foto_url: '' }).success).toBe(true)
   })
+
+  it('permite la foto sin ajustar y con encuadre', () => {
+    expect(jugadorSchema.safeParse({ ...VALIDO, foto_foco_x: null, foto_foco_y: null }).success).toBe(true)
+    expect(jugadorSchema.safeParse({ ...VALIDO, foto_foco_x: 30, foto_foco_y: 70 }).success).toBe(true)
+  })
 })
 
-describe('encuadre de la portada', () => {
+describe('encuadre de las fotos', () => {
+  it('focoDe junta el encuadre guardado, o null si la foto está sin ajustar', () => {
+    expect(focoDe(30, 70)).toEqual({ x: 30, y: 70 })
+    expect(focoDe(30, null)).toBeNull()
+    expect(focoDe(undefined, undefined)).toBeNull()
+  })
+
   it('posicionCSS arma el object-position y respeta una fila sin encuadre', () => {
     expect(posicionCSS({ x: 30, y: 70 })).toBe('30% 70%')
     expect(posicionCSS(FOCO_CENTRO)).toBe('50% 50%')

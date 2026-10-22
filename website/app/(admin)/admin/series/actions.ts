@@ -23,6 +23,15 @@ const opcional = z
 
 const urlImagen = z.url({ protocol: /^https?$/ }).nullable()
 
+// Encuadre de la foto, de 0 a 100 por eje; null o ausente = sin ajustar
+const foco = z
+  .number()
+  .int('El encuadre debe ser un número entero')
+  .min(0, 'El encuadre debe estar entre 0 y 100')
+  .max(100, 'El encuadre debe estar entre 0 y 100')
+  .nullable()
+  .optional()
+
 const serieSchema = z.object({
   titulo: opcional,
   descripcion: opcional,
@@ -41,6 +50,12 @@ const equipoSchema = z.object({
   entrenador_foto_url: urlImagen,
   asistente_tecnico_foto_url: urlImagen,
   preparador_fisico_foto_url: urlImagen,
+  entrenador_foco_x: foco,
+  entrenador_foco_y: foco,
+  asistente_tecnico_foco_x: foco,
+  asistente_tecnico_foco_y: foco,
+  preparador_fisico_foco_x: foco,
+  preparador_fisico_foco_y: foco,
 })
 
 export type SerieInput = z.input<typeof serieSchema>
