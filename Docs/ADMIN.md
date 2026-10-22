@@ -163,6 +163,14 @@ El sitio público muestra el lugar tal como se escribe en la actividad, y en la 
 
 **Migración 016.** Crea `estadios` (con lectura pública por RLS; la escritura es solo `service_role`), agrega `programacion.estadio_id` y siembra los lugares que ya aparecen en las programaciones. **Debe aplicarse en producción antes de desplegar el código** (`npm run db:push`, con autorización): guardar una actividad ya manda `estadio_id` y falla sin la columna.
 
+## Encuadre de la portada de noticias
+
+Al editar una noticia, el panel «Portada» permite mover la foto dentro de dos marcos con la proporción real del artículo (16/9) y de las tarjetas del inicio (3/4). Se arrastra la foto con el mouse o el dedo (con el teclado, las flechas) para elegir qué parte se ve, y «Centrar» la devuelve al medio. Los marcos muestran el recorte tal como quedará en el sitio, y cambian al instante.
+
+El encuadre se guarda como un punto de 0 a 100 en cada eje (`noticias.portada_foco_x/y`, ver `lib/contenido/foco.ts`) y se aplica como `object-position` en el artículo, el listado de noticias, las tarjetas del inicio y el listado del admin. En un eje donde la foto no sobra el marco no hay nada que mover, así que ahí arrastrarla no cambia nada.
+
+**Migración 017.** Agrega `portada_foco_x` y `portada_foco_y` a `noticias`, con `DEFAULT 50`: las portadas ya guardadas quedan recortadas como hasta ahora. **Debe aplicarse en producción antes de desplegar el código** (`npm run db:push`, con autorización): sin ella, guardar una noticia falla porque el formulario ya manda el encuadre.
+
 ## Seguridad
 
 - La sesión es una cookie `httpOnly` firmada con HMAC (`SESSION_SECRET`) que expira a las 8 horas. El token lleva el rol (admin o redactor) y, para un redactor, su id y la versión de su sesión.

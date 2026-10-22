@@ -2,6 +2,7 @@ import { revalidatePath } from 'next/cache'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { revalidarSitio } from '@/lib/admin/revalidar'
 import { parseTags, slugify } from '@/lib/admin/slug'
+import { arrastrarFoco, desbordeImagen, FOCO_CENTRO, posicionCSS } from '@/lib/contenido/foco'
 import { jugadorSchema, parsePosiciones } from '@/lib/validations/jugador'
 
 describe('slugify', () => {
@@ -61,6 +62,33 @@ describe('jugadorSchema', () => {
 
   it('permite dejar email y foto vacíos', () => {
     expect(jugadorSchema.safeParse({ ...VALIDO, email: '', foto_url: '' }).success).toBe(true)
+  })
+})
+
+describe('encuadre de la portada', () => {
+  it('posicionCSS arma el object-position y respeta una fila sin encuadre', () => {
+    expect(posicionCSS({ x: 30, y: 70 })).toBe('30% 70%')
+    expect(posicionCSS(FOCO_CENTRO)).toBe('50% 50%')
+    expect(posicionCSS({ x: 30 })).toBeUndefined()
+    expect(posicionCSS(undefined)).toBeUndefined()
+  })
+
+  it('desbordeImagen mide cuánto sobra la foto al cubrir el marco', () => {
+    expect(desbordeImagen(300, 200, 150, 150)).toEqual({ x: 75, y: 0 })
+    expect(desbordeImagen(200, 300, 150, 150)).toEqual({ x: 0, y: 75 })
+    // Una foto que aún no cargó no tiene dónde moverse
+    expect(desbordeImagen(0, 0, 150, 150)).toEqual({ x: 0, y: 0 })
+  })
+
+  it('arrastrarFoco mueve la foto, no el encuadre, y solo donde la foto sobra', () => {
+    expect(arrastrarFoco({ x: 50, y: 50 }, 25, 0, { x: 100, y: 0 })).toEqual({ x: 25, y: 50 })
+    expect(arrastrarFoco({ x: 50, y: 50 }, 0, 25, { x: 100, y: 0 })).toEqual({ x: 50, y: 50 })
+  })
+
+  it('el encuadre se queda entre 0 y 100', () => {
+    expect(arrastrarFoco({ x: 50, y: 50 }, -200, 0, { x: 100, y: 0 })).toEqual({ x: 100, y: 50 })
+    expect(arrastrarFoco({ x: 50, y: 50 }, 200, 0, { x: 100, y: 0 })).toEqual({ x: 0, y: 50 })
+    expect(arrastrarFoco({ x: 50, y: 50 }, 0, 200, { x: 0, y: 100 })).toEqual({ x: 50, y: 0 })
   })
 })
 

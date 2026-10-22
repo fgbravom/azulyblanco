@@ -11,11 +11,13 @@ interface Props {
   onChange: (url: string | null) => void;
   /** Proporción de la vista previa */
   aspecto?: 'video' | 'cuadrado';
+  /** Encuadre de la vista previa (object-position), para que muestre el mismo recorte que el sitio */
+  posicion?: string;
   className?: string;
 }
 
 /** Campo de imagen: sube una nueva o elige una de la biblioteca */
-export default function SelectorImagen({ value, onChange, aspecto = 'video', className }: Props) {
+export default function SelectorImagen({ value, onChange, aspecto = 'video', posicion, className }: Props) {
   const [abierto, setAbierto] = useState(false);
 
   return (
@@ -28,7 +30,7 @@ export default function SelectorImagen({ value, onChange, aspecto = 'video', cla
           )}
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={value} alt="" className="h-full w-full object-cover" />
+          <img src={value} alt="" className="h-full w-full object-cover" style={{ objectPosition: posicion }} />
           <div className="absolute inset-x-0 bottom-0 flex gap-2 bg-gradient-to-t from-black/60 to-transparent p-2 pt-8">
             <button
               type="button"

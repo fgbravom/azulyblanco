@@ -52,7 +52,7 @@ function NoticiaCard({ noticia }: { noticia: NoticiaPublica }) {
       <Card className="h-full overflow-hidden border-gray-100 transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
         <div className={`relative h-44 bg-gradient-to-br ${getCategoryBg(noticia.categoria)} flex items-center justify-center`}>
           {noticia.coverUrl ? (
-            <Image src={noticia.coverUrl} alt={noticia.title} fill sizes="(min-width: 768px) 33vw, 100vw" className="object-cover" />
+            <Image src={noticia.coverUrl} alt={noticia.title} fill sizes="(min-width: 768px) 33vw, 100vw" className="object-cover" style={{ objectPosition: noticia.coverPos }} />
           ) : (
             <Newspaper className="w-10 h-10 text-white/25" />
           )}
@@ -84,7 +84,7 @@ function NoticiaDestacada({ noticia }: { noticia: NoticiaPublica }) {
           {/* Imagen grande */}
           <div className={`relative md:w-1/2 h-56 md:h-auto bg-gradient-to-br ${getCategoryBg(noticia.categoria)} flex items-center justify-center min-h-[220px]`}>
             {noticia.coverUrl ? (
-              <Image src={noticia.coverUrl} alt={noticia.title} fill sizes="(min-width: 768px) 50vw, 100vw" className="object-cover" />
+              <Image src={noticia.coverUrl} alt={noticia.title} fill sizes="(min-width: 768px) 50vw, 100vw" className="object-cover" style={{ objectPosition: noticia.coverPos }} />
             ) : (
               <Newspaper className="w-16 h-16 text-white/20" />
             )}

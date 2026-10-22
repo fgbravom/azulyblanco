@@ -8,6 +8,13 @@ import { revalidarSitio } from '@/lib/admin/revalidar'
 import { slugify } from '@/lib/admin/slug'
 import type { DespublicacionNoticia, NoticiaDB, NoticiaInput } from '@/lib/contenido/tipos'
 
+// 0 a 100 en cada eje: el punto de la foto que se mantiene visible al recortarla
+const foco = z
+  .number()
+  .int('El encuadre de la portada debe ser un número entero')
+  .min(0, 'El encuadre de la portada debe estar entre 0 y 100')
+  .max(100, 'El encuadre de la portada debe estar entre 0 y 100')
+
 const noticiaSchema = z.object({
   slug: z.string().trim(),
   titulo: z.string().trim().min(1, 'El título es obligatorio'),
@@ -19,6 +26,9 @@ const noticiaSchema = z.object({
   redactor_id: z.string().uuid().nullable(),
   fecha: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Fecha inválida'),
   portada_url: z.url({ protocol: /^https?$/ }).nullable(),
+  // Encuadre de la portada: 0 a 100 en cada eje (ver lib/contenido/foco.ts)
+  portada_foco_x: foco,
+  portada_foco_y: foco,
   publicado: z.boolean(),
 })
 
@@ -112,7 +122,7 @@ export async function listarNoticias(): Promise<NoticiaDB[]> {
 
   let consulta = supabase
     .from('noticias')
-    .select('id, slug, titulo, bajada, categoria, tags, autor, redactor_id, fecha, portada_url, publicado, created_at, updated_at')
+    .select('id, slug, titulo, bajada, categoria, tags, autor, redactor_id, fecha, portada_url, portada_foco_x, portada_foco_y, publicado, created_at, updated_at')
   if (yo) consulta = consulta.eq('redactor_id', yo)
   const { data, error } = await consulta.order('fecha', { ascending: false }).order('created_at', { ascending: false })
   if (error) throw new Error(error.message)

@@ -142,7 +142,7 @@ describe('noticias', () => {
   const FILA = {
     id: 'n1', slug: 'gran-final', titulo: 'Gran final', bajada: 'Resumen', contenido: '# Hola',
     categoria: 'Deportes', tags: ['final', 'honor'], autor: null, fecha: '2026-03-01',
-    portada_url: 'https://x/portada.webp', publicado: true,
+    portada_url: 'https://x/portada.webp', portada_foco_x: 30, portada_foco_y: 70, publicado: true,
   }
 
   it('el listado no trae el contenido completo y adapta los campos', async () => {
@@ -152,7 +152,14 @@ describe('noticias', () => {
     expect(noticia).toEqual({
       slug: 'gran-final', title: 'Gran final', description: 'Resumen', tags: 'final, honor',
       date: '2026-03-01', categoria: 'Deportes', author: undefined, coverUrl: 'https://x/portada.webp',
+      coverPos: '30% 70%',
     })
+  })
+
+  it('una portada sin encuadre (fila anterior a la migración 017) se recorta al centro', async () => {
+    conBase(() => ({ data: [{ ...FILA, portada_foco_x: undefined, portada_foco_y: undefined }] }))
+    const [noticia] = await publico.getNoticiasPublicas()
+    expect(noticia.coverPos).toBeUndefined()
   })
 
   it('la noticia trae el avatar de su redactor', async () => {

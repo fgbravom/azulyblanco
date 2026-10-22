@@ -21,6 +21,8 @@ const NOTICIA: NoticiaInput = {
   redactor_id: null,
   fecha: '2026-03-01',
   portada_url: 'https://falso.supabase.co/storage/v1/object/public/medios/portada.webp',
+  portada_foco_x: 50,
+  portada_foco_y: 50,
   publicado: true,
 }
 
@@ -82,10 +84,19 @@ describe('guardarNoticia', () => {
     await expect(guardarNoticia(null, NOTICIA)).rejects.toThrow('Ya existe una noticia con la dirección "gran-final-ayb-vs-union"')
   })
 
+  it('guarda el encuadre de la portada', async () => {
+    const falso = conBase(() => ({ data: { id: 'n1' } }))
+    await guardarNoticia(null, { ...NOTICIA, portada_foco_x: 30, portada_foco_y: 70 })
+
+    expect(argsDe(falso.a('noticias')[0], 'insert')?.[0]).toMatchObject({ portada_foco_x: 30, portada_foco_y: 70 })
+  })
+
   it.each([
     ['sin título', { titulo: '  ' }, 'El título es obligatorio'],
     ['fecha inválida', { fecha: '01-03-2026' }, 'Fecha inválida'],
     ['un título sin letras ni números (slug vacío)', { titulo: '¡¡¡!!!' }, 'slug'],
+    ['un encuadre de la portada fuera de rango', { portada_foco_x: 101 }, 'entre 0 y 100'],
+    ['un encuadre de la portada con decimales', { portada_foco_y: 12.5 }, 'número entero'],
   ])('rechaza %s', async (_caso, cambio, mensaje) => {
     conBase(() => ({ data: null }))
     await expect(guardarNoticia(null, { ...NOTICIA, ...cambio })).rejects.toThrow(mensaje)

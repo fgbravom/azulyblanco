@@ -120,7 +120,7 @@ export default async function NoticiaPage({ params }: PageProps) {
           <div className="container mx-auto max-w-3xl">
             {noticia.coverUrl && (
               <div className="relative aspect-[16/9] -mt-6 mb-8 rounded-xl overflow-hidden shadow-lg">
-                <Image src={noticia.coverUrl} alt={noticia.title} fill priority sizes="(min-width: 768px) 768px, 100vw" className="object-cover" />
+                <Image src={noticia.coverUrl} alt={noticia.title} fill priority sizes="(min-width: 768px) 768px, 100vw" className="object-cover" style={{ objectPosition: noticia.coverPos }} />
               </div>
             )}
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 px-6 py-10 md:px-12 md:py-14">

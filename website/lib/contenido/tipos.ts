@@ -119,6 +119,9 @@ export interface NoticiaDB {
   redactor_id: string | null // redactor del catálogo (tabla redactores)
   fecha: string
   portada_url: string | null
+  /** Encuadre de la portada, de 0 a 100 en cada eje (migración 017) */
+  portada_foco_x: number
+  portada_foco_y: number
   publicado: boolean
   created_at: string
   updated_at: string

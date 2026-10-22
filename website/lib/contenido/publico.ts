@@ -25,10 +25,11 @@ import { codigoPais, PAISES, type CodigoPais } from '@/lib/jugadores/paises'
 import { HERO_FOTOS_REPO, type HeroFotos } from '@/components/hero/hero-boot'
 import { claveEquipo } from '@/lib/data/posiciones'
 import { actividadAEvento } from './calendario'
+import { posicionCSS } from './foco'
 import type { Actividad, AlbumDB, Estadio, Foto, HeroFoto, NoticiaDB, Rival, SerieInfo } from './tipos'
 
-export type NoticiaPublica = NoticiaMetadata & { coverUrl?: string }
-export type NoticiaCompleta = Noticia & { coverUrl?: string; authorAvatar?: string }
+export type NoticiaPublica = NoticiaMetadata & { coverUrl?: string; coverPos?: string }
+export type NoticiaCompleta = Noticia & { coverUrl?: string; coverPos?: string; authorAvatar?: string }
 export type AlbumPublico = Album & { fotoUrls: string[] }
 
 class SinBaseDeDatos extends Error {}
@@ -170,6 +171,7 @@ function noticiaAMetadata(n: NoticiaDB): NoticiaPublica {
     categoria: n.categoria,
     author: n.autor ?? undefined,
     coverUrl: n.portada_url ?? undefined,
+    coverPos: posicionCSS({ x: n.portada_foco_x, y: n.portada_foco_y }),
   }
 }
 
@@ -189,7 +191,7 @@ export async function getNoticiasPublicas(): Promise<NoticiaPublica[]> {
     async () => {
       const { data, error } = await cliente()
         .from('noticias')
-        .select('id, slug, titulo, bajada, categoria, tags, autor, fecha, portada_url, publicado, created_at, updated_at')
+        .select('id, slug, titulo, bajada, categoria, tags, autor, fecha, portada_url, portada_foco_x, portada_foco_y, publicado, created_at, updated_at')
         .order('fecha', { ascending: false })
         .order('created_at', { ascending: false })
       if (error) throw error

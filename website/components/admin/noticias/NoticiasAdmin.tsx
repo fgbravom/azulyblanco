@@ -7,6 +7,7 @@ import { ExternalLink, Newspaper, Pencil, Search, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import type { NoticiaDB } from '@/lib/contenido/tipos';
+import { posicionCSS } from '@/lib/contenido/foco';
 import { cambiarPublicacionNoticia, eliminarNoticia } from '@/app/(admin)/admin/noticias/actions';
 import AvisoDespublicacion from './AvisoDespublicacion';
 import MotivoDespublicacion from './MotivoDespublicacion';
@@ -103,7 +104,12 @@ export default function NoticiasAdmin({ iniciales, rol = 'admin' }: { iniciales:
               <div className="h-14 w-20 shrink-0 sm:h-16 sm:w-24 overflow-hidden rounded-md bg-gradient-to-br from-azul-primario to-azul-medio">
                 {n.portada_url ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={n.portada_url} alt="" className="h-full w-full object-cover" />
+                  <img
+                    src={n.portada_url}
+                    alt=""
+                    className="h-full w-full object-cover"
+                    style={{ objectPosition: posicionCSS({ x: n.portada_foco_x, y: n.portada_foco_y }) }}
+                  />
                 ) : (
                   <div className="flex h-full items-center justify-center">
                     <Newspaper className="h-6 w-6 text-white/40" />

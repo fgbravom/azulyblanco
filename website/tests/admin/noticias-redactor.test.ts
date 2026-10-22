@@ -23,6 +23,8 @@ const NOTICIA: NoticiaInput = {
   redactor_id: AJENO,
   fecha: '2026-03-01',
   portada_url: null,
+  portada_foco_x: 50,
+  portada_foco_y: 50,
   publicado: true,
 }
 

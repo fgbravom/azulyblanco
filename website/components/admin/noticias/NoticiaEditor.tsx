@@ -14,12 +14,19 @@ import AvisoDespublicacion from './AvisoDespublicacion';
 import MotivoDespublicacion from './MotivoDespublicacion';
 import SelectorImagen from '@/components/admin/medios/SelectorImagen';
 import EditorMarkdown from '@/components/admin/editor/EditorMarkdown';
+import AjustePortada from './AjustePortada';
+import { FOCO_CENTRO, posicionCSS } from '@/lib/contenido/foco';
 
 function desdeNoticia(n: NoticiaDB | null): NoticiaInput {
   if (n) {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { id, created_at, updated_at, despublicacion, ...resto } = n;
-    return resto;
+    return {
+      ...resto,
+      // Una fila anterior a la migración 017 no trae encuadre: parte del centro
+      portada_foco_x: resto.portada_foco_x ?? FOCO_CENTRO.x,
+      portada_foco_y: resto.portada_foco_y ?? FOCO_CENTRO.y,
+    };
   }
   return {
     slug: '',
@@ -32,6 +39,8 @@ function desdeNoticia(n: NoticiaDB | null): NoticiaInput {
     redactor_id: null,
     fecha: new Date().toLocaleDateString('sv-SE'),
     portada_url: null,
+    portada_foco_x: FOCO_CENTRO.x,
+    portada_foco_y: FOCO_CENTRO.y,
     publicado: false,
   };
 }
@@ -201,7 +210,26 @@ export default function NoticiaEditor({ noticia, redactores, rol = 'admin', nomb
           </Panel>
 
           <Panel titulo="Portada">
-            <SelectorImagen value={datos.portada_url} onChange={(url) => set('portada_url', url)} />
+            <SelectorImagen
+              value={datos.portada_url}
+              posicion={posicionCSS({ x: datos.portada_foco_x, y: datos.portada_foco_y })}
+              onChange={(url) => {
+                // Una foto nueva parte del centro
+                set('portada_url', url);
+                set('portada_foco_x', FOCO_CENTRO.x);
+                set('portada_foco_y', FOCO_CENTRO.y);
+              }}
+            />
+            {datos.portada_url && (
+              <AjustePortada
+                url={datos.portada_url}
+                foco={{ x: datos.portada_foco_x, y: datos.portada_foco_y }}
+                onChange={(foco) => {
+                  set('portada_foco_x', foco.x);
+                  set('portada_foco_y', foco.y);
+                }}
+              />
+            )}
           </Panel>
 
           <Panel titulo="Detalles">
