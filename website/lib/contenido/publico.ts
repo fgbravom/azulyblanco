@@ -324,9 +324,10 @@ export interface PlantelJugador {
   apellidos: string
   nombre_completo: string
   foto_url: string | null
-  /** Encuadre de la foto, de 0 a 100 por eje; null = sin ajustar */
+  /** Recorte de la foto en la ficha (migraciones 018 y 019); null = sin ajustar */
   foto_foco_x: number | null
   foto_foco_y: number | null
+  foto_foco_ancho: number | null
   dorsal: number | null
   estado: string
   posicion: string | null
@@ -343,7 +344,7 @@ export async function getPlantelPublico(equipoId: number): Promise<PlantelJugado
 
   const { data, error } = await supabase
     .from('vista_plantel_publico')
-    .select('id, nombre, apellidos, nombre_completo, foto_url, foto_foco_x, foto_foco_y, dorsal, estado, posicion, posicion_abr, posiciones, posiciones_abr, nacionalidad')
+    .select('id, nombre, apellidos, nombre_completo, foto_url, foto_foco_x, foto_foco_y, foto_foco_ancho, dorsal, estado, posicion, posicion_abr, posiciones, posiciones_abr, nacionalidad')
     .eq('equipo_id', equipoId)
     .eq('activo', true)
     .order('dorsal', { ascending: true, nullsFirst: false })

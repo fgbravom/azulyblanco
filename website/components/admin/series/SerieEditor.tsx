@@ -16,12 +16,12 @@ import { BarraAcciones, Campo, PageHeader, Panel, inputClass, textareaClass } fr
 import SelectorImagen from '@/components/admin/medios/SelectorImagen';
 import Encuadre, { type MarcoEncuadre } from '@/components/admin/medios/Encuadre';
 import EditorMarkdown from '@/components/admin/editor/EditorMarkdown';
-import { focoDe, FOCO_ARRIBA, posicionCSS } from '@/lib/contenido/foco';
+import { recorteDe, FOCO_ARRIBA, type RecorteFoto } from '@/lib/contenido/foco';
 
 const MIEMBROS_STAFF = [
-  { campo: 'entrenador', foto: 'entrenador_foto_url', focoX: 'entrenador_foco_x', focoY: 'entrenador_foco_y', label: 'Director técnico' },
-  { campo: 'asistente_tecnico', foto: 'asistente_tecnico_foto_url', focoX: 'asistente_tecnico_foco_x', focoY: 'asistente_tecnico_foco_y', label: 'Asistente técnico' },
-  { campo: 'preparador_fisico', foto: 'preparador_fisico_foto_url', focoX: 'preparador_fisico_foco_x', focoY: 'preparador_fisico_foco_y', label: 'Preparador físico' },
+  { campo: 'entrenador', foto: 'entrenador_foto_url', focoX: 'entrenador_foco_x', focoY: 'entrenador_foco_y', focoAncho: 'entrenador_foco_ancho', label: 'Director técnico' },
+  { campo: 'asistente_tecnico', foto: 'asistente_tecnico_foto_url', focoX: 'asistente_tecnico_foco_x', focoY: 'asistente_tecnico_foco_y', focoAncho: 'asistente_tecnico_foco_ancho', label: 'Asistente técnico' },
+  { campo: 'preparador_fisico', foto: 'preparador_fisico_foto_url', focoX: 'preparador_fisico_foco_x', focoY: 'preparador_fisico_foco_y', focoAncho: 'preparador_fisico_foco_ancho', label: 'Preparador físico' },
 ] as const;
 
 /** Dónde se recortan las fotos del cuerpo técnico: la ficha de la serie */
@@ -49,10 +49,13 @@ export default function SerieEditor({ serie }: { serie: SerieAdmin }) {
     preparador_fisico_foto_url: serie.equipo?.preparador_fisico_foto_url ?? null,
     entrenador_foco_x: serie.equipo?.entrenador_foco_x ?? null,
     entrenador_foco_y: serie.equipo?.entrenador_foco_y ?? null,
+    entrenador_foco_ancho: serie.equipo?.entrenador_foco_ancho ?? null,
     asistente_tecnico_foco_x: serie.equipo?.asistente_tecnico_foco_x ?? null,
     asistente_tecnico_foco_y: serie.equipo?.asistente_tecnico_foco_y ?? null,
+    asistente_tecnico_foco_ancho: serie.equipo?.asistente_tecnico_foco_ancho ?? null,
     preparador_fisico_foco_x: serie.equipo?.preparador_fisico_foco_x ?? null,
     preparador_fisico_foco_y: serie.equipo?.preparador_fisico_foco_y ?? null,
+    preparador_fisico_foco_ancho: serie.equipo?.preparador_fisico_foco_ancho ?? null,
   });
   const [guardando, setGuardando] = useState<'serie' | 'staff' | null>(null);
 
@@ -172,11 +175,12 @@ export default function SerieEditor({ serie }: { serie: SerieAdmin }) {
                   <Campo label="Temporada" htmlFor="temporada">
                     <input id="temporada" required value={staff.temporada} onChange={(e) => setS('temporada', e.target.value)} className={inputClass} />
                   </Campo>
-                  {MIEMBROS_STAFF.map(({ campo, foto, focoX, focoY, label }) => {
-                    const encuadre = focoDe(staff[focoX], staff[focoY]);
-                    const setFoco = (foco: { x: number; y: number } | null) => {
-                      setS(focoX, foco?.x ?? null);
-                      setS(focoY, foco?.y ?? null);
+                  {MIEMBROS_STAFF.map(({ campo, foto, focoX, focoY, focoAncho, label }) => {
+                    const recorte = recorteDe(staff[focoX], staff[focoY], staff[focoAncho]);
+                    const setRecorte = (nuevo: RecorteFoto | null) => {
+                      setS(focoX, nuevo?.x ?? null);
+                      setS(focoY, nuevo?.y ?? null);
+                      setS(focoAncho, nuevo?.ancho ?? null);
                     };
                     return (
                       <Campo key={campo} label={label} htmlFor={campo}>
@@ -184,20 +188,20 @@ export default function SerieEditor({ serie }: { serie: SerieAdmin }) {
                         <SelectorImagen
                           aspecto="cuadrado"
                           className="mt-2"
-                          posicion={posicionCSS(encuadre)}
+                          recorte={recorte}
                           value={staff[foto]}
                           onChange={(url) => {
                             setS(foto, url);
                             // Una foto nueva vuelve al recorte automático
-                            setFoco(null);
+                            setRecorte(null);
                           }}
                         />
                         {staff[foto] && (
                           <Encuadre
                             url={staff[foto]!}
-                            foco={encuadre}
-                            onChange={setFoco}
-                            onQuitar={() => setFoco(null)}
+                            recorte={recorte}
+                            onChange={setRecorte}
+                            onQuitar={() => setRecorte(null)}
                             marcos={MARCOS_STAFF}
                           />
                         )}

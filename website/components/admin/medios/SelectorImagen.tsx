@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { ImagePlus, Replace, X } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
+import { estiloRecorte, posicionCSS, type FocoPortada, type RecorteFoto } from '@/lib/contenido/foco';
 import Biblioteca from './Biblioteca';
 
 interface Props {
@@ -11,13 +12,15 @@ interface Props {
   onChange: (url: string | null) => void;
   /** Proporción de la vista previa */
   aspecto?: 'video' | 'cuadrado';
-  /** Encuadre de la vista previa (object-position), para que muestre el mismo recorte que el sitio */
-  posicion?: string;
+  /** Recorte de la vista previa; null = recorte automático del lugar */
+  recorte?: RecorteFoto | null;
+  /** Recorte automático (object-position) cuando la foto está sin ajustar */
+  defecto?: FocoPortada;
   className?: string;
 }
 
 /** Campo de imagen: sube una nueva o elige una de la biblioteca */
-export default function SelectorImagen({ value, onChange, aspecto = 'video', posicion, className }: Props) {
+export default function SelectorImagen({ value, onChange, aspecto = 'video', recorte, defecto, className }: Props) {
   const [abierto, setAbierto] = useState(false);
 
   return (
@@ -30,7 +33,12 @@ export default function SelectorImagen({ value, onChange, aspecto = 'video', pos
           )}
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={value} alt="" className="h-full w-full object-cover" style={{ objectPosition: posicion }} />
+          <img
+            src={value}
+            alt=""
+            className="absolute inset-0 h-full w-full object-cover"
+            style={recorte?.ancho != null ? estiloRecorte(recorte) : { objectPosition: posicionCSS(recorte ?? defecto) }}
+          />
           <div className="absolute inset-x-0 bottom-0 flex gap-2 bg-gradient-to-t from-black/60 to-transparent p-2 pt-8">
             <button
               type="button"

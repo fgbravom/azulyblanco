@@ -2,7 +2,7 @@ import { revalidatePath } from 'next/cache'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { revalidarSitio } from '@/lib/admin/revalidar'
 import { parseTags, slugify } from '@/lib/admin/slug'
-import { arrastrarFoco, desbordeImagen, focoDe, FOCO_CENTRO, posicionCSS } from '@/lib/contenido/foco'
+import { arrastrarFoco, estiloRecorte, margenMovimiento, posicionCSS, recorteDe, tamanoDesplegado } from '@/lib/contenido/foco'
 import { jugadorSchema, parsePosiciones } from '@/lib/validations/jugador'
 
 describe('slugify', () => {
@@ -56,6 +56,8 @@ describe('jugadorSchema', () => {
     ['foto que no es URL', { foto_url: 'javascript:alert(1)' }],
     ['encuadre de la foto fuera de rango', { foto_foco_x: 101 }],
     ['encuadre de la foto con decimales', { foto_foco_y: 12.5 }],
+    ['encuadre de la cara fuera de rango', { foto_cara_x: -1 }],
+    ['tamaño de recorte fuera de rango', { foto_cara_ancho: 5 }],
     ['estado desconocido', { estado: 'Retirado' }],
     ['nacionalidad fuera del listado', { nacionalidad: 'España' }],
   ])('rechaza %s', (_caso, cambio) => {
@@ -66,39 +68,66 @@ describe('jugadorSchema', () => {
     expect(jugadorSchema.safeParse({ ...VALIDO, email: '', foto_url: '' }).success).toBe(true)
   })
 
-  it('permite la foto sin ajustar y con encuadre', () => {
+  it('permite la foto sin ajustar y con recorte', () => {
     expect(jugadorSchema.safeParse({ ...VALIDO, foto_foco_x: null, foto_foco_y: null }).success).toBe(true)
     expect(jugadorSchema.safeParse({ ...VALIDO, foto_foco_x: 30, foto_foco_y: 70 }).success).toBe(true)
+    // Cara y ficha se ajustan por separado, y con acercamiento
+    expect(
+      jugadorSchema.safeParse({ ...VALIDO, foto_cara_x: 20, foto_cara_y: 10, foto_cara_ancho: 250 }).success
+    ).toBe(true)
+    expect(jugadorSchema.safeParse({ ...VALIDO, foto_foco_ancho: 2000 }).success).toBe(true)
   })
 })
 
-describe('encuadre de las fotos', () => {
-  it('focoDe junta el encuadre guardado, o null si la foto está sin ajustar', () => {
-    expect(focoDe(30, 70)).toEqual({ x: 30, y: 70 })
-    expect(focoDe(30, null)).toBeNull()
-    expect(focoDe(undefined, undefined)).toBeNull()
+describe('recorte de las fotos', () => {
+  it('recorteDe junta el recorte guardado, o null si la foto está sin ajustar', () => {
+    expect(recorteDe(30, 70, 150)).toEqual({ x: 30, y: 70, ancho: 150 })
+    expect(recorteDe(30, 70, null)).toEqual({ x: 30, y: 70, ancho: null })
+    expect(recorteDe(30, null, 150)).toBeNull()
+    expect(recorteDe(undefined, undefined, undefined)).toBeNull()
   })
 
   it('posicionCSS arma el object-position y respeta una fila sin encuadre', () => {
     expect(posicionCSS({ x: 30, y: 70 })).toBe('30% 70%')
-    expect(posicionCSS(FOCO_CENTRO)).toBe('50% 50%')
+    expect(posicionCSS({ x: 50, y: 50 })).toBe('50% 50%')
     expect(posicionCSS({ x: 30 })).toBeUndefined()
     expect(posicionCSS(undefined)).toBeUndefined()
   })
 
-  it('desbordeImagen mide cuánto sobra la foto al cubrir el marco', () => {
-    expect(desbordeImagen(300, 200, 150, 150)).toEqual({ x: 75, y: 0 })
-    expect(desbordeImagen(200, 300, 150, 150)).toEqual({ x: 0, y: 75 })
-    // Una foto que aún no cargó no tiene dónde moverse
-    expect(desbordeImagen(0, 0, 150, 150)).toEqual({ x: 0, y: 0 })
+  it('estiloRecorte enmarca la foto con su punto fijo y su tamaño', () => {
+    expect(estiloRecorte({ x: 30, y: 70, ancho: 150 })).toEqual({
+      width: '150%',
+      height: 'auto',
+      left: '30%',
+      top: '70%',
+      right: 'auto',
+      bottom: 'auto',
+      transform: 'translate(-30%, -70%)',
+    })
   })
 
-  it('arrastrarFoco mueve la foto, no el encuadre, y solo donde la foto sobra', () => {
+  it('sin acercar, la foto se muestra cubriendo el marco; acercada, mide lo pedido', () => {
+    // Foto de 300x200 en un marco cuadrado de 150: la cubre con 225 de ancho
+    expect(tamanoDesplegado(null, { ancho: 150, alto: 150 }, { ancho: 300, alto: 200 })).toEqual({ ancho: 225, alto: 150 })
+    // Acercada al doble del ancho del marco
+    expect(tamanoDesplegado({ ancho: 200 }, { ancho: 150, alto: 150 }, { ancho: 300, alto: 200 })).toEqual({
+      ancho: 300,
+      alto: 200,
+    })
+    // Una foto que aún no cargó no tiene dónde moverse
+    expect(tamanoDesplegado(null, { ancho: 150, alto: 150 }, { ancho: 0, alto: 0 })).toEqual({ ancho: 0, alto: 0 })
+  })
+
+  it('la foto solo se mueve dentro del marco', () => {
+    expect(margenMovimiento({ ancho: 225, alto: 150 }, { ancho: 150, alto: 150 })).toEqual({ x: 75, y: 0 })
+  })
+
+  it('arrastrarFoco mueve la foto, no el punto fijo, y solo donde hay espacio', () => {
     expect(arrastrarFoco({ x: 50, y: 50 }, 25, 0, { x: 100, y: 0 })).toEqual({ x: 25, y: 50 })
     expect(arrastrarFoco({ x: 50, y: 50 }, 0, 25, { x: 100, y: 0 })).toEqual({ x: 50, y: 50 })
   })
 
-  it('el encuadre se queda entre 0 y 100', () => {
+  it('el punto fijo se queda entre 0 y 100', () => {
     expect(arrastrarFoco({ x: 50, y: 50 }, -200, 0, { x: 100, y: 0 })).toEqual({ x: 100, y: 50 })
     expect(arrastrarFoco({ x: 50, y: 50 }, 200, 0, { x: 100, y: 0 })).toEqual({ x: 0, y: 50 })
     expect(arrastrarFoco({ x: 50, y: 50 }, 0, 200, { x: 0, y: 100 })).toEqual({ x: 50, y: 0 })

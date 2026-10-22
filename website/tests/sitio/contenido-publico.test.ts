@@ -40,10 +40,12 @@ describe('plantel público', () => {
     }
   })
 
-  it('trae el encuadre de la foto para recortarla igual que en el sitio', async () => {
+  it('trae el recorte de la foto para mostrarla igual que en el sitio', async () => {
     const falso = conBase(() => ({ data: [] }))
     await publico.getPlantelPublico(3)
-    expect(columnas(argsDe(falso.consultas[0], 'select')?.[0])).toEqual(expect.arrayContaining(['foto_foco_x', 'foto_foco_y']))
+    expect(columnas(argsDe(falso.consultas[0], 'select')?.[0])).toEqual(
+      expect.arrayContaining(['foto_foco_x', 'foto_foco_y', 'foto_foco_ancho'])
+    )
   })
 
   it('filtra por serie y solo jugadores activos', async () => {

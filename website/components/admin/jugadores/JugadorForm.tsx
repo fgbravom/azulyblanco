@@ -24,15 +24,18 @@ import { toast } from 'sonner';
 import { BarraAcciones } from '@/components/admin/ui';
 import SelectorImagen from '@/components/admin/medios/SelectorImagen';
 import Encuadre, { type MarcoEncuadre } from '@/components/admin/medios/Encuadre';
-import { focoDe, FOCO_ARRIBA, posicionCSS } from '@/lib/contenido/foco';
+import { recorteDe, FOCO_ARRIBA, type RecorteFoto } from '@/lib/contenido/foco';
 
 /** Campo numérico opcional: vacío se guarda como null (valueAsNumber daba NaN y la validación fallaba) */
 const numeroOpcional = (valor: unknown) => (valor === '' || valor == null ? null : Number(valor));
 
-/** Lugares donde se recorta la foto del jugador, con su proporción real */
-const MARCOS_FOTO: MarcoEncuadre[] = [
+/** La cara se recorta para el avatar del admin; cada uno se ajusta por separado */
+const MARCOS_CARA: MarcoEncuadre[] = [
+  { etiqueta: 'Avatar', clase: 'aspect-square rounded-full', ancho: 'w-32' },
+];
+
+const MARCOS_FICHA: MarcoEncuadre[] = [
   { etiqueta: 'En la ficha de la serie', clase: 'aspect-[3/4] rounded-2xl', defecto: FOCO_ARRIBA },
-  { etiqueta: 'Avatar', clase: 'aspect-square rounded-full', ancho: 'w-24' },
 ];
 
 interface Props {
@@ -69,6 +72,10 @@ export default function JugadorForm({ jugador, onSave, onCancel }: Props) {
           foto_url: jugador.foto_url,
           foto_foco_x: jugador.foto_foco_x,
           foto_foco_y: jugador.foto_foco_y,
+          foto_foco_ancho: jugador.foto_foco_ancho,
+          foto_cara_x: jugador.foto_cara_x,
+          foto_cara_y: jugador.foto_cara_y,
+          foto_cara_ancho: jugador.foto_cara_ancho,
           altura_cm: jugador.altura_cm,
           peso_kg: jugador.peso_kg,
           pie_preferido: jugador.pie_preferido,
@@ -162,19 +169,29 @@ export default function JugadorForm({ jugador, onSave, onCancel }: Props) {
     }
   }, [errors]);
 
-  // Encuadre de la foto: null es "sin ajustar" y cada lugar usa su recorte automático
+  // Recortes de la foto: null es "sin ajustar" y cada lugar usa su recorte automático.
+  // La cara (avatar) y la ficha del plantel se mueven por separado.
   const fotoUrl = watch('foto_url') || null;
-  const foto = focoDe(watch('foto_foco_x'), watch('foto_foco_y'));
+  const recorteCara = recorteDe(watch('foto_cara_x'), watch('foto_cara_y'), watch('foto_cara_ancho'));
+  const recorteFicha = recorteDe(watch('foto_foco_x'), watch('foto_foco_y'), watch('foto_foco_ancho'));
 
-  const setFoco = (foco: { x: number; y: number } | null) => {
-    setValue('foto_foco_x', foco?.x ?? null, { shouldDirty: true });
-    setValue('foto_foco_y', foco?.y ?? null, { shouldDirty: true });
+  const setCara = (recorte: RecorteFoto | null) => {
+    setValue('foto_cara_x', recorte?.x ?? null, { shouldDirty: true });
+    setValue('foto_cara_y', recorte?.y ?? null, { shouldDirty: true });
+    setValue('foto_cara_ancho', recorte?.ancho ?? null, { shouldDirty: true });
+  };
+
+  const setFicha = (recorte: RecorteFoto | null) => {
+    setValue('foto_foco_x', recorte?.x ?? null, { shouldDirty: true });
+    setValue('foto_foco_y', recorte?.y ?? null, { shouldDirty: true });
+    setValue('foto_foco_ancho', recorte?.ancho ?? null, { shouldDirty: true });
   };
 
   const setFoto = (url: string | null) => {
     setValue('foto_url', url ?? '', { shouldValidate: true, shouldDirty: true });
-    // Una foto nueva vuelve al recorte automático
-    setFoco(null);
+    // Una foto nueva vuelve a los recortes automáticos
+    setCara(null);
+    setFicha(null);
   };
 
   if (loadingData) {
@@ -248,11 +265,30 @@ export default function JugadorForm({ jugador, onSave, onCancel }: Props) {
               <SelectorImagen
                 aspecto="cuadrado"
                 className="mt-1.5"
-                posicion={posicionCSS(foto)}
+                recorte={recorteCara}
                 value={watch('foto_url')}
                 onChange={setFoto}
               />
-              {fotoUrl && <Encuadre url={fotoUrl} foco={foto} onChange={setFoco} onQuitar={() => setFoco(null)} marcos={MARCOS_FOTO} />}
+              {fotoUrl && (
+                <>
+                  <Encuadre
+                    titulo="Encuadre de la cara"
+                    url={fotoUrl}
+                    recorte={recorteCara}
+                    onChange={setCara}
+                    onQuitar={() => setCara(null)}
+                    marcos={MARCOS_CARA}
+                  />
+                  <Encuadre
+                    titulo="Encuadre de la ficha"
+                    url={fotoUrl}
+                    recorte={recorteFicha}
+                    onChange={setFicha}
+                    onQuitar={() => setFicha(null)}
+                    marcos={MARCOS_FICHA}
+                  />
+                </>
+              )}
               {errors.foto_url && (
                 <p className="text-sm text-red-500 mt-1">{errors.foto_url.message}</p>
               )}

@@ -6,7 +6,8 @@ import { Badge } from '@/components/ui/badge';
 import { Edit, Trash2, Loader2, Eye } from 'lucide-react';
 import { MenuAcciones } from '@/components/admin/ui';
 import type { JugadorCompleto } from '@/types/database';
-import { posicionCSS } from '@/lib/contenido/foco';
+import { recorteDe } from '@/lib/contenido/foco';
+import FotoRecorte from '@/components/ui/foto-recorte';
 
 interface Props {
   jugadores: JugadorCompleto[];
@@ -70,12 +71,14 @@ export default function JugadoresTable({ jugadores, loading, onView, onEdit, onD
               className="flex min-w-0 flex-1 items-center gap-3 text-left"
             >
               {jugador.foto_url ? (
-                <img
-                  src={jugador.foto_url}
-                  alt={jugador.nombre_completo}
-                  className="h-12 w-12 shrink-0 rounded-full border-2 border-azul-primario/20 object-cover"
-                  style={{ objectPosition: posicionCSS({ x: jugador.foto_foco_x, y: jugador.foto_foco_y }) }}
-                />
+                <span className="relative block h-12 w-12 shrink-0 overflow-hidden rounded-full border-2 border-azul-primario/20">
+                  <FotoRecorte
+                    url={jugador.foto_url}
+                    alt={jugador.nombre_completo}
+                    recorte={recorteDe(jugador.foto_cara_x, jugador.foto_cara_y, jugador.foto_cara_ancho)}
+                    sizes="48px"
+                  />
+                </span>
               ) : (
                 <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-gray-100 font-mono font-bold text-gray-700">
                   {jugador.dorsal || '-'}
@@ -123,12 +126,14 @@ export default function JugadoresTable({ jugadores, loading, onView, onEdit, onD
             >
               <TableCell className="text-center">
                 {jugador.foto_url ? (
-                  <img
-                    src={jugador.foto_url}
-                    alt={jugador.nombre_completo}
-                    className="w-10 h-10 rounded-full object-cover border-2 border-azul-primario/20 mx-auto"
-                    style={{ objectPosition: posicionCSS({ x: jugador.foto_foco_x, y: jugador.foto_foco_y }) }}
-                  />
+                  <span className="relative mx-auto block h-10 w-10 overflow-hidden rounded-full border-2 border-azul-primario/20">
+                    <FotoRecorte
+                      url={jugador.foto_url}
+                      alt={jugador.nombre_completo}
+                      recorte={recorteDe(jugador.foto_cara_x, jugador.foto_cara_y, jugador.foto_cara_ancho)}
+                      sizes="40px"
+                    />
+                  </span>
                 ) : (
                   <span className="font-mono font-bold">{jugador.dorsal || '-'}</span>
                 )}

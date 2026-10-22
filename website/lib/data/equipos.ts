@@ -19,7 +19,7 @@ import type {
  * serie (cuota_*) solo los lee el servidor con la service_role (migración 005).
  */
 export const COLUMNAS_EQUIPO =
-  'id, categoria_id, nombre, temporada, entrenador, asistente_tecnico, preparador_fisico, entrenador_foto_url, asistente_tecnico_foto_url, preparador_fisico_foto_url, entrenador_foco_x, entrenador_foco_y, asistente_tecnico_foco_x, asistente_tecnico_foco_y, preparador_fisico_foco_x, preparador_fisico_foco_y, activo, created_at, updated_at';
+  'id, categoria_id, nombre, temporada, entrenador, asistente_tecnico, preparador_fisico, entrenador_foto_url, asistente_tecnico_foto_url, preparador_fisico_foto_url, entrenador_foco_x, entrenador_foco_y, asistente_tecnico_foco_x, asistente_tecnico_foco_y, preparador_fisico_foco_x, preparador_fisico_foco_y, entrenador_foco_ancho, asistente_tecnico_foco_ancho, preparador_fisico_foco_ancho, activo, created_at, updated_at';
 
 // ============================================================================
 // CATEGORÍAS

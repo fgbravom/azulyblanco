@@ -23,12 +23,21 @@ const opcional = z
 
 const urlImagen = z.url({ protocol: /^https?$/ }).nullable()
 
-// Encuadre de la foto, de 0 a 100 por eje; null o ausente = sin ajustar
+// Encuadre de la foto: punto fijo de 0 a 100 por eje y ancho respecto al marco
+// en %; null o ausente = sin ajustar / sin acercar
 const foco = z
   .number()
   .int('El encuadre debe ser un número entero')
   .min(0, 'El encuadre debe estar entre 0 y 100')
   .max(100, 'El encuadre debe estar entre 0 y 100')
+  .nullable()
+  .optional()
+
+const anchoRecorte = z
+  .number()
+  .int('El tamaño del recorte debe ser un número entero')
+  .min(10, 'El tamaño del recorte debe estar entre 10 y 2000')
+  .max(2000, 'El tamaño del recorte debe estar entre 10 y 2000')
   .nullable()
   .optional()
 
@@ -56,6 +65,9 @@ const equipoSchema = z.object({
   asistente_tecnico_foco_y: foco,
   preparador_fisico_foco_x: foco,
   preparador_fisico_foco_y: foco,
+  entrenador_foco_ancho: anchoRecorte,
+  asistente_tecnico_foco_ancho: anchoRecorte,
+  preparador_fisico_foco_ancho: anchoRecorte,
 })
 
 export type SerieInput = z.input<typeof serieSchema>

@@ -84,6 +84,10 @@ export interface Equipo {
   asistente_tecnico_foco_y: number | null;
   preparador_fisico_foco_x: number | null;
   preparador_fisico_foco_y: number | null;
+  /** Ancho de cada foto respecto al marco, en % (migración 019); null = sin acercar */
+  entrenador_foco_ancho: number | null;
+  asistente_tecnico_foco_ancho: number | null;
+  preparador_fisico_foco_ancho: number | null;
   /** Cuota mensual y datos de transferencia (migración 004) */
   cuota_monto: number;
   cuota_datos_pago: string | null;
@@ -126,9 +130,15 @@ export interface Jugador {
   nacionalidad: string;
   dni: string | null;
   foto_url: string | null;
-  /** Encuadre de la foto, de 0 a 100 por eje (migración 018); null = sin ajustar */
+  /** Recorte de la foto en la ficha del plantel, de 0 a 100 por eje (migración 018); null = sin ajustar */
   foto_foco_x: number | null;
   foto_foco_y: number | null;
+  /** Ancho de la foto respecto al marco, en % (migración 019); null = sin acercar */
+  foto_foco_ancho: number | null;
+  /** Recorte de la cara, para el avatar; independiente del de la ficha (migración 019) */
+  foto_cara_x: number | null;
+  foto_cara_y: number | null;
+  foto_cara_ancho: number | null;
 
   // Información deportiva
   equipo_id: number;
@@ -180,6 +190,10 @@ export interface JugadorInsert {
   foto_url?: string;
   foto_foco_x?: number | null;
   foto_foco_y?: number | null;
+  foto_foco_ancho?: number | null;
+  foto_cara_x?: number | null;
+  foto_cara_y?: number | null;
+  foto_cara_ancho?: number | null;
 
   // Información deportiva
   dorsal?: number;
@@ -215,6 +229,10 @@ export interface JugadorUpdate {
   foto_url?: string;
   foto_foco_x?: number | null;
   foto_foco_y?: number | null;
+  foto_foco_ancho?: number | null;
+  foto_cara_x?: number | null;
+  foto_cara_y?: number | null;
+  foto_cara_ancho?: number | null;
   equipo_id?: number;
   posicion_id?: number;
   dorsal?: number;

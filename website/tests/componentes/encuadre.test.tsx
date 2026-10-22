@@ -2,6 +2,7 @@
 import { fireEvent, render, screen } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 import type { MarcoEncuadre } from '@/components/admin/medios/Encuadre'
+import type { RecorteFoto } from '@/lib/contenido/foco'
 
 const { default: Encuadre } = await import('@/components/admin/medios/Encuadre')
 const { FOCO_ARRIBA } = await import('@/lib/contenido/foco')
@@ -21,13 +22,16 @@ const MARCOS_FICHA: MarcoEncuadre[] = [
   { etiqueta: 'Avatar', clase: 'aspect-square rounded-full', ancho: 'w-24' },
 ]
 
+// Un solo marco: el único caso donde se puede acercar la foto
+const MARCO_UNICO: MarcoEncuadre[] = [{ etiqueta: 'Avatar', clase: 'aspect-square rounded-full', ancho: 'w-32' }]
+
 function preparar({
-  foco = { x: 50, y: 50 },
+  recorte = { x: 50, y: 50, ancho: null } as RecorteFoto | null,
   marcos = MARCOS_NOTICIA,
   onQuitar,
-}: { foco?: { x: number; y: number } | null; marcos?: MarcoEncuadre[]; onQuitar?: () => void } = {}) {
+}: { recorte?: RecorteFoto | null; marcos?: MarcoEncuadre[]; onQuitar?: () => void } = {}) {
   const onChange = vi.fn()
-  render(<Encuadre url="https://x/foto.webp" foco={foco} onChange={onChange} onQuitar={onQuitar} marcos={marcos} />)
+  render(<Encuadre url="https://x/foto.webp" recorte={recorte} onChange={onChange} onQuitar={onQuitar} marcos={marcos} />)
   return { onChange }
 }
 
@@ -38,45 +42,46 @@ function medirComo(boton: HTMLElement, ancho: number, alto: number) {
   const img = boton.querySelector('img')!
   Object.defineProperty(img, 'naturalWidth', { value: 200 })
   Object.defineProperty(img, 'naturalHeight', { value: 200 })
+  fireEvent.load(img)
 }
 
 const encuadreDe = (boton: HTMLElement) => (boton.querySelector('img') as HTMLImageElement).style.objectPosition
 
 describe('Encuadre', () => {
-  it('muestra el encuadre en todos los marcos', () => {
-    preparar({ foco: { x: 30, y: 70 } })
+  it('muestra el recorte en todos los marcos', () => {
+    preparar({ recorte: { x: 30, y: 70, ancho: null } })
     for (const etiqueta of ['En el artículo', 'En las tarjetas del inicio']) {
       const boton = screen.getByRole('button', { name: new RegExp(etiqueta) })
       expect(encuadreDe(boton)).toBe('30% 70%')
     }
   })
 
-  it('sin ajuste, cada marco muestra el recorte automático de su lugar', () => {
-    preparar({ foco: null, marcos: MARCOS_FICHA })
+  it('sin ajustar, cada marco muestra el recorte automático de su lugar', () => {
+    preparar({ recorte: null, marcos: MARCOS_FICHA })
     // La ficha se corta desde arriba y el avatar, al centro
     expect(encuadreDe(screen.getByRole('button', { name: /En la ficha de la serie/ }))).toBe('50% 0%')
     expect(encuadreDe(screen.getByRole('button', { name: /Avatar/ }))).toBe('50% 50%')
   })
 
   it('Centrar vuelve al centro de la foto', () => {
-    const { onChange } = preparar({ foco: { x: 30, y: 70 } })
+    const { onChange } = preparar({ recorte: { x: 30, y: 70, ancho: 150 } })
     fireEvent.click(screen.getByRole('button', { name: 'Centrar' }))
-    expect(onChange).toHaveBeenCalledWith({ x: 50, y: 50 })
+    expect(onChange).toHaveBeenCalledWith({ x: 50, y: 50, ancho: null })
   })
 
   it('Quitar ajuste devuelve la foto a los recortes automáticos', () => {
     const onQuitar = vi.fn()
-    preparar({ foco: { x: 30, y: 70 }, marcos: MARCOS_FICHA, onQuitar })
+    preparar({ recorte: { x: 30, y: 70, ancho: null }, marcos: MARCOS_FICHA, onQuitar })
     fireEvent.click(screen.getByRole('button', { name: 'Quitar ajuste' }))
     expect(onQuitar).toHaveBeenCalledOnce()
   })
 
   it('Quitar ajuste está disponible solo cuando hay un ajuste', () => {
-    preparar({ foco: null, marcos: MARCOS_FICHA, onQuitar: vi.fn() })
+    preparar({ recorte: null, marcos: MARCOS_FICHA, onQuitar: vi.fn() })
     expect(screen.getByRole('button', { name: 'Quitar ajuste' })).toBeDisabled()
   })
 
-  it('arrastrar la foto cambia el encuadre del eje donde ella sobra', () => {
+  it('arrastrar la foto cambia el recorte del eje donde ella sobra', () => {
     // En 16:9 la foto cuadrada sobra en alto: el arrastre mueve el eje vertical
     const { onChange } = preparar()
     const articulo = screen.getByRole('button', { name: /En el artículo/ })
@@ -85,7 +90,7 @@ describe('Encuadre', () => {
     fireEvent.pointerDown(articulo, { clientX: 0, clientY: 0 })
     fireEvent.pointerMove(articulo, { clientX: 40, clientY: -7 })
 
-    expect(onChange).toHaveBeenCalledWith({ x: 50, y: 60 })
+    expect(onChange).toHaveBeenCalledWith({ x: 50, y: 60, ancho: null })
   })
 
   it('en 3:4 la foto sobra en ancho y el arrastre mueve el eje horizontal', () => {
@@ -96,7 +101,7 @@ describe('Encuadre', () => {
     fireEvent.pointerDown(inicio, { clientX: 0, clientY: 0 })
     fireEvent.pointerMove(inicio, { clientX: -8, clientY: 30 })
 
-    expect(onChange).toHaveBeenCalledWith({ x: 70, y: 50 })
+    expect(onChange).toHaveBeenCalledWith({ x: 70, y: 50, ancho: null })
   })
 
   it('las flechas mueven la foto, con pasos largos con Shift', () => {
@@ -105,14 +110,14 @@ describe('Encuadre', () => {
     medirComo(articulo, 160, 60)
 
     fireEvent.keyDown(articulo, { key: 'ArrowUp' })
-    expect(onChange).toHaveBeenLastCalledWith({ x: 50, y: 53 })
+    expect(onChange).toHaveBeenLastCalledWith({ x: 50, y: 53, ancho: null })
 
     fireEvent.keyDown(articulo, { key: 'ArrowDown', shiftKey: true })
-    expect(onChange).toHaveBeenLastCalledWith({ x: 50, y: 40 })
+    expect(onChange).toHaveBeenLastCalledWith({ x: 50, y: 40, ancho: null })
   })
 
-  it('sin ajuste, el arrastre parte del recorte automático del marco', () => {
-    const { onChange } = preparar({ foco: null, marcos: MARCOS_FICHA })
+  it('sin ajustar, el arrastre parte del recorte automático del marco', () => {
+    const { onChange } = preparar({ recorte: null, marcos: MARCOS_FICHA })
     const ficha = screen.getByRole('button', { name: /En la ficha de la serie/ })
     medirComo(ficha, 120, 160)
 
@@ -120,6 +125,34 @@ describe('Encuadre', () => {
     fireEvent.pointerMove(ficha, { clientX: -8, clientY: 0 })
 
     // El arrastre parte de 50% 0% (el recorte de la ficha) y no del centro
-    expect(onChange).toHaveBeenCalledWith({ x: 70, y: 0 })
+    expect(onChange).toHaveBeenCalledWith({ x: 70, y: 0, ancho: null })
+  })
+
+  it('con un solo marco se puede acercar la foto', () => {
+    const { onChange } = preparar({ recorte: { x: 30, y: 70, ancho: null }, marcos: MARCO_UNICO })
+    const avatar = screen.getByRole('button', { name: /Avatar/ })
+    medirComo(avatar, 120, 120)
+
+    const acercar = screen.getByRole('slider', { name: 'Acercar la foto' })
+    fireEvent.change(acercar, { target: { value: '240' } })
+
+    expect(onChange).toHaveBeenCalledWith({ x: 30, y: 70, ancho: 240 })
+  })
+
+  it('los marcos de proporciones distintas no ofrecen acercar (el tamaño sería distinto en cada uno)', () => {
+    preparar()
+    expect(screen.queryByRole('slider', { name: 'Acercar la foto' })).toBeNull()
+  })
+
+  it('acercada, la foto se mueve sobre su tamaño acercado', () => {
+    const { onChange } = preparar({ recorte: { x: 50, y: 50, ancho: 200 }, marcos: MARCO_UNICO })
+    const avatar = screen.getByRole('button', { name: /Avatar/ })
+    // Marco de 160x90 y foto cuadrada: al doble del ancho del marco (320x320) sobra 160x230
+    medirComo(avatar, 160, 90)
+
+    fireEvent.pointerDown(avatar, { clientX: 0, clientY: 0 })
+    fireEvent.pointerMove(avatar, { clientX: -8, clientY: 0 })
+
+    expect(onChange).toHaveBeenCalledWith({ x: 55, y: 50, ancho: 200 })
   })
 })

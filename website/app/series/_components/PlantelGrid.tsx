@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import type { PlantelJugador } from '@/lib/contenido/publico'
-import { posicionCSS } from '@/lib/contenido/foco'
+import { recorteDe } from '@/lib/contenido/foco'
 import { codigoPais } from '@/lib/jugadores/paises'
 import Bandera from '@/components/ui/bandera'
 import { FichaPersona } from './FichaPersona'
@@ -89,7 +89,7 @@ export function PlantelGrid({ jugadores }: PlantelGridProps) {
               alt={jugador.nombre_completo}
               nombre={primerNombre(jugador.nombre)}
               apellidos={jugador.apellidos}
-              foco={posicionCSS({ x: jugador.foto_foco_x, y: jugador.foto_foco_y })}
+              recorte={recorteDe(jugador.foto_foco_x, jugador.foto_foco_y, jugador.foto_foco_ancho)}
               detalle={posicionesAbr.join(' · ')}
               marca={pais && <Bandera codigo={pais} className="h-3 w-[18px] md:h-3.5 md:w-[21px]" />}
             >

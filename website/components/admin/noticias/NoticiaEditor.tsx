@@ -15,7 +15,7 @@ import MotivoDespublicacion from './MotivoDespublicacion';
 import SelectorImagen from '@/components/admin/medios/SelectorImagen';
 import Encuadre, { type MarcoEncuadre } from '@/components/admin/medios/Encuadre';
 import EditorMarkdown from '@/components/admin/editor/EditorMarkdown';
-import { FOCO_CENTRO, posicionCSS } from '@/lib/contenido/foco';
+import { FOCO_CENTRO, type RecorteFoto } from '@/lib/contenido/foco';
 
 /** Lugares donde se recorta la portada de una noticia, con su proporción real */
 const MARCOS_PORTADA: MarcoEncuadre[] = [
@@ -108,6 +108,9 @@ export default function NoticiaEditor({ noticia, redactores, rol = 'admin', nomb
   };
 
   const redactor = redactores.find((r) => r.id === datos.redactor_id);
+
+  // La portada se mueve con el mismo recorte en el artículo y en las tarjetas
+  const recortePortada: RecorteFoto = { x: datos.portada_foco_x, y: datos.portada_foco_y, ancho: null };
 
   const elegirRedactor = (valor: string) => {
     if (valor === AUTOR_TEXTO) return;
@@ -218,7 +221,7 @@ export default function NoticiaEditor({ noticia, redactores, rol = 'admin', nomb
           <Panel titulo="Portada">
             <SelectorImagen
               value={datos.portada_url}
-              posicion={posicionCSS({ x: datos.portada_foco_x, y: datos.portada_foco_y })}
+              recorte={recortePortada}
               onChange={(url) => {
                 // Una foto nueva parte del centro
                 set('portada_url', url);
@@ -229,10 +232,10 @@ export default function NoticiaEditor({ noticia, redactores, rol = 'admin', nomb
             {datos.portada_url && (
               <Encuadre
                 url={datos.portada_url}
-                foco={{ x: datos.portada_foco_x, y: datos.portada_foco_y }}
-                onChange={(foco) => {
-                  set('portada_foco_x', foco.x);
-                  set('portada_foco_y', foco.y);
+                recorte={recortePortada}
+                onChange={(recorte) => {
+                  set('portada_foco_x', recorte.x);
+                  set('portada_foco_y', recorte.y);
                 }}
                 marcos={MARCOS_PORTADA}
               />

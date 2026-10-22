@@ -5,7 +5,8 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import type { JugadorCompleto } from '@/types/database';
 import { codigoPais } from '@/lib/jugadores/paises';
-import { posicionCSS } from '@/lib/contenido/foco';
+import { recorteDe } from '@/lib/contenido/foco';
+import FotoRecorte from '@/components/ui/foto-recorte';
 import Bandera from '@/components/ui/bandera';
 import { User, Shield, Mail, Heart, Calendar, MapPin, Phone } from 'lucide-react';
 
@@ -69,12 +70,14 @@ export default function JugadorFicha({ jugador, open, onClose }: Props) {
               </div>
             </div>
             {jugador.foto_url && (
-              <img
-                src={jugador.foto_url}
-                alt={jugador.nombre_completo}
-                className="h-16 w-16 shrink-0 rounded-full object-cover border-4 sm:h-24 sm:w-24 border-azul-primario"
-                style={{ objectPosition: posicionCSS({ x: jugador.foto_foco_x, y: jugador.foto_foco_y }) }}
-              />
+              <span className="relative block h-16 w-16 shrink-0 overflow-hidden rounded-full border-4 border-azul-primario sm:h-24 sm:w-24">
+                <FotoRecorte
+                  url={jugador.foto_url}
+                  alt={jugador.nombre_completo}
+                  recorte={recorteDe(jugador.foto_cara_x, jugador.foto_cara_y, jugador.foto_cara_ancho)}
+                  sizes="(min-width: 640px) 96px, 64px"
+                />
+              </span>
             )}
           </div>
         </DialogHeader>

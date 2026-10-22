@@ -1,13 +1,15 @@
 import type { ReactNode } from 'react'
 import Image from 'next/image'
+import FotoRecorte from '@/components/ui/foto-recorte'
+import { FOCO_ARRIBA, type RecorteFoto } from '@/lib/contenido/foco'
 
 interface FichaPersonaProps {
   foto: string | null
   alt: string
   nombre: string
   apellidos: string
-  /** Encuadre de la foto (object-position); sin ajuste, se muestra desde arriba */
-  foco?: string
+  /** Recorte de la foto; sin ajuste, se muestra desde arriba */
+  recorte?: RecorteFoto | null
   // Línea azul bajo el nombre: posiciones del jugador o cargo del técnico
   detalle?: string
   // Va a la derecha del detalle (la bandera del jugador)
@@ -16,17 +18,17 @@ interface FichaPersonaProps {
   children?: ReactNode
 }
 
-export function FichaPersona({ foto, alt, nombre, apellidos, foco, detalle, marca, children }: FichaPersonaProps) {
+export function FichaPersona({ foto, alt, nombre, apellidos, recorte, detalle, marca, children }: FichaPersonaProps) {
   return (
     <article className="group relative aspect-[3/4] rounded-2xl overflow-hidden bg-gradient-to-b from-azul-claro to-azul-primario shadow-sm hover:shadow-xl transition-shadow">
       {foto ? (
-        <Image
-          src={foto}
+        <FotoRecorte
+          url={foto}
           alt={alt}
-          fill
+          recorte={recorte ?? null}
+          defecto={FOCO_ARRIBA}
           sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw"
-          className="object-cover object-top transition-transform duration-500 group-hover:scale-105"
-          style={{ objectPosition: foco }}
+          className="object-top transition-transform duration-500 group-hover:scale-105"
         />
       ) : (
         <Image
