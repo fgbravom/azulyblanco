@@ -6,7 +6,7 @@ import { CalendarDays, Copy, EyeOff, MapPin, Pencil, Plus, Search, Trash2, Clock
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
-import type { Actividad, ActividadInput, JugadorGoles, Rival } from '@/lib/contenido/tipos';
+import type { Actividad, ActividadInput, Estadio, JugadorGoles, Rival } from '@/lib/contenido/tipos';
 import { horaCorta, nombreActividad } from '@/lib/contenido/calendario';
 import { cambiarConfirmacion, eliminarActividad } from '@/app/(admin)/admin/programacion/actions';
 import { FiltroChips, MenuAcciones, PageHeader, Vacio, inputClass } from '@/components/admin/ui';
@@ -34,10 +34,12 @@ function aInput(a: Actividad): ActividadInput {
 export default function ProgramacionAdmin({
   iniciales,
   rivales,
+  estadios,
   jugadores,
 }: {
   iniciales: Actividad[];
   rivales: Rival[];
+  estadios: Estadio[];
   jugadores: JugadorGoles[];
 }) {
   const [actividades, setActividades] = useState(iniciales);
@@ -303,6 +305,7 @@ export default function ProgramacionAdmin({
               inicial={editor.inicial}
               lugares={lugares}
               rivales={rivales}
+              estadios={estadios}
               jugadores={jugadores}
               onGuardada={guardada}
               onCancelar={() => setEditor(null)}

@@ -18,7 +18,7 @@ function conBase(responder: Responder = () => ({ data: { id: 'p1' } })) {
 function partido(parcial: Partial<ActividadInput> = {}): ActividadInput {
   return {
     tipo: 'partido', fecha: '2026-10-18', hora_inicio: null, hora_fin: null, rival: 'AYB VS SM', rival_id: null,
-    tipo_partido: 'Amistoso', actividad: null, titulo: null, descripcion: null, estadio: '', confirmado: true,
+    tipo_partido: 'Amistoso', actividad: null, titulo: null, descripcion: null, estadio: '', estadio_id: null, confirmado: true,
     llevar: null, precio_entrada: null, edad_gratis: null, series: [], goles_local: 2, goles_visitante: 1,
     publicado: true,
     ...parcial,

@@ -5,7 +5,7 @@ import { toast } from 'sonner';
 import { ArrowLeftRight, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import type { Actividad, ActividadInput, GolInput, JugadorGoles, LadoPartido, Rival } from '@/lib/contenido/tipos';
+import type { Actividad, ActividadInput, Estadio, GolInput, JugadorGoles, LadoPartido, Rival } from '@/lib/contenido/tipos';
 import { TIPOS_PARTIDO } from '@/lib/contenido/tipos';
 import type { TipoEvento } from '@/lib/types/calendario';
 import { esEquipoAYB } from '@/lib/utils/calendario';
@@ -41,6 +41,7 @@ export function actividadVacia(): ActividadInput {
     titulo: null,
     descripcion: null,
     estadio: '',
+    estadio_id: null,
     confirmado: false,
     llevar: null,
     precio_entrada: null,
@@ -58,12 +59,13 @@ interface Props {
   inicial: ActividadInput;
   lugares: string[];
   rivales: Rival[];
+  estadios: Estadio[];
   jugadores: JugadorGoles[];
   onGuardada: (actividad: Actividad) => void;
   onCancelar: () => void;
 }
 
-export default function ActividadForm({ id, inicial, lugares, rivales, jugadores, onGuardada, onCancelar }: Props) {
+export default function ActividadForm({ id, inicial, lugares, rivales, estadios, jugadores, onGuardada, onCancelar }: Props) {
   const [datos, setDatos] = useState<ActividadInput>(inicial);
   const [[local, visita], setEquipos] = useState(() => separarEquipos(inicial.rival));
   const [guardando, setGuardando] = useState(false);
@@ -125,6 +127,13 @@ export default function ActividadForm({ id, inicial, lugares, rivales, jugadores
     setEquipos(ladoRival === 'local' ? [r.sigla, visita] : [local, r.sigla]);
   };
 
+  const elegirEstadio = (estadioId: string) => {
+    const e = estadios.find((x) => x.id === estadioId);
+    set('estadio_id', e?.id ?? null);
+    if (!e) return;
+    set('estadio', e.nombre.toUpperCase());
+  };
+
   const enviar = async (e: React.FormEvent) => {
     e.preventDefault();
     setGuardando(true);
@@ -134,8 +143,12 @@ export default function ActividadForm({ id, inicial, lugares, rivales, jugadores
       const elegido = rivales.find((r) => r.id === datos.rival_id);
       const siglaRival = (ladoRival === 'local' ? local : visita).trim().toUpperCase();
       const rival_id = elegido && elegido.sigla.toUpperCase() === siglaRival ? elegido.id : null;
+      // Ídem con el lugar: si se editó a mano y ya no coincide con el estadio elegido, se suelta el vínculo
+      const elegidoEstadio = estadios.find((e) => e.id === datos.estadio_id);
+      const lugar = datos.estadio.trim().toUpperCase();
+      const estadio_id = elegidoEstadio && elegidoEstadio.nombre.trim().toUpperCase() === lugar ? elegidoEstadio.id : null;
       const detalleGoles = estadoGoles === 'listo' ? golesAGuardar(goles, ladosGoles) : null;
-      const guardada = await guardarActividad(id, { ...datos, rival, rival_id, estadio: datos.estadio.toUpperCase() }, detalleGoles);
+      const guardada = await guardarActividad(id, { ...datos, rival, rival_id, estadio: lugar, estadio_id }, detalleGoles);
       toast.success(id ? 'Actividad actualizada' : 'Actividad creada');
       onGuardada(guardada);
     } catch (error) {
@@ -283,6 +296,17 @@ export default function ActividadForm({ id, inicial, lugares, rivales, jugadores
             </Campo>
           </div>
         </>
+      )}
+
+      {estadios.length > 0 && (
+        <Campo label="Lugar guardado" htmlFor="estadio_id" ayuda="Rellena el nombre del lugar. Administra la lista en Canchas y estadios.">
+          <select id="estadio_id" value={datos.estadio_id ?? ''} onChange={(e) => elegirEstadio(e.target.value)} className={inputClass}>
+            <option value="">Otro (escribir a mano)</option>
+            {estadios.map((e) => (
+              <option key={e.id} value={e.id}>{e.nombre}</option>
+            ))}
+          </select>
+        </Campo>
       )}
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">

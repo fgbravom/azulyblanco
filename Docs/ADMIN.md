@@ -153,6 +153,16 @@ Se guardan en `goles`, una fila por gol con su `lado` y `orden`. La tabla tiene 
 
 **Migración 014.** Crea `goles` y `vista_goles_publico`. Conviene aplicarla en producción antes de desplegar (`npm run db:push`, con autorización): sin ella el sitio sigue funcionando, pero el admin no puede guardar partidos porque al guardar actualiza los goleadores.
 
+## Canchas y estadios
+
+`/admin/estadios` mantiene el catálogo de canchas y estadios donde juega el club: nombre (obligatorio y único sin importar mayúsculas), ubicación y link al mapa (opcionales).
+
+En el formulario de actividad, «Lugar guardado» elige una cancha del catálogo y rellena el campo «Lugar»; si no está en la lista se puede escribir a mano y queda como texto sin vínculo. Las actividades antiguas solo tienen el texto y siguen funcionando igual. Al **renombrar** una cancha se actualiza también el lugar de las actividades que la usan; al **eliminarla**, esas actividades conservan el lugar escrito (el texto ya no está vinculado).
+
+El sitio público muestra el lugar tal como se escribe en la actividad. La ubicación y el link al mapa quedan en el catálogo para mostrarlos más adelante en la ficha del partido.
+
+**Migración 016.** Crea `estadios` (con lectura pública por RLS; la escritura es solo `service_role`), agrega `programacion.estadio_id` y siembra los lugares que ya aparecen en las programaciones. **Debe aplicarse en producción antes de desplegar el código** (`npm run db:push`, con autorización): guardar una actividad ya manda `estadio_id` y falla sin la columna.
+
 ## Seguridad
 
 - La sesión es una cookie `httpOnly` firmada con HMAC (`SESSION_SECRET`) que expira a las 8 horas. El token lleva el rol (admin o redactor) y, para un redactor, su id y la versión de su sesión.

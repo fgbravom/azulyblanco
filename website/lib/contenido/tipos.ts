@@ -17,6 +17,7 @@ export interface Actividad {
   titulo: string | null
   descripcion: string | null
   estadio: string
+  estadio_id: string | null // cancha del catálogo (tabla estadios)
   confirmado: boolean
   llevar: string | null
   precio_entrada: string | null
@@ -65,6 +66,18 @@ export interface Rival {
 }
 
 export type RivalInput = Omit<Rival, 'id' | 'created_at' | 'updated_at'>
+
+/** Cancha o estadio donde se juega (supabase/migrations/20260101000016_estadios.sql) */
+export interface Estadio {
+  id: string
+  nombre: string
+  ubicacion: string | null
+  mapa_url: string | null
+  created_at: string
+  updated_at: string
+}
+
+export type EstadioInput = Omit<Estadio, 'id' | 'created_at' | 'updated_at'>
 
 /** Quien escribe las noticias (supabase/migrations/20260101000011_redactores.sql) */
 export interface Redactor {
