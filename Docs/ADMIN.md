@@ -159,7 +159,7 @@ Se guardan en `goles`, una fila por gol con su `lado` y `orden`. La tabla tiene 
 
 En el formulario de actividad, «Lugar guardado» elige una cancha del catálogo y rellena el campo «Lugar»; si no está en la lista se puede escribir a mano y queda como texto sin vínculo. Las actividades antiguas solo tienen el texto y siguen funcionando igual. Al **renombrar** una cancha se actualiza también el lugar de las actividades que la usan; al **eliminarla**, esas actividades conservan el lugar escrito (el texto ya no está vinculado).
 
-El sitio público muestra el lugar tal como se escribe en la actividad. La ubicación y el link al mapa quedan en el catálogo para mostrarlos más adelante en la ficha del partido.
+El sitio público muestra el lugar tal como se escribe en la actividad, y en la ficha del partido es un link a Google Maps: el del catálogo si la actividad tiene cancha vinculada con mapa, o una búsqueda con el lugar escrito si no.
 
 **Migración 016.** Crea `estadios` (con lectura pública por RLS; la escritura es solo `service_role`), agrega `programacion.estadio_id` y siembra los lugares que ya aparecen en las programaciones. **Debe aplicarse en producción antes de desplegar el código** (`npm run db:push`, con autorización): guardar una actividad ya manda `estadio_id` y falla sin la columna.
 

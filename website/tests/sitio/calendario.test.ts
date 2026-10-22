@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { actividadAEvento, horaCorta, nombreActividad } from '@/lib/contenido/calendario'
+import { actividadAEvento, horaCorta, nombreActividad, urlMapaLugar } from '@/lib/contenido/calendario'
 import {
   agruparPorDia,
   desenlaceAYB,
@@ -62,6 +62,20 @@ describe('actividadAEvento', () => {
     expect(actividadAEvento(actividad({ goles_local: 1, goles_visitante: 0 }), undefined, goles).goles).toEqual(goles)
     expect(actividadAEvento(actividad({ goles_local: null, goles_visitante: null }), undefined, goles).goles).toBeUndefined()
     expect(actividadAEvento(actividad({ goles_local: 0, goles_visitante: 0 }), undefined, []).goles).toBeUndefined()
+  })
+
+  it('lleva el link al mapa del estadio del catálogo, o busca el lugar escrito', () => {
+    const estadio = {
+      id: 'e1', nombre: 'ESTADIO ANFA', ubicacion: 'Curicó', mapa_url: 'https://maps.app.goo.gl/abc',
+      created_at: '', updated_at: '',
+    }
+    expect(actividadAEvento(actividad({ estadio: 'ESTADIO ANFA' }), undefined, undefined, estadio).estadioMapaUrl).toBe('https://maps.app.goo.gl/abc')
+    expect(actividadAEvento(actividad({ estadio: 'ESTADIO ANFA' })).estadioMapaUrl).toBeUndefined()
+  })
+
+  it('urlMapaLugar abre el link guardado o busca el lugar en Google Maps', () => {
+    expect(urlMapaLugar('ESTADIO ANFA', 'https://maps.app.goo.gl/abc')).toBe('https://maps.app.goo.gl/abc')
+    expect(urlMapaLugar('LA GRANJA')).toBe('https://www.google.com/maps/search/?api=1&query=LA%20GRANJA')
   })
 
   it('horaCorta sin hora devuelve undefined', () => {

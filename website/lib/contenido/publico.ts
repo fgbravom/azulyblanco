@@ -25,7 +25,7 @@ import { codigoPais, PAISES, type CodigoPais } from '@/lib/jugadores/paises'
 import { HERO_FOTOS_REPO, type HeroFotos } from '@/components/hero/hero-boot'
 import { claveEquipo } from '@/lib/data/posiciones'
 import { actividadAEvento } from './calendario'
-import type { Actividad, AlbumDB, Foto, HeroFoto, NoticiaDB, Rival, SerieInfo } from './tipos'
+import type { Actividad, AlbumDB, Estadio, Foto, HeroFoto, NoticiaDB, Rival, SerieInfo } from './tipos'
 
 export type NoticiaPublica = NoticiaMetadata & { coverUrl?: string }
 export type NoticiaCompleta = Noticia & { coverUrl?: string; authorAvatar?: string }
@@ -73,6 +73,17 @@ export async function getEscudosRivales(): Promise<Record<string, string>> {
     if (r.logo_url) escudos[claveEquipo(r.nombre)] = r.logo_url
   }
   return escudos
+}
+
+/** Catálogo de canchas y estadios. Si la migración 016 aún no se aplica, el lugar se muestra sin link al mapa. */
+async function getEstadios(): Promise<Estadio[]> {
+  try {
+    const { data, error } = await cliente().from('estadios').select('*')
+    if (error) throw error
+    return data as Estadio[]
+  } catch {
+    return []
+  }
 }
 
 interface FilaGol {
@@ -124,19 +135,21 @@ export async function getEventosCalendario(): Promise<EventoCalendario[]> {
   return conRespaldo(
     async () => {
       const supabase = cliente()
-      const [{ data, error }, rivales, goles] = await Promise.all([
+      const [{ data, error }, rivales, estadios, goles] = await Promise.all([
         supabase
           .from('programacion')
           .select('*')
           .order('fecha', { ascending: true })
           .order('hora_inicio', { ascending: true, nullsFirst: true }),
         getRivales(),
+        getEstadios(),
         getGoles(),
       ])
       if (error) throw error
       const porId = new Map(rivales.map((r) => [r.id, r]))
+      const estadioPorId = new Map(estadios.map((e) => [e.id, e]))
       return (data as Actividad[]).map((a) =>
-        actividadAEvento(a, a.rival_id ? porId.get(a.rival_id) : undefined, goles.get(a.id))
+        actividadAEvento(a, a.rival_id ? porId.get(a.rival_id) : undefined, goles.get(a.id), a.estadio_id ? estadioPorId.get(a.estadio_id) : undefined)
       )
     },
     () => [...eventosDiciembrePasados, ...eventosEnero2026]

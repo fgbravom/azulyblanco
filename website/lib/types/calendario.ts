@@ -22,6 +22,7 @@ export interface EventoCalendario {
   rivalSitioWeb?: string // sitio web del rival del catálogo
   actividad?: string // para entrenamientos u otros
   estadio: string
+  estadioMapaUrl?: string // link al mapa del estadio del catálogo (tabla estadios)
   confirmado: boolean
   horaInicio?: string // formato: "15:00"
   horaFin?: string // formato: "13:00" - para eventos con duración

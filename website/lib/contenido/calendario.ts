@@ -1,5 +1,5 @@
 import type { EventoCalendario, GolPartido } from '@/lib/types/calendario'
-import type { Actividad, Rival } from './tipos'
+import type { Actividad, Estadio, Rival } from './tipos'
 
 const DIAS = ['DOMINGO', 'LUNES', 'MARTES', 'MIÉRCOLES', 'JUEVES', 'VIERNES', 'SÁBADO']
 const MESES = [
@@ -13,12 +13,21 @@ export function horaCorta(hora: string | null): string | undefined {
 }
 
 /**
+ * Link para abrir el lugar en Google Maps: el del catálogo de estadios si existe,
+ * o una búsqueda con el lugar escrito para los antiguos.
+ */
+export function urlMapaLugar(estadio: string, mapaUrl?: string | null): string {
+  return mapaUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(estadio)}`
+}
+
+/**
  * Convierte una fila de la tabla programacion al formato que consumen los componentes
  * de components/calendario (el mismo de los antiguos lib/data/eventos-*.ts).
  * `rival` es el equipo del catálogo (tabla rivales) al que apunta rival_id, si existe.
+ * `estadio` es la cancha del catálogo (tabla estadios) al que apunta estadio_id, si existe.
  * `goles` son los goleadores de AYB de ese partido (tabla goles).
  */
-export function actividadAEvento(a: Actividad, rival?: Rival, goles?: GolPartido[]): EventoCalendario {
+export function actividadAEvento(a: Actividad, rival?: Rival, goles?: GolPartido[], estadio?: Estadio): EventoCalendario {
   const resultado =
     a.goles_local != null && a.goles_visitante != null
       ? { local: a.goles_local, visitante: a.goles_visitante }
@@ -42,6 +51,7 @@ export function actividadAEvento(a: Actividad, rival?: Rival, goles?: GolPartido
     titulo: a.titulo ?? undefined,
     descripcion: a.descripcion ?? undefined,
     estadio: a.estadio,
+    estadioMapaUrl: estadio?.mapa_url ?? undefined,
     confirmado: a.confirmado,
     horaInicio: horaCorta(a.hora_inicio),
     horaFin: horaCorta(a.hora_fin),

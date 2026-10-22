@@ -8,6 +8,7 @@ import {
 } from 'lucide-react'
 import { EventoCalendario } from '@/lib/types/calendario'
 import { SITE_CONFIG } from '@/lib/constants'
+import { urlMapaLugar } from '@/lib/contenido/calendario'
 import { equiposDeEvento, fechaLarga } from '@/lib/utils/calendario'
 import { cn } from '@/lib/utils'
 import { Marcador } from './Marcador'
@@ -188,7 +189,18 @@ export function DetalleEvento({ evento, onCerrar }: DetalleEventoProps) {
               </Fila>
             )}
             {evento.estadio && (
-              <Fila icono={MapPin} titulo="Lugar">{evento.estadio}</Fila>
+              <Fila icono={MapPin} titulo="Lugar">
+                <a
+                  href={urlMapaLugar(evento.estadio, evento.estadioMapaUrl)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  title="Abrir en Google Maps"
+                  className="inline-flex items-start gap-1 text-azul-claro hover:underline"
+                >
+                  {evento.estadio}
+                  <ExternalLink className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                </a>
+              </Fila>
             )}
             {evento.series && evento.series.length > 0 && (
               <Fila icono={Users} titulo="Series">{evento.series.join(' · ')}</Fila>
