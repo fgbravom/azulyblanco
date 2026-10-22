@@ -35,12 +35,17 @@ const secciones = [
     items: [
       { name: 'Portada', href: '/admin/hero', icon: MonitorSmartphone },
       { name: 'Programación', href: '/admin/programacion', icon: CalendarDays },
-      { name: 'Rivales', href: '/admin/rivales', icon: Swords },
-      { name: 'Canchas y estadios', href: '/admin/estadios', icon: MapPin },
       { name: 'Noticias', href: '/admin/noticias', icon: Newspaper },
-      { name: 'Redactores', href: '/admin/redactores', icon: PenLine },
       { name: 'Galerías', href: '/admin/galeria', icon: Images },
       { name: 'Imágenes', href: '/admin/medios', icon: ImageIcon },
+    ],
+  },
+  {
+    titulo: 'Mantenedores',
+    items: [
+      { name: 'Rivales', href: '/admin/rivales', icon: Swords },
+      { name: 'Canchas y estadios', href: '/admin/estadios', icon: MapPin },
+      { name: 'Redactores', href: '/admin/redactores', icon: PenLine },
     ],
   },
   {
