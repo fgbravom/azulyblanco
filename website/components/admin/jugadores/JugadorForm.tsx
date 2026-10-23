@@ -113,9 +113,6 @@ export default function JugadorForm({ jugador, onSave, onCancel }: Props) {
         const equiposData = await equiposRes.json();
         const posicionesData = await posicionesRes.json();
 
-        console.log('Equipos loaded:', equiposData);
-        console.log('Posiciones loaded:', posicionesData);
-
         setEquipos(equiposData.data || []);
         setPosiciones(posicionesData.data || []);
       } catch (error) {
@@ -162,7 +159,6 @@ export default function JugadorForm({ jugador, onSave, onCancel }: Props) {
   // Log de errores de validación
   useEffect(() => {
     if (Object.keys(errors).length > 0) {
-      console.log('Errores de validación:', errors);
       const primerError = Object.values(errors)[0];
       if (primerError?.message) {
         toast.error(`Error de validación: ${primerError.message}`);
@@ -389,24 +385,6 @@ export default function JugadorForm({ jugador, onSave, onCancel }: Props) {
               )}
             </div>
             <div>
-              <Label htmlFor="pie_preferido">Pie Preferido</Label>
-              <Select
-                value={watch('pie_preferido') || ''}
-                onValueChange={(value) =>
-                  setValue('pie_preferido', value as 'Derecho' | 'Izquierdo' | 'Ambidiestro')
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecciona" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Derecho">Derecho</SelectItem>
-                  <SelectItem value="Izquierdo">Izquierdo</SelectItem>
-                  <SelectItem value="Ambidiestro">Ambidiestro</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
               <Label htmlFor="altura_cm">Altura (cm)</Label>
               <Input
                 id="altura_cm"
@@ -426,6 +404,24 @@ export default function JugadorForm({ jugador, onSave, onCancel }: Props) {
                 step="0.1"
                 {...register('peso_kg', { setValueAs: numeroOpcional })}
               />
+            </div>
+            <div>
+              <Label htmlFor="pie_preferido">Pie Preferido</Label>
+              <Select
+                value={watch('pie_preferido') || ''}
+                onValueChange={(value) =>
+                  setValue('pie_preferido', value as 'Derecho' | 'Izquierdo' | 'Ambidiestro')
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecciona" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Derecho">Derecho</SelectItem>
+                  <SelectItem value="Izquierdo">Izquierdo</SelectItem>
+                  <SelectItem value="Ambidiestro">Ambidiestro</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <div>
               <Label htmlFor="estado">Estado</Label>
@@ -509,9 +505,9 @@ export default function JugadorForm({ jugador, onSave, onCancel }: Props) {
               Guardando...
             </>
           ) : jugador ? (
-            'Actualizar'
+            'Guardar cambios'
           ) : (
-            'Crear Jugador'
+            'Crear jugador'
           )}
         </Button>
       </BarraAcciones>

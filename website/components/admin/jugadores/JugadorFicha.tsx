@@ -1,34 +1,37 @@
 'use client';
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import type { JugadorCompleto } from '@/types/database';
 import { codigoPais } from '@/lib/jugadores/paises';
-import { recorteDe } from '@/lib/contenido/foco';
-import FotoRecorte from '@/components/ui/foto-recorte';
 import Bandera from '@/components/ui/bandera';
-import { User, Shield, Mail, Heart, Calendar, MapPin, Phone } from 'lucide-react';
+import { FichaPersona } from '@/app/series/_components/FichaPersona';
+import { recorteDe } from '@/lib/contenido/foco';
+import { formatearFecha } from '@/components/admin/ui';
+import EstadoJugadorBadge from './EstadoJugadorBadge';
+import { User, Shield, Mail, Heart, Calendar, MapPin, Phone, Edit, Trash2 } from 'lucide-react';
 
 interface Props {
   jugador: JugadorCompleto | null;
   open: boolean;
   onClose: () => void;
+  onEditar: (jugador: JugadorCompleto) => void;
+  onEliminar: (jugador: JugadorCompleto) => void;
 }
 
-export default function JugadorFicha({ jugador, open, onClose }: Props) {
+// Primer nombre; los apellidos ya vienen con paterno y materno (igual que la página pública)
+function primerNombre(nombre: string): string {
+  return nombre.trim().split(/\s+/)[0] ?? nombre;
+}
+
+const formatDate = (date: string | null) =>
+  date ? formatearFecha(date, { day: '2-digit', month: '2-digit', year: 'numeric' }).replaceAll('/', '-') : '-';
+
+export default function JugadorFicha({ jugador, open, onClose, onEditar, onEliminar }: Props) {
   if (!jugador) return null;
 
   const pais = codigoPais(jugador.nacionalidad);
-
-  const formatDate = (date: string | null) => {
-    if (!date) return '-';
-    return new Date(date).toLocaleDateString('es-ES', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
-  };
 
   const calcularEdad = (fechaNacimiento: string | null) => {
     if (!fechaNacimiento) return '-';
@@ -45,42 +48,57 @@ export default function JugadorFicha({ jugador, open, onClose }: Props) {
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-white">
-        <DialogHeader>
-          <div className="flex items-start justify-between gap-3">
-            <div className="min-w-0 flex-1">
-              <DialogTitle className="flex items-center gap-3 flex-wrap text-2xl text-azul-primario mb-2 sm:text-3xl">
-                {jugador.nombre_completo}
-                {pais && <Bandera codigo={pais} className="h-6 w-9" />}
-              </DialogTitle>
-              <div className="flex items-center gap-3 flex-wrap">
-                <Badge
-                  variant={jugador.estado === 'Activo' ? 'default' : 'secondary'}
-                  className="text-sm"
-                >
-                  {jugador.estado}
-                </Badge>
-                <span className="text-sm text-gray-600">
-                  {jugador.categoria}
+        <div className="flex gap-4 sm:gap-6">
+          <div className="w-36 shrink-0 sm:w-44">
+            <FichaPersona
+              foto={jugador.foto_url}
+              alt={jugador.nombre_completo}
+              nombre={primerNombre(jugador.nombre)}
+              apellidos={jugador.apellidos}
+              recorte={recorteDe(jugador.foto_foco_x, jugador.foto_foco_y, jugador.foto_foco_ancho)}
+              detalle={jugador.posiciones_abr.slice(0, 2).join(' · ')}
+              marca={pais && <Bandera codigo={pais} className="h-3 w-[18px] md:h-3.5 md:w-[21px]" />}
+            >
+              {jugador.dorsal != null && (
+                <span className="absolute top-3 left-4 font-heading font-black text-5xl leading-none text-white/90 drop-shadow md:text-6xl">
+                  {jugador.dorsal}
                 </span>
-                {jugador.dorsal && (
-                  <span className="text-2xl font-bold font-mono text-azul-primario">
-                    #{jugador.dorsal}
-                  </span>
-                )}
-              </div>
-            </div>
-            {jugador.foto_url && (
-              <span className="relative block h-16 w-16 shrink-0 overflow-hidden rounded-full border-4 border-azul-primario sm:h-24 sm:w-24">
-                <FotoRecorte
-                  url={jugador.foto_url}
-                  alt={jugador.nombre_completo}
-                  recorte={recorteDe(jugador.foto_cara_x, jugador.foto_cara_y, jugador.foto_cara_ancho)}
-                  sizes="(min-width: 640px) 96px, 64px"
-                />
-              </span>
-            )}
+              )}
+              {jugador.estado !== 'Activo' && (
+                <span className="absolute top-3 right-3 rounded-full bg-gray-600 px-2 py-0.5 text-[11px] font-semibold text-white">
+                  {jugador.estado}
+                </span>
+              )}
+            </FichaPersona>
+            <p className="mt-2 text-xs text-gray-500">Así se ve en la página de la serie.</p>
           </div>
-        </DialogHeader>
+
+          <div className="min-w-0 flex-1 space-y-3 pt-1">
+            <DialogHeader className="text-left">
+              <DialogTitle className="flex flex-wrap items-center gap-2 pr-8 font-heading text-2xl font-bold text-azul-primario sm:text-3xl">
+                {jugador.nombre_completo}
+              </DialogTitle>
+            </DialogHeader>
+            <p className="text-sm text-gray-600">
+              {jugador.categoria ? `Serie ${jugador.categoria}` : 'Sin serie'}
+              {jugador.dorsal != null && <span className="font-mono font-bold text-azul-primario"> · #{jugador.dorsal}</span>}
+            </p>
+            <EstadoJugadorBadge estado={jugador.estado} />
+            <div className="flex flex-wrap gap-2 pt-1">
+              <Button variant="outline" size="sm" onClick={() => onEditar(jugador)}>
+                <Edit /> Editar
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onEliminar(jugador)}
+                className="text-red-600 hover:bg-red-50 hover:text-red-700"
+              >
+                <Trash2 /> Eliminar
+              </Button>
+            </div>
+          </div>
+        </div>
 
         <Tabs defaultValue="personal" className="w-full mt-6">
           <TabsList className="grid h-auto w-full grid-cols-4">
