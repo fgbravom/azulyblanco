@@ -26,7 +26,8 @@ const MIEMBROS_STAFF = [
 
 /** Dónde se recortan las fotos del cuerpo técnico: la ficha de la serie */
 const MARCOS_STAFF: MarcoEncuadre[] = [
-  { etiqueta: 'En la ficha de la serie', clase: 'aspect-[3/4] rounded-2xl', defecto: FOCO_ARRIBA },
+  // Ancho fijo: la vista previa no se estira a todo el ancho del panel lateral
+  { etiqueta: 'En la ficha de la serie', clase: 'aspect-[3/4] rounded-2xl', ancho: 'w-64', defecto: FOCO_ARRIBA },
 ];
 
 export default function SerieEditor({ serie }: { serie: SerieAdmin }) {

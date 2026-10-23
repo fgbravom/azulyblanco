@@ -35,7 +35,8 @@ const MARCOS_CARA: MarcoEncuadre[] = [
 ];
 
 const MARCOS_FICHA: MarcoEncuadre[] = [
-  { etiqueta: 'En la ficha de la serie', clase: 'aspect-[3/4] rounded-2xl', defecto: FOCO_ARRIBA },
+  // Ancho fijo como el avatar: así la vista previa no se estira a todo el ancho del diálogo
+  { etiqueta: 'En la ficha de la serie', clase: 'aspect-[3/4] rounded-2xl', ancho: 'w-64', defecto: FOCO_ARRIBA },
 ];
 
 interface Props {
