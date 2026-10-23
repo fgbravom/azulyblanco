@@ -107,6 +107,17 @@ export interface RedactorConCuenta extends Redactor {
   cuenta: CuentaRedactor | null
 }
 
+/** Cuenta del panel para la pantalla de usuarios (nunca incluye el hash) */
+export interface CuentaPanel {
+  id: string
+  usuario: string
+  rol: 'admin' | 'colaborador'
+  nombre: string // nombre del redactor, o "Administración"
+  activa: boolean
+  ultimo_ingreso: string | null
+  debe_cambiar_password: boolean
+}
+
 export interface NoticiaDB {
   id: string
   slug: string

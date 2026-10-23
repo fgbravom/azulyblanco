@@ -76,41 +76,74 @@ describe('server actions del admin sin sesión', () => {
   )
 })
 
-// Acciones que además puede usar un redactor (requireEditorNoticias). Cada una
-// aplica sus propias reglas (solo sus noticias, solo la biblioteca...), que se prueban
-// aparte; agregar una acá debe justificarse en la revisión del PR.
-const ACCIONES_REDACTOR = new Set([
+// Acciones que además puede usar un colaborador (requirePermiso con su sección).
+// Cada una aplica sus propias reglas (solo sus noticias, sin rivales, sin eliminar
+// medios...), que se prueban aparte; agregar una acá debe justificarse en la revisión del PR.
+const ACCIONES_COLABORADOR = new Set([
+  // Noticias
   '(admin)/admin/noticias → listarNoticias',
   '(admin)/admin/noticias → obtenerNoticia',
   '(admin)/admin/noticias → guardarNoticia',
   '(admin)/admin/noticias → cambiarPublicacionNoticia',
+  // Imágenes
   '(admin)/admin/medios → prepararSubida',
   '(admin)/admin/medios → listarMedios',
   '(admin)/admin/medios → registrarMedio',
+  // Mi cuenta
   '(admin)/admin/cuenta → cambiarMiPassword',
   '(admin)/admin/cuenta → cambiarMiAvatar',
+  // Portada
+  '(admin)/admin/hero → listarFotosHero',
+  '(admin)/admin/hero → procesarFotoHero',
+  '(admin)/admin/hero → cambiarVisibilidadHero',
+  '(admin)/admin/hero → reordenarFotosHero',
+  '(admin)/admin/hero → eliminarFotoHero',
+  // Programación (y la lectura de rivales y canchas que usa el formulario)
+  '(admin)/admin/programacion → listarActividades',
+  '(admin)/admin/programacion → listarJugadoresGoles',
+  '(admin)/admin/programacion → obtenerGoles',
+  '(admin)/admin/programacion → guardarActividad',
+  '(admin)/admin/programacion → cambiarConfirmacion',
+  '(admin)/admin/programacion → eliminarActividad',
+  '(admin)/admin/rivales → listarRivales',
+  '(admin)/admin/estadios → listarEstadios',
+  // Galería
+  '(admin)/admin/galeria → listarAlbumes',
+  '(admin)/admin/galeria → obtenerAlbum',
+  '(admin)/admin/galeria → guardarAlbum',
+  '(admin)/admin/galeria → eliminarAlbum',
+  '(admin)/admin/galeria → agregarFotos',
+  '(admin)/admin/galeria → actualizarDescripcionFoto',
+  '(admin)/admin/galeria → definirPortada',
+  '(admin)/admin/galeria → reordenarFotos',
+  '(admin)/admin/galeria → eliminarFotos',
+  // Plantel y series
+  '(admin)/admin/series → listarSeries',
+  '(admin)/admin/series → obtenerSerie',
+  '(admin)/admin/series → guardarSerie',
+  '(admin)/admin/series → guardarCuerpoTecnico',
 ])
 
-describe('server actions del admin con sesión de redactor', () => {
+describe('server actions del admin con sesión de colaborador', () => {
   let base: Awaited<ReturnType<typeof simularSesion>>['base']
 
   beforeEach(async () => {
     vi.clearAllMocks()
-    base = (await simularSesion('redactor')).base
+    base = (await simularSesion('colaborador')).base
   })
 
   it('la lista blanca no se queda con nombres que ya no existen', () => {
-    for (const permitida of ACCIONES_REDACTOR) {
-      expect(acciones.some((a) => a.accion === permitida)).toBe(true)
+    for (const permitida of ACCIONES_COLABORADOR) {
+      expect(acciones.some((a) => a.accion === permitida), permitida).toBe(true)
     }
   })
 
-  it.each(acciones.filter((a) => !ACCIONES_PUBLICAS.has(a.accion) && !ACCIONES_REDACTOR.has(a.accion)))(
+  it.each(acciones.filter((a) => !ACCIONES_PUBLICAS.has(a.accion) && !ACCIONES_COLABORADOR.has(a.accion)))(
     '$accion se rechaza',
     async ({ fn }) => {
       await expect(fn(...ARGS)).rejects.toThrow('No autorizado')
-      // Lo único que puede consultarse es la cuenta del redactor, nunca contenido
-      expect(base!.consultas.every((c) => c.tabla === 'cuentas_redactores')).toBe(true)
+      // Lo único que puede consultarse es la cuenta, nunca contenido
+      expect(base!.consultas.every((c) => c.tabla === 'cuentas_panel')).toBe(true)
       expect(cargarSharp).not.toHaveBeenCalled()
     }
   )

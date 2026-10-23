@@ -4,7 +4,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { rechazarSinSesion } from '@/lib/auth/session';
+import { rechazarSinPermiso } from '@/lib/auth/session';
 import { getJugadores, createJugador, setPosicionesJugador } from '@/lib/data/jugadores';
 import { parsePosiciones } from '@/lib/validations/jugador';
 import type { EstadoJugador, JugadorInsert, JugadoresFilter, QueryOptions } from '@/types/database';
@@ -14,7 +14,7 @@ import type { EstadoJugador, JugadorInsert, JugadoresFilter, QueryOptions } from
  * Obtiene lista de jugadores con filtros opcionales
  */
 export async function GET(request: NextRequest) {
-  const denegado = await rechazarSinSesion();
+  const denegado = await rechazarSinPermiso('plantel');
   if (denegado) return denegado;
 
   try {
@@ -87,7 +87,7 @@ export async function GET(request: NextRequest) {
  * Crea un nuevo jugador
  */
 export async function POST(request: NextRequest) {
-  const denegado = await rechazarSinSesion();
+  const denegado = await rechazarSinPermiso('plantel');
   if (denegado) return denegado;
 
   try {

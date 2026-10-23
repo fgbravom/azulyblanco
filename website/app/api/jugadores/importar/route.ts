@@ -4,7 +4,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { rechazarSinSesion } from '@/lib/auth/session';
+import { rechazarSinPermiso } from '@/lib/auth/session';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { createJugador, setPosicionesJugador, updateJugador } from '@/lib/data/jugadores';
 import { cargarDatosReferencia, planificarImportacion } from '@/lib/jugadores/importar-csv';
@@ -21,7 +21,7 @@ const TAMANO_MAXIMO = 1024 * 1024;
  * crea los nuevos y actualiza los que cambiaron.
  */
 export async function POST(request: NextRequest) {
-  const denegado = await rechazarSinSesion();
+  const denegado = await rechazarSinPermiso('plantel');
   if (denegado) return denegado;
 
   try {

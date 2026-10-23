@@ -15,7 +15,7 @@ import { EstadoBadge, FiltroChips, MenuAcciones, Vacio, formatearFecha, inputCla
 
 type Filtro = 'todas' | 'publicadas' | 'borradores';
 
-export default function NoticiasAdmin({ iniciales, rol = 'admin' }: { iniciales: NoticiaDB[]; rol?: 'admin' | 'redactor' }) {
+export default function NoticiasAdmin({ iniciales, rol = 'admin' }: { iniciales: NoticiaDB[]; rol?: 'admin' | 'colaborador' }) {
   const [noticias, setNoticias] = useState(iniciales);
   const [filtro, setFiltro] = useState<Filtro>('todas');
   const [busqueda, setBusqueda] = useState('');

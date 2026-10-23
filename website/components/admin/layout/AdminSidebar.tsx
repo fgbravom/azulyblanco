@@ -19,6 +19,7 @@ import {
   Swords,
   MapPin,
   Wallet,
+  UserCog,
   ExternalLink,
   LogOut,
   Menu,
@@ -28,7 +29,10 @@ import {
 const secciones = [
   {
     titulo: null,
-    items: [{ name: 'Inicio', href: '/admin', icon: LayoutDashboard }],
+    items: [
+      { name: 'Inicio', href: '/admin', icon: LayoutDashboard },
+      { name: 'Mi cuenta', href: '/admin/cuenta', icon: UserRound },
+    ],
   },
   {
     titulo: 'Contenido',
@@ -46,6 +50,7 @@ const secciones = [
       { name: 'Rivales', href: '/admin/rivales', icon: Swords },
       { name: 'Canchas y estadios', href: '/admin/estadios', icon: MapPin },
       { name: 'Redactores', href: '/admin/redactores', icon: PenLine },
+      { name: 'Usuarios', href: '/admin/usuarios', icon: UserCog },
     ],
   },
   {
@@ -58,8 +63,8 @@ const secciones = [
   },
 ];
 
-// Lo único que ve un redactor
-const seccionesRedactor = [
+// Lo que ve un colaborador (las mismas secciones que RUTAS_SECCION en lib/auth/permisos.ts)
+const seccionesColaborador = [
   {
     titulo: null,
     items: [
@@ -67,9 +72,25 @@ const seccionesRedactor = [
       { name: 'Mi cuenta', href: '/admin/cuenta', icon: UserRound },
     ],
   },
+  {
+    titulo: 'Contenido',
+    items: [
+      { name: 'Portada', href: '/admin/hero', icon: MonitorSmartphone },
+      { name: 'Programación', href: '/admin/programacion', icon: CalendarDays },
+      { name: 'Galerías', href: '/admin/galeria', icon: Images },
+      { name: 'Imágenes', href: '/admin/medios', icon: ImageIcon },
+    ],
+  },
+  {
+    titulo: 'Club',
+    items: [
+      { name: 'Plantel', href: '/admin/jugadores', icon: Users },
+      { name: 'Series', href: '/admin/series', icon: Shield },
+    ],
+  },
 ];
 
-type Rol = 'admin' | 'redactor';
+type Rol = 'admin' | 'colaborador';
 
 function estaActivo(pathname: string, href: string) {
   if (href === '/admin') return pathname === '/admin';
@@ -89,16 +110,16 @@ function Navegacion({ onNavigate, cuotas, rol, nombre }: { onNavigate?: () => vo
   return (
     <div className="flex h-full flex-col bg-azul-primario text-white">
       <Link
-        href={rol === 'redactor' ? '/admin/noticias' : '/admin'}
+        href={rol === 'colaborador' ? '/admin/noticias' : '/admin'}
         onClick={onNavigate}
         className="flex h-16 shrink-0 flex-col justify-center border-b border-white/10 px-5"
       >
-        <p className="font-heading font-bold">{rol === 'redactor' ? 'Redacción' : 'Administración'}</p>
-        {rol === 'redactor' && nombre && <p className="truncate text-xs text-white/70">{nombre}</p>}
+        <p className="font-heading font-bold">{rol === 'colaborador' ? 'Colaboración' : 'Administración'}</p>
+        {rol === 'colaborador' && nombre && <p className="truncate text-xs text-white/70">{nombre}</p>}
       </Link>
 
       <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-6">
-        {(rol === 'redactor' ? seccionesRedactor : secciones).map((seccion, i) => (
+        {(rol === 'colaborador' ? seccionesColaborador : secciones).map((seccion, i) => (
           <div key={seccion.titulo ?? i}>
             {seccion.titulo && (
               <p className="px-3 mb-2 text-[11px] font-semibold uppercase tracking-wider text-azul-cielo/80">
@@ -170,7 +191,7 @@ export default function AdminSidebar({ cuotas, rol = 'admin', nombre }: { cuotas
           <Menu className="h-6 w-6" />
         </button>
         {/* Escudo centrado, como en el header del sitio */}
-        <Link href={rol === 'redactor' ? '/admin/noticias' : '/admin'} className="absolute left-1/2 -translate-x-1/2">
+        <Link href={rol === 'colaborador' ? '/admin/noticias' : '/admin'} className="absolute left-1/2 -translate-x-1/2">
           <Image src="/images/escudoazulyblanco.png" alt="Inicio de administración" width={48} height={48} className="h-12 w-12 object-contain" />
         </Link>
       </div>

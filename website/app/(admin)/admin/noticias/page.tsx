@@ -20,7 +20,7 @@ export default async function NoticiasPage() {
     <>
       <PageHeader
         titulo="Noticias"
-        descripcion={rol === 'redactor' ? 'Tus noticias: redáctalas, publícalas y edítalas.' : 'Redacta, publica y edita las noticias del club.'}
+        descripcion={rol === 'colaborador' ? 'Tus noticias: redáctalas, publícalas y edítalas.' : 'Redacta, publica y edita las noticias del club.'}
         acciones={
           <Button asChild>
             <Link href="/admin/noticias/nueva">

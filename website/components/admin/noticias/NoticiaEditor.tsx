@@ -58,7 +58,7 @@ interface Props {
   noticia: NoticiaDB | null;
   /** Catálogo para elegir autor (solo el admin; un redactor firma siempre como él mismo) */
   redactores: Redactor[];
-  rol?: 'admin' | 'redactor';
+  rol?: 'admin' | 'colaborador';
   /** Nombre del redactor que escribe, para mostrarlo como autor fijo */
   nombreRedactor?: string;
 }

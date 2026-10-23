@@ -53,7 +53,7 @@ type FilaPrevia = { slug: string; redactor_id: string | null; publicado: boolean
 // Los helpers de abajo no se exportan: todo export de un actions.ts es una server action
 
 /** Id del redactor si la sesión es de uno; null para el admin */
-const idRedactor = (sesion: Sesion) => (sesion.rol === 'redactor' ? sesion.redactorId : null)
+const idRedactor = (sesion: Sesion) => (sesion.rol === 'colaborador' ? sesion.redactorId : null)
 
 /** Slug, dueño y estado de publicación de la noticia, leídos una sola vez */
 async function leerFilaPrevia(supabase: Supabase, id: string): Promise<FilaPrevia | null> {
@@ -64,7 +64,7 @@ async function leerFilaPrevia(supabase: Supabase, id: string): Promise<FilaPrevi
 
 /** Un redactor solo toca sus noticias; las ajenas (o inexistentes) se rechazan igual */
 function comprobarPropiedad(sesion: Sesion, previa: FilaPrevia | null) {
-  if (sesion.rol === 'redactor' && previa?.redactor_id !== sesion.redactorId) throw new Error('No autorizado')
+  if (sesion.rol === 'colaborador' && previa?.redactor_id !== sesion.redactorId) throw new Error('No autorizado')
 }
 
 /**
@@ -74,7 +74,7 @@ function comprobarPropiedad(sesion: Sesion, previa: FilaPrevia | null) {
  */
 function motivoDespublicacion(sesion: Sesion, previa: FilaPrevia | null, publicado: boolean, motivo?: string): string | null {
   if (!previa?.publicado || publicado) return null
-  if (sesion.rol === 'redactor') {
+  if (sesion.rol === 'colaborador') {
     const parsed = motivoRedactorSchema.safeParse(motivo)
     if (!parsed.success) throw new Error(parsed.error.issues[0]?.message ?? 'Motivo inválido')
     return parsed.data
@@ -158,7 +158,7 @@ export async function guardarNoticia(
   const yo = idRedactor(sesion)
 
   // Un redactor firma siempre como él mismo, sin importar lo que traiga el input
-  const entrada = sesion.rol === 'redactor' ? { ...input, redactor_id: sesion.redactorId, autor: sesion.nombre } : input
+  const entrada = sesion.rol === 'colaborador' ? { ...input, redactor_id: sesion.redactorId, autor: sesion.nombre } : input
   const parsed = noticiaSchema.safeParse(entrada)
   if (!parsed.success) throw new Error(parsed.error.issues[0]?.message ?? 'Datos inválidos')
 

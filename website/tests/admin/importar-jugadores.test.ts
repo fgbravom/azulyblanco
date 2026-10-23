@@ -137,20 +137,34 @@ vi.mock('@/lib/data/jugadores', () => ({
 // cualquier orden, y jugadores antiguos con solo posicion_id
 vi.mock('@/lib/supabase/admin', () => ({
   createAdminClient: () => ({
-    from: (tabla: string) => ({
-      select: async () => ({
-        data:
-          tabla === 'jugadores'
-            ? referencia.existentes.map(({ posiciones, ...j }) => ({
-                ...j,
-                posicion_id: posiciones[0],
-                jugador_posiciones:
-                  j.id === 60 ? [] : posiciones.map((posicion_id, orden) => ({ posicion_id, orden })).reverse(),
-              }))
-            : referencia[tabla as keyof DatosReferencia],
-        error: null,
-      }),
-    }),
+    from: (tabla: string) => {
+      // La cuenta de la sesión (administrador activo) que valida la ruta
+      if (tabla === 'cuentas_panel') {
+        return {
+          select: () => ({
+            eq: () => ({
+              maybeSingle: async () => ({
+                data: { rol: 'admin', activa: true, version_sesion: 0, debe_cambiar_password: false, redactor_id: null, redactores: null },
+              }),
+            }),
+          }),
+        }
+      }
+      return {
+        select: async () => ({
+          data:
+            tabla === 'jugadores'
+              ? referencia.existentes.map(({ posiciones, ...j }) => ({
+                  ...j,
+                  posicion_id: posiciones[0],
+                  jugador_posiciones:
+                    j.id === 60 ? [] : posiciones.map((posicion_id, orden) => ({ posicion_id, orden })).reverse(),
+                }))
+              : referencia[tabla as keyof DatosReferencia],
+          error: null,
+        }),
+      }
+    },
   }),
 }))
 

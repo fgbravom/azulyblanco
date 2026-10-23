@@ -9,13 +9,12 @@ import { createSession, obtenerSesion, requireEditorNoticias } from '@/lib/auth/
 import { createAdminClient } from '@/lib/supabase/admin'
 
 /**
- * Un redactor cambia su propia contraseña. El admin no: la suya vive en una
- * variable de entorno. Subir la versión cierra sus demás sesiones, y la cookie
- * se vuelve a emitir para no cerrar la actual.
+ * Cualquier cuenta cambia su propia contraseña. Subir la versión cierra sus
+ * demás sesiones, y la cookie se vuelve a emitir para no cerrar la actual.
  */
 export async function cambiarMiPassword(actual: string, nueva: string) {
   const sesion = await obtenerSesion()
-  if (sesion?.rol !== 'redactor') throw new Error('No autorizado')
+  if (!sesion) throw new Error('No autorizado')
 
   if (typeof actual !== 'string' || typeof nueva !== 'string' || !actual) throw new Error('Indica tu contraseña actual')
   const invalida = validarPasswordNueva(nueva)
@@ -24,9 +23,9 @@ export async function cambiarMiPassword(actual: string, nueva: string) {
 
   const supabase = createAdminClient()
   const { data: cuenta, error } = await supabase
-    .from('cuentas_redactores')
-    .select('password_hash, version_sesion')
-    .eq('redactor_id', sesion.redactorId)
+    .from('cuentas_panel')
+    .select('password_hash, version_sesion, rol')
+    .eq('id', sesion.cuentaId)
     .single()
   if (error) throw new Error(error.message)
 
@@ -34,12 +33,12 @@ export async function cambiarMiPassword(actual: string, nueva: string) {
 
   const version = cuenta.version_sesion + 1
   const { error: errorGuardado } = await supabase
-    .from('cuentas_redactores')
+    .from('cuentas_panel')
     .update({ password_hash: await hashPassword(nueva), debe_cambiar_password: false, version_sesion: version })
-    .eq('redactor_id', sesion.redactorId)
+    .eq('id', sesion.cuentaId)
   if (errorGuardado) throw new Error(errorGuardado.message)
 
-  await createSession({ rol: 'redactor', redactorId: sesion.redactorId, version })
+  await createSession({ rol: cuenta.rol as 'admin' | 'colaborador', cuentaId: sesion.cuentaId, version })
 }
 
 /**
@@ -49,7 +48,7 @@ export async function cambiarMiPassword(actual: string, nueva: string) {
  */
 export async function cambiarMiAvatar(avatarPath: string | null): Promise<string | null> {
   const sesion = await requireEditorNoticias()
-  if (sesion.rol !== 'redactor') throw new Error('No autorizado')
+  if (sesion.rol !== 'colaborador') throw new Error('No autorizado')
   if (avatarPath !== null && typeof avatarPath !== 'string') throw new Error('Ruta de avatar inválida')
 
   const supabase = createAdminClient()

@@ -1,3 +1,4 @@
+import { sesionParaSeccion } from '@/lib/auth/session';
 import { ErrorDatos, PageHeader } from '@/components/admin/ui';
 import HeroAdmin from '@/components/admin/hero/HeroAdmin';
 import { listarFotosHero } from './actions';
@@ -6,6 +7,7 @@ import { listarFotosHero } from './actions';
 export const maxDuration = 60;
 
 export default async function HeroPage() {
+  await sesionParaSeccion('portada');
   let fotos;
   let error: string | null = null;
   try {

@@ -122,20 +122,31 @@ Una server action o ruta `/api` nueva queda cubierta sola por las pruebas de pro
 
 ## Redactores con acceso
 
-El panel tiene dos roles. El **admin** (usuario `ab06`, contraseña de `ADMIN_PASSWORD_HASH`) conserva todo. Un **redactor** ingresa con el usuario y la contraseña de su cuenta y solo ve `/admin/noticias` y `/admin/cuenta`.
+El panel tiene dos roles, guardados en la tabla `cuentas_panel` (migración 020):
 
-| | Admin | Redactor |
+- **Administrador** (`admin`): conserva todo. Su cuenta se crea en su primer ingreso con el hash de `ADMIN_PASSWORD_HASH` (usuario `ab06`); desde entonces su contraseña se cambia en «Mi cuenta» y la variable ya no cuenta.
+- **Colaborador** (`colaborador`): escribe noticias con su propia firma y gestiona Portada, Programación, Galerías, Imágenes, Plantel y Series. Ingresa con su usuario y solo ve esas secciones y «Mi cuenta».
+
+| | Administrador | Colaborador |
 |---|---|---|
-| Noticias | Todas | Solo las suyas (`redactor_id` propio); firma siempre con su nombre |
+| Noticias | Todas; eliminar | Solo las suyas (`redactor_id` propio); firma siempre con su nombre |
 | Publicar / despublicar | Sí, sin motivo obligatorio | Sí; para despublicar debe escribir un motivo (10 a 500 caracteres) |
-| Eliminar noticias | Sí | No |
-| Imágenes | Biblioteca completa, puede eliminar | Subir a la biblioteca y su avatar, listar y elegir; no eliminar ni subir a otros destinos |
-| Resto del panel y `/api/*` | Sí | No (el middleware redirige o responde 401, y cada acción lo vuelve a comprobar) |
-| Mi cuenta | No aplica (su contraseña es una variable de entorno) | Cambiar su contraseña y su avatar (este último, después de cambiar la temporal) |
+| Portada, Programación, Galerías, Plantel y Series | Sí | Sí |
+| Imágenes | Biblioteca completa, puede eliminar | Subir a la biblioteca, portadas, galerías y su avatar; no escudos de rivales ni eliminar |
+| Rivales, canchas y estadios, Redactores, Cuotas | Sí | No (lectura de rivales y canchas para programar, sí) |
+| Usuarios | Sí | No |
+| `/api/*` | Sí | Solo plantel (`/api/jugadores`, `/api/equipos`) |
+| Mi cuenta | Cambiar su contraseña | Cambiar su contraseña y su avatar (este último, después de cambiar la temporal) |
 
-**Dar acceso a un redactor.** En `/admin/redactores`, botón «Acceso al panel» del redactor → «Crear acceso» con un usuario (3 a 32 caracteres: minúsculas, números, punto, guion y guion bajo; `ab06` está reservado). El panel muestra una contraseña temporal **una sola vez**: hay que entregársela al redactor. Al ingresar, el redactor es enviado a «Mi cuenta» y no puede usar nada más hasta cambiarla (mínimo 10 caracteres).
+Cada sección del panel la protege `sesionParaSeccion` (la página) y cada acción `requirePermiso` (la sección correspondiente). El middleware solo deja pasar las rutas del rol; las APIs de cada sección comprueban su permiso con `rechazarSinPermiso`. Las reglas de las secciones están en `lib/auth/permisos.ts`.
 
-**Restablecer, cambiar usuario o desactivar.** Desde el mismo diálogo. Restablecer genera otra contraseña temporal; desactivar impide ingresar hasta que se reactive.
+**Usuarios** (`/admin/usuarios`, solo administrador). Crear una cuenta con usuario y contraseña temporal (se muestra **una sola vez**: hay que entregársela a la persona). Un colaborador también crea su redactor, con el nombre que firma sus noticias. Desde la misma tabla se puede cambiar el rol, restablecer la contraseña o desactivar la cuenta. Nadie puede cambiar, restablecer ni desactivar su propia cuenta. Pasar a colaborador exige un nombre y una contraseña nueva al ingresar.
+
+**Dar acceso a un redactor existente.** En `/admin/redactores`, botón «Acceso al panel» del redactor → «Crear acceso». Crea una cuenta de colaborador enlazada a ese redactor.
+
+**Restablecer, cambiar usuario o desactivar.** Restablecer genera otra contraseña temporal y cierra las sesiones abiertas; desactivar impide ingresar hasta que se reactive.
+
+**Migración 020.** Crea `cuentas_panel` y copia las cuentas de `cuentas_redactores` como colaboradores. **Debe aplicarse en producción antes de desplegar el código** (`npm run db:push`, con autorización): sin ella el login no encuentra las cuentas. `cuentas_redactores` queda sin uso y se borra en una migración posterior.
 
 **Revocación de sesiones.** El token de sesión lleva el id del redactor y la `version_sesion` de su cuenta. En cada petición al servidor se compara con la base y se confirma que la cuenta siga activa. Restablecer la contraseña, desactivar la cuenta o que el propio redactor cambie su contraseña suben `version_sesion` y cierran sus demás sesiones (al cambiarla él mismo, su sesión actual se vuelve a emitir). El middleware no consulta la base: solo valida la firma.
 
@@ -180,7 +191,7 @@ El admin deja mover una foto dentro de marcos con la proporción real de cada lu
 ## Seguridad
 
 - La sesión es una cookie `httpOnly` firmada con HMAC (`SESSION_SECRET`) que expira a las 8 horas. El token lleva el rol (admin o redactor) y, para un redactor, su id y la versión de su sesión.
-- El admin entra con el usuario `ab06` y la contraseña de `ADMIN_PASSWORD_HASH`. Los redactores entran con la cuenta de la tabla `cuentas_redactores` (RLS sin políticas: solo `service_role`); subir su `version_sesion` o desactivarla cierra sus sesiones. Un redactor solo ve `/admin/noticias` y `/admin/cuenta`, y `requireAdmin()` y las rutas `/api` lo rechazan.
+- Las cuentas están en `cuentas_panel` (RLS sin políticas: solo `service_role`). El admin entra con `ab06` y la contraseña guardada en la base (en el primer ingreso, la de `ADMIN_PASSWORD_HASH`). Subir la `version_sesion` de una cuenta o desactivarla cierra sus sesiones; la sesión también se corta si el rol de la cuenta cambió. `requireAdmin()` y las rutas `/api` de admin rechazan al colaborador, y el middleware solo deja pasar sus rutas.
 - Tras 10 intentos fallidos de login desde una IP, el login responde 429 durante 15 minutos (tabla `login_intentos`).
 - El middleware protege `/admin/*` y todas las `/api/*` salvo login/logout: esas APIs devuelven datos personales del plantel. Además, cada ruta revisa la sesión por su cuenta (`rechazarSinSesion()`), por si el middleware fallara.
 - `/cuotas/<código>` (solo con las cuotas activadas) es público a propósito: el código (128 bits aleatorios) es la llave. No se indexa ni manda referrer, y se puede regenerar desde el admin.

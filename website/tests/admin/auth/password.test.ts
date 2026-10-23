@@ -92,11 +92,35 @@ describe('verificarCredenciales', () => {
     return base
   }
 
-  it('el usuario del admin es ab06 y solo vale con la contraseña del admin', async () => {
+  it('el usuario del admin es ab06', () => {
     expect(ADMIN_USUARIO).toBe('ab06')
-    expect(await verificarCredenciales('Ab06', 'clave-larga-del-club')).toEqual({ rol: 'admin' })
+  })
+
+  it('el primer ingreso del admin crea su cuenta con el hash de la variable', async () => {
+    const base = crearSupabaseFalso((c) =>
+      c.ops.some((o) => o.metodo === 'insert') ? { data: { id: 'nueva', version_sesion: 0 } } : { data: null }
+    )
+    vi.mocked(createAdminClient).mockReturnValue(base.cliente)
+    expect(await verificarCredenciales('Ab06', 'clave-larga-del-club')).toEqual({
+      rol: 'admin',
+      cuentaId: 'nueva',
+      version: 0,
+    })
+    const insert = base.a('cuentas_panel').flatMap((c) => c.ops).find((o) => o.metodo === 'insert')
+    expect(insert?.args[0]).toMatchObject({ usuario: 'ab06', rol: 'admin', password_hash: HASH })
+  })
+
+  it('el primer ingreso del admin con la contraseña mala no crea nada', async () => {
+    const base = baseCon(null)
     expect(await verificarCredenciales('ab06', 'otra')).toBeNull()
-    expect(createAdminClient).not.toHaveBeenCalled()
+    expect(base.a('cuentas_panel').some((c) => c.ops.some((o) => o.metodo === 'insert'))).toBe(false)
+  })
+
+  it('después del primer ingreso la contraseña del admin se valida contra la base', async () => {
+    const otro = bcrypt.hashSync('nueva-clave-del-admin', 4)
+    baseCon({ id: 'a1', rol: 'admin', password_hash: otro, activa: true, version_sesion: 0 })
+    expect(await verificarCredenciales('ab06', 'clave-larga-del-club')).toBeNull()
+    expect(await verificarCredenciales('ab06', 'nueva-clave-del-admin')).toEqual({ rol: 'admin', cuentaId: 'a1', version: 0 })
   })
 
   it('un usuario inexistente igual ejecuta una comparación bcrypt (mismo tiempo que uno real)', async () => {
@@ -107,17 +131,17 @@ describe('verificarCredenciales', () => {
   })
 
   it('una cuenta inactiva no entra aunque la contraseña sea correcta', async () => {
-    baseCon({ redactor_id: 'r1', password_hash: HASH, activa: false, version_sesion: 0 })
+    baseCon({ id: 'c1', rol: 'colaborador', password_hash: HASH, activa: false, version_sesion: 0 })
     expect(await verificarCredenciales('redactor1', 'clave-larga-del-club')).toBeNull()
   })
 
-  it('una cuenta activa con la contraseña correcta entra con su id y versión', async () => {
-    const base = baseCon({ redactor_id: 'r1', password_hash: HASH, activa: true, version_sesion: 4 })
+  it('un colaborador activo con la contraseña correcta entra con su cuenta y versión', async () => {
+    const base = baseCon({ id: 'c1', rol: 'colaborador', password_hash: HASH, activa: true, version_sesion: 4 })
     expect(await verificarCredenciales('redactor1', 'clave-larga-del-club')).toEqual({
-      rol: 'redactor',
-      redactorId: 'r1',
+      rol: 'colaborador',
+      cuentaId: 'c1',
       version: 4,
     })
-    expect(base.a('cuentas_redactores').some((c) => c.ops.some((o) => o.metodo === 'update'))).toBe(true)
+    expect(base.a('cuentas_panel').some((c) => c.ops.some((o) => o.metodo === 'update'))).toBe(true)
   })
 })

@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
-import { requireAdmin } from '@/lib/auth/session'
+import { requirePermiso } from '@/lib/auth/session'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidarSitio } from '@/lib/admin/revalidar'
 import type { SerieInfo } from '@/lib/contenido/tipos'
@@ -80,7 +80,7 @@ function cambios(id: number) {
 }
 
 export async function listarSeries(): Promise<SerieAdmin[]> {
-  await requireAdmin()
+  await requirePermiso('plantel')
   const supabase = createAdminClient()
 
   const [{ data: categorias, error }, { data: equipos, error: errorEquipos }, { data: jugadores }] = await Promise.all([
@@ -109,7 +109,7 @@ export async function obtenerSerie(id: number): Promise<SerieAdmin | null> {
 }
 
 export async function guardarSerie(id: number, input: SerieInput) {
-  await requireAdmin()
+  await requirePermiso('plantel')
   const parsed = serieSchema.safeParse(input)
   if (!parsed.success) throw new Error(parsed.error.issues[0]?.message ?? 'Datos inválidos')
 
@@ -119,7 +119,7 @@ export async function guardarSerie(id: number, input: SerieInput) {
 }
 
 export async function guardarCuerpoTecnico(serieId: number, equipoId: number, input: EquipoStaffInput) {
-  await requireAdmin()
+  await requirePermiso('plantel')
   const parsed = equipoSchema.safeParse(input)
   if (!parsed.success) throw new Error(parsed.error.issues[0]?.message ?? 'Datos inválidos')
 

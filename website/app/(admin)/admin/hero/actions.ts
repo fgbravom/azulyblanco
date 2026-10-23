@@ -1,7 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { requireAdmin } from '@/lib/auth/session'
+import { requirePermiso } from '@/lib/auth/session'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { BUCKET_MEDIOS, type HeroFoto } from '@/lib/contenido/tipos'
 import { HERO_WIDTHS } from '@/components/hero/hero-boot'
@@ -56,7 +56,7 @@ async function contarActivas(dispositivo: Dispositivo, excepto?: string) {
 }
 
 export async function listarFotosHero(): Promise<HeroFoto[]> {
-  await requireAdmin()
+  await requirePermiso('portada')
   const { data, error } = await createAdminClient()
     .from('hero_fotos')
     .select('*')
@@ -76,7 +76,7 @@ export async function procesarFotoHero(
   pathOriginal: string,
   reemplaza?: string
 ): Promise<HeroFoto> {
-  await requireAdmin()
+  await requirePermiso('portada')
   if (dispositivo !== 'desktop' && dispositivo !== 'mobile') throw new Error('Dispositivo inválido')
 
   const coincidencia = pathOriginal.match(RUTA_ORIGINAL)
@@ -141,7 +141,7 @@ export async function procesarFotoHero(
 }
 
 export async function cambiarVisibilidadHero(id: string, activo: boolean) {
-  await requireAdmin()
+  await requirePermiso('portada')
   const supabase = createAdminClient()
 
   if (!activo) {
@@ -157,7 +157,7 @@ export async function cambiarVisibilidadHero(id: string, activo: boolean) {
 }
 
 export async function reordenarFotosHero(ids: string[]) {
-  await requireAdmin()
+  await requirePermiso('portada')
   const supabase = createAdminClient()
   const resultados = await Promise.all(ids.map((id, orden) => supabase.from('hero_fotos').update({ orden }).eq('id', id)))
   const fallo = resultados.find((r) => r.error)
@@ -166,7 +166,7 @@ export async function reordenarFotosHero(ids: string[]) {
 }
 
 export async function eliminarFotoHero(id: string) {
-  await requireAdmin()
+  await requirePermiso('portada')
   const supabase = createAdminClient()
 
   const { data: foto, error } = await supabase.from('hero_fotos').select('*').eq('id', id).single()

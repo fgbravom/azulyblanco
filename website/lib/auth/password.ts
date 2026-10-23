@@ -3,7 +3,7 @@ import { randomInt } from 'node:crypto';
 import { createAdminClient } from '@/lib/supabase/admin';
 import type { DatosToken } from './token';
 
-/** Usuario del administrador (su contraseña es ADMIN_PASSWORD_HASH). Ningún redactor puede usarlo. */
+/** Usuario del administrador. Ningún colaborador puede usarlo. */
 export const ADMIN_USUARIO = 'ab06';
 
 // Hash sin dueño: se compara cuando el usuario no existe para que la respuesta
@@ -20,7 +20,8 @@ const DEV_HASH = '$2b$10$O1mN4pE8HyJQxLUdY7Ens.Rj5U5F7qojNGInzKElD9pXP9nQ4Eq7a';
 
 /**
  * Lee el hash desde ADMIN_PASSWORD_HASH. Se acepta en base64 porque los "$"
- * del hash bcrypt se rompen en algunos .env.
+ * del hash bcrypt se rompen en algunos .env. Solo sirve para crear la cuenta
+ * del admin en su primer ingreso; después la contraseña vive en la base.
  */
 function getPasswordHash(): string | null {
   const raw = process.env.ADMIN_PASSWORD_HASH?.trim();
@@ -65,26 +66,38 @@ export function generarPasswordTemporal(): string {
  */
 export async function verificarCredenciales(usuario: string, password: string): Promise<DatosToken | null> {
   const nombre = usuario.trim().toLowerCase();
-
-  if (nombre === ADMIN_USUARIO) {
-    return (await verifyPassword(password)) ? { rol: 'admin' } : null;
-  }
-
   const supabase = createAdminClient();
+
   // El usuario se guarda en minúscula (CHECK en la tabla), así que basta comparar con igualdad
   const { data: cuenta } = await supabase
-    .from('cuentas_redactores')
-    .select('redactor_id, password_hash, activa, version_sesion')
+    .from('cuentas_panel')
+    .select('id, rol, password_hash, activa, version_sesion')
     .eq('usuario', nombre)
     .maybeSingle();
+
+  // Primer ingreso del admin: la contraseña de ADMIN_PASSWORD_HASH crea su cuenta.
+  // Desde entonces su contraseña se cambia en la base y la variable ya no cuenta.
+  if (nombre === ADMIN_USUARIO && !cuenta) {
+    const hash = getPasswordHash();
+    if (!hash || !(await verifyPassword(password))) return null;
+
+    const { data: nueva, error } = await supabase
+      .from('cuentas_panel')
+      .insert({ usuario: ADMIN_USUARIO, rol: 'admin', password_hash: hash, debe_cambiar_password: false })
+      .select('id, version_sesion')
+      .single();
+    if (error) throw new Error(error.message);
+
+    return { rol: 'admin', cuentaId: nueva.id, version: nueva.version_sesion };
+  }
 
   const coincide = await bcrypt.compare(password, cuenta?.password_hash ?? HASH_FICTICIO);
   if (!cuenta || !coincide || !cuenta.activa) return null;
 
   await supabase
-    .from('cuentas_redactores')
+    .from('cuentas_panel')
     .update({ ultimo_ingreso: new Date().toISOString() })
-    .eq('redactor_id', cuenta.redactor_id);
+    .eq('id', cuenta.id);
 
-  return { rol: 'redactor', redactorId: cuenta.redactor_id, version: cuenta.version_sesion };
+  return { rol: cuenta.rol as DatosToken['rol'], cuentaId: cuenta.id, version: cuenta.version_sesion };
 }

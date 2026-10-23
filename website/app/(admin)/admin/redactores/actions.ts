@@ -5,21 +5,14 @@ import { z } from 'zod'
 import { requireAdmin } from '@/lib/auth/session'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidarSitio } from '@/lib/admin/revalidar'
-import { ADMIN_USUARIO, generarPasswordTemporal, hashPassword } from '@/lib/auth/password'
+import { generarPasswordTemporal, hashPassword } from '@/lib/auth/password'
+import { validarUsuario } from '@/lib/auth/usuario'
 import { borrarAvatar, urlAvatar } from '@/lib/admin/avatar-redactor'
 import type { CuentaRedactor, Redactor, RedactorConCuenta } from '@/lib/contenido/tipos'
 
 const redactorSchema = z.object({
   nombre: z.string().trim().min(1, 'Indica el nombre del redactor'),
 })
-
-// Mismo patrón que el CHECK de cuentas_redactores; se guarda en minúscula
-const usuarioSchema = z
-  .string({ error: 'Indica el usuario' })
-  .trim()
-  .toLowerCase()
-  .regex(/^[a-z0-9._-]{3,32}$/, 'El usuario debe tener de 3 a 32 caracteres: letras, números, punto, guion o guion bajo')
-  .refine((u) => u !== ADMIN_USUARIO, 'Ese usuario está reservado')
 
 function cambios() {
   revalidatePath('/admin/redactores')
@@ -32,13 +25,13 @@ export async function listarRedactores(): Promise<RedactorConCuenta[]> {
   // Columnas de la cuenta una a una: el hash de la contraseña nunca sale del servidor
   const { data, error } = await createAdminClient()
     .from('redactores')
-    .select('*, cuentas_redactores(usuario, activa, ultimo_ingreso, debe_cambiar_password)')
+    .select('*, cuentas_panel(usuario, activa, ultimo_ingreso, debe_cambiar_password)')
     .order('nombre')
   if (error) throw new Error(error.message)
-  return (data as (Redactor & { cuentas_redactores: CuentaRedactor | CuentaRedactor[] | null })[]).map(
-    ({ cuentas_redactores, ...redactor }) => ({
+  return (data as (Redactor & { cuentas_panel: CuentaRedactor | CuentaRedactor[] | null })[]).map(
+    ({ cuentas_panel, ...redactor }) => ({
       ...redactor,
-      cuenta: (Array.isArray(cuentas_redactores) ? cuentas_redactores[0] : cuentas_redactores) ?? null,
+      cuenta: (Array.isArray(cuentas_panel) ? cuentas_panel[0] : cuentas_panel) ?? null,
     })
   )
 }
@@ -115,12 +108,6 @@ export async function eliminarRedactor(id: string) {
 // Acceso al panel (cuentas de redactores)
 // ============================================================================
 
-function validarUsuario(usuario: string): string {
-  const parsed = usuarioSchema.safeParse(usuario)
-  if (!parsed.success) throw new Error(parsed.error.issues[0]?.message ?? 'Usuario inválido')
-  return parsed.data
-}
-
 // Los helpers no se exportan: todo export de un actions.ts es una server action
 function errorDeCuenta(error: { code?: string; message: string }): Error {
   if (error.code === '23505') {
@@ -132,7 +119,7 @@ function errorDeCuenta(error: { code?: string; message: string }): Error {
 }
 
 async function versionDeSesion(supabase: ReturnType<typeof createAdminClient>, redactorId: string): Promise<number> {
-  const { data, error } = await supabase.from('cuentas_redactores').select('version_sesion').eq('redactor_id', redactorId).single()
+  const { data, error } = await supabase.from('cuentas_panel').select('version_sesion').eq('redactor_id', redactorId).single()
   if (error) throw errorDeCuenta(error)
   return data.version_sesion
 }
@@ -144,9 +131,10 @@ export async function crearCuenta(redactorId: string, usuario: string): Promise<
   const passwordTemporal = generarPasswordTemporal()
 
   const { error } = await createAdminClient()
-    .from('cuentas_redactores')
+    .from('cuentas_panel')
     .insert({
       redactor_id: redactorId,
+      rol: 'colaborador',
       usuario: nombre,
       password_hash: await hashPassword(passwordTemporal),
       debe_cambiar_password: true,
@@ -162,7 +150,7 @@ export async function cambiarUsuario(redactorId: string, usuario: string): Promi
   const nombre = validarUsuario(usuario)
 
   const { error } = await createAdminClient()
-    .from('cuentas_redactores')
+    .from('cuentas_panel')
     .update({ usuario: nombre })
     .eq('redactor_id', redactorId)
     .select('usuario')
@@ -181,7 +169,7 @@ export async function restablecerPassword(redactorId: string): Promise<{ passwor
   const passwordTemporal = generarPasswordTemporal()
 
   const { error } = await supabase
-    .from('cuentas_redactores')
+    .from('cuentas_panel')
     .update({
       password_hash: await hashPassword(passwordTemporal),
       debe_cambiar_password: true,
@@ -201,7 +189,7 @@ export async function cambiarEstadoCuenta(redactorId: string, activa: boolean) {
   const cambio: { activa: boolean; version_sesion?: number } = { activa }
   if (!activa) cambio.version_sesion = (await versionDeSesion(supabase, redactorId)) + 1
 
-  const { error } = await supabase.from('cuentas_redactores').update(cambio).eq('redactor_id', redactorId)
+  const { error } = await supabase.from('cuentas_panel').update(cambio).eq('redactor_id', redactorId)
   if (error) throw errorDeCuenta(error)
 
   revalidatePath('/admin/redactores')

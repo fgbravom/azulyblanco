@@ -1,9 +1,11 @@
 import Link from 'next/link';
 import { ChevronRight, Shield, Users } from 'lucide-react';
+import { sesionParaSeccion } from '@/lib/auth/session';
 import { ErrorDatos, PageHeader, Vacio } from '@/components/admin/ui';
 import { listarSeries, type SerieAdmin } from './actions';
 
 export default async function SeriesPage() {
+  await sesionParaSeccion('plantel');
   let series: SerieAdmin[] | undefined;
   let error: string | null = null;
   try {

@@ -1,8 +1,10 @@
+import { sesionParaSeccion } from '@/lib/auth/session';
 import { PageHeader, ErrorDatos } from '@/components/admin/ui';
 import Biblioteca from '@/components/admin/medios/Biblioteca';
 import { listarMedios } from './actions';
 
 export default async function MediosPage() {
+  await sesionParaSeccion('medios');
   let medios;
   let error: string | null = null;
   try {

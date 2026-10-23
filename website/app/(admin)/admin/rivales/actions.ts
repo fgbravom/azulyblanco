@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
-import { requireAdmin } from '@/lib/auth/session'
+import { requireAdmin, requirePermiso } from '@/lib/auth/session'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidarSitio } from '@/lib/admin/revalidar'
 import { BUCKET_MEDIOS, type Rival } from '@/lib/contenido/tipos'
@@ -23,8 +23,9 @@ function cambios() {
   revalidarSitio('programacion')
 }
 
+// Lectura para programación (el colaborador elige el rival); la edición es del admin
 export async function listarRivales(): Promise<Rival[]> {
-  await requireAdmin()
+  await requirePermiso('programacion')
   const { data, error } = await createAdminClient().from('rivales').select('*').order('nombre')
   if (error) throw new Error(error.message)
   return data as Rival[]

@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
-import { requireAdmin } from '@/lib/auth/session'
+import { requireAdmin, requirePermiso } from '@/lib/auth/session'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidarSitio } from '@/lib/admin/revalidar'
 import type { Estadio } from '@/lib/contenido/tipos'
@@ -25,8 +25,9 @@ function cambios() {
   revalidarSitio('programacion')
 }
 
+// Lectura para programación (el colaborador elige la cancha); la edición es del admin
 export async function listarEstadios(): Promise<Estadio[]> {
-  await requireAdmin()
+  await requirePermiso('programacion')
   const { data, error } = await createAdminClient().from('estadios').select('*').order('nombre')
   if (error) throw new Error(error.message)
   return data as Estadio[]

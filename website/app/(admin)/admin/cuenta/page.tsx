@@ -7,13 +7,27 @@ import MiAvatarForm from '@/components/admin/cuenta/MiAvatarForm';
 
 export default async function CuentaPage() {
   const sesion = await obtenerSesion();
-  // La contraseña del admin vive en una variable de entorno: aquí no hay nada que cambiar
-  if (sesion?.rol !== 'redactor') redirect('/admin');
+  if (!sesion) redirect('/admin/login');
+
+  if (sesion.rol === 'admin') {
+    const { data } = await createAdminClient()
+      .from('cuentas_panel')
+      .select('usuario')
+      .eq('id', sesion.cuentaId)
+      .single();
+
+    return (
+      <>
+        <PageHeader titulo="Mi cuenta" descripcion="Tus datos de acceso al panel." />
+        <CambiarPasswordForm nombre="Administración" usuario={data?.usuario ?? ''} debeCambiar={false} />
+      </>
+    );
+  }
 
   const { data } = await createAdminClient()
-    .from('cuentas_redactores')
+    .from('cuentas_panel')
     .select('usuario, redactores(avatar_url)')
-    .eq('redactor_id', sesion.redactorId)
+    .eq('id', sesion.cuentaId)
     .maybeSingle();
   const redactor = Array.isArray(data?.redactores) ? data.redactores[0] : data?.redactores;
 

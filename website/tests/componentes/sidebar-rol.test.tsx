@@ -14,23 +14,22 @@ vi.mock('next/image', () => ({
 const { default: AdminSidebar } = await import('@/components/admin/layout/AdminSidebar')
 
 describe('menú lateral según el rol', () => {
-  it('un redactor solo ve Noticias y Mi cuenta, con su nombre', () => {
-    render(<AdminSidebar cuotas rol="redactor" nombre="Ana Pérez" />)
-    const aside = screen.getAllByRole('list')[0]
-    const enlaces = Array.from(aside.querySelectorAll('a')).map((a) => a.textContent)
+  it('un colaborador ve sus secciones y Mi cuenta, con su nombre, y no los mantenedores ni usuarios', () => {
+    render(<AdminSidebar cuotas rol="colaborador" nombre="Ana Pérez" />)
+    const enlaces = Array.from(document.querySelectorAll('nav a')).map((a) => a.textContent)
 
-    expect(enlaces).toEqual(['Noticias', 'Mi cuenta'])
+    expect(enlaces).toEqual(['Noticias', 'Mi cuenta', 'Portada', 'Programación', 'Galerías', 'Imágenes', 'Plantel', 'Series'])
     expect(screen.getAllByText('Ana Pérez').length).toBeGreaterThan(0)
-    expect(screen.queryByText('Jugadores')).not.toBeInTheDocument()
+    expect(screen.queryByText('Cuotas')).not.toBeInTheDocument()
     expect(screen.queryByText('Redactores')).not.toBeInTheDocument()
+    expect(screen.queryByText('Usuarios')).not.toBeInTheDocument()
     expect(screen.getAllByText('Cerrar sesión').length).toBeGreaterThan(0)
   })
 
-  it('el admin conserva todo el menú', () => {
+  it('el admin conserva todo el menú, con Usuarios y Mi cuenta', () => {
     render(<AdminSidebar cuotas rol="admin" />)
-    for (const nombre of ['Inicio', 'Noticias', 'Redactores', 'Plantel', 'Cuotas']) {
+    for (const nombre of ['Inicio', 'Noticias', 'Redactores', 'Usuarios', 'Plantel', 'Cuotas', 'Mi cuenta']) {
       expect(screen.getAllByText(nombre).length).toBeGreaterThan(0)
     }
-    expect(screen.queryByText('Mi cuenta')).not.toBeInTheDocument()
   })
 })

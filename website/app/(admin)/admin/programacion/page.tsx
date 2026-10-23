@@ -1,3 +1,4 @@
+import { sesionParaSeccion } from '@/lib/auth/session';
 import { ErrorDatos, PageHeader } from '@/components/admin/ui';
 import ProgramacionAdmin from '@/components/admin/programacion/ProgramacionAdmin';
 import { listarRivales } from '../rivales/actions';
@@ -5,6 +6,7 @@ import { listarEstadios } from '../estadios/actions';
 import { listarActividades, listarJugadoresGoles } from './actions';
 
 export default async function ProgramacionPage() {
+  await sesionParaSeccion('programacion');
   let actividades;
   let rivales;
   let estadios;

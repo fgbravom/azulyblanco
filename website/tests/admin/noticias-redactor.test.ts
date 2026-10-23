@@ -31,7 +31,7 @@ const NOTICIA: NoticiaInput = {
 // La cuenta del redactor responde siempre; el resto lo decide cada prueba
 function conBase(responder: Responder) {
   const falso = crearSupabaseFalso((c) =>
-    c.tabla === 'cuentas_redactores' ? { data: filaCuenta() } : c.tabla === 'redactores' ? { data: { nombre: 'Ana' } } : responder(c)
+    c.tabla === 'cuentas_panel' ? { data: filaCuenta() } : c.tabla === 'redactores' ? { data: { nombre: 'Ana' } } : responder(c)
   )
   vi.mocked(createAdminClient).mockReturnValue(falso.cliente)
   return falso
@@ -49,7 +49,7 @@ const hizoUpdate = (falso: ReturnType<typeof conBase>) => falso.a('noticias').so
 describe('noticias con sesión de redactor', () => {
   beforeEach(async () => {
     vi.clearAllMocks()
-    await simularSesion('redactor')
+    await simularSesion('colaborador')
   })
 
   it('listarNoticias filtra por su redactor_id y no consulta despublicaciones', async () => {

@@ -20,7 +20,7 @@ function conBase(responder: Responder) {
 }
 
 const actualizacion = (falso: ReturnType<typeof conBase>) =>
-  argsDe(falso.a('cuentas_redactores').find((c) => uso(c, 'update'))!, 'update')?.[0] as Record<string, unknown>
+  argsDe(falso.a('cuentas_panel').find((c) => uso(c, 'update'))!, 'update')?.[0] as Record<string, unknown>
 
 describe('administración de cuentas de redactores', () => {
   beforeEach(async () => {
@@ -32,15 +32,15 @@ describe('administración de cuentas de redactores', () => {
     it('devuelve la cuenta sin el hash, o null si no tiene', async () => {
       const falso = conBase(() => ({
         data: [
-          { id: 'r1', nombre: 'Ana', cuentas_redactores: { usuario: 'ana', activa: true, ultimo_ingreso: null, debe_cambiar_password: true } },
-          { id: 'r2', nombre: 'Beto', cuentas_redactores: null },
+          { id: 'r1', nombre: 'Ana', cuentas_panel: { usuario: 'ana', activa: true, ultimo_ingreso: null, debe_cambiar_password: true } },
+          { id: 'r2', nombre: 'Beto', cuentas_panel: null },
         ],
       }))
       const lista = await listarRedactores()
 
       expect(lista[0].cuenta).toEqual({ usuario: 'ana', activa: true, ultimo_ingreso: null, debe_cambiar_password: true })
       expect(lista[1].cuenta).toBeNull()
-      expect(lista[0]).not.toHaveProperty('cuentas_redactores')
+      expect(lista[0]).not.toHaveProperty('cuentas_panel')
       expect(String(argsDe(falso.a('redactores')[0], 'select')?.[0])).not.toMatch(/password_hash|\*\)/)
     })
   })
@@ -52,7 +52,7 @@ describe('administración de cuentas de redactores', () => {
 
       expect(usuario).toBe('ana.perez')
       expect(passwordTemporal).toHaveLength(12)
-      const fila = argsDe(falso.a('cuentas_redactores')[0], 'insert')?.[0] as Record<string, unknown>
+      const fila = argsDe(falso.a('cuentas_panel')[0], 'insert')?.[0] as Record<string, unknown>
       expect(fila).toMatchObject({ redactor_id: ID, usuario: 'ana.perez', debe_cambiar_password: true })
       expect(fila.password_hash).not.toBe(passwordTemporal)
       expect(await bcrypt.compare(passwordTemporal, fila.password_hash as string)).toBe(true)
@@ -92,7 +92,7 @@ describe('administración de cuentas de redactores', () => {
 
       expect(await cambiarUsuario(ID, 'Nuevo')).toEqual({ usuario: 'nuevo' })
       expect(actualizacion(falso)).toEqual({ usuario: 'nuevo' })
-      expect(argsDe(falso.a('cuentas_redactores')[0], 'eq')).toEqual(['redactor_id', ID])
+      expect(argsDe(falso.a('cuentas_panel')[0], 'eq')).toEqual(['redactor_id', ID])
     })
 
     it('si el usuario ya existe lo explica', async () => {

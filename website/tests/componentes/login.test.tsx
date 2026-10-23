@@ -65,7 +65,7 @@ describe('página de login del admin', () => {
   })
 
   it('un redactor entra directo a las noticias', async () => {
-    fetchFalso.mockResolvedValue(respuesta(200, { success: true, rol: 'redactor' }))
+    fetchFalso.mockResolvedValue(respuesta(200, { success: true, rol: 'colaborador' }))
     const usuario = userEvent.setup()
     render(<LoginPage />)
 

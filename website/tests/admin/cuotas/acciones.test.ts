@@ -23,12 +23,12 @@ const PAGO = {
 }
 
 describe('cuotas: interruptor CUOTAS_HABILITADAS', () => {
-  it('con sesión pero el sistema apagado, toda acción se rechaza', async () => {
+  it('con sesión pero el sistema apagado, toda acción se rechaza sin consultar cuotas', async () => {
     vi.stubEnv('CUOTAS_HABILITADAS', 'false')
-    await simularSesion(true)
+    const { base } = await simularSesion(true)
     await expect(acciones.obtenerTablero()).rejects.toThrow('no está habilitado')
     await expect(acciones.registrarPago(PAGO)).rejects.toThrow('no está habilitado')
-    expect(createAdminClient).not.toHaveBeenCalled()
+    expect(base!.consultas).toHaveLength(0)
   })
 
   it('solo "true" lo enciende', async () => {
@@ -39,10 +39,12 @@ describe('cuotas: interruptor CUOTAS_HABILITADAS', () => {
 })
 
 describe('cuotas con sesión y sistema encendido', () => {
+  let baseSesion: ReturnType<typeof crearSupabaseFalso> | undefined
+
   beforeEach(async () => {
     vi.clearAllMocks()
     vi.stubEnv('CUOTAS_HABILITADAS', 'true')
-    await simularSesion(true)
+    ;({ base: baseSesion } = await simularSesion(true))
   })
 
   describe('generarCuotas', () => {
@@ -106,7 +108,7 @@ describe('cuotas con sesión y sistema encendido', () => {
       'rechaza el periodo %j',
       async (periodo) => {
         await expect(acciones.generarCuotas(7, periodo)).rejects.toThrow('Mes inválido')
-        expect(createAdminClient).not.toHaveBeenCalled()
+        expect(baseSesion!.consultas).toHaveLength(0)
       }
     )
   })

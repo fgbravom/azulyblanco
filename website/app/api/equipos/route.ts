@@ -4,7 +4,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { rechazarSinSesion } from '@/lib/auth/session';
+import { rechazarSinPermiso } from '@/lib/auth/session';
 import {
   getEquipos,
   getEquiposTemporadaActual,
@@ -18,7 +18,7 @@ import {
  * Obtiene lista de equipos
  */
 export async function GET(request: NextRequest) {
-  const denegado = await rechazarSinSesion();
+  const denegado = await rechazarSinPermiso('plantel');
   if (denegado) return denegado;
 
   try {

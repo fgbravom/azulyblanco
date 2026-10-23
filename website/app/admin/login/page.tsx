@@ -30,7 +30,7 @@ export default function LoginPage() {
       if (res.ok) {
         // Navegación completa: con la cookie recién creada el panel se arma de cero
         // (con router.push + refresh, el desvío a /admin/cuenta dejaba la página en blanco)
-        window.location.assign(data.rol === 'redactor' ? '/admin/noticias' : '/admin');
+        window.location.assign(data.rol === 'colaborador' ? '/admin/noticias' : '/admin');
       } else {
         setError(data.error || 'Usuario o contraseña incorrectos');
       }

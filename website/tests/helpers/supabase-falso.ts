@@ -35,8 +35,24 @@ export function uso(consulta: Consulta, metodo: string): boolean {
   return consulta.ops.some((o) => o.metodo === metodo)
 }
 
+/**
+ * La sesión de la petición que simula simularSesion (tests/helpers/sesion.ts).
+ * Toda consulta que valida la sesión (cuentas_panel) recibe esta fila, sin
+ * importar qué responda la prueba para el resto de las consultas.
+ */
+export const sesionDePrueba: { activa: boolean; fila: Record<string, unknown> | null } = { activa: false, fila: null }
+
+function esConsultaDeSesion(consulta: Consulta): boolean {
+  return (
+    consulta.tabla === 'cuentas_panel' &&
+    consulta.ops.some((o) => o.metodo === 'select' && String(o.args[0]).includes('debe_cambiar_password'))
+  )
+}
+
 export function crearSupabaseFalso(responder: Responder = () => ({ data: [] })) {
   const consultas: Consulta[] = []
+  /** Consultas que validan la sesión: se guardan aparte para no contarlas como contenido */
+  const sesiones: Consulta[] = []
 
   function from(tabla: string) {
     const consulta: Consulta = { tabla, ops: [] }
@@ -47,7 +63,18 @@ export function crearSupabaseFalso(responder: Responder = () => ({ data: [] })) 
       {
         get(_destino, prop) {
           if (prop === 'then') {
-            const respuesta = { data: null, error: null, count: null, ...responder(consulta) }
+            const porSesion = sesionDePrueba.activa && esConsultaDeSesion(consulta)
+            if (porSesion) {
+              const indice = consultas.indexOf(consulta)
+              if (indice >= 0) consultas.splice(indice, 1)
+              sesiones.push(consulta)
+            }
+            const respuesta = {
+              data: null,
+              error: null,
+              count: null,
+              ...(porSesion ? { data: sesionDePrueba.fila } : responder(consulta)),
+            }
             return (ok: (r: unknown) => unknown, falla: (e: unknown) => unknown) =>
               Promise.resolve(respuesta).then(ok, falla)
           }
@@ -73,6 +100,7 @@ export function crearSupabaseFalso(responder: Responder = () => ({ data: [] })) 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     cliente: { from, storage } as any,
     consultas,
+    sesiones,
     /** Consultas hechas a una tabla, en orden */
     a: (tabla: string) => consultas.filter((c) => c.tabla === tabla),
   }

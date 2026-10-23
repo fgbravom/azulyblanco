@@ -2,7 +2,7 @@ import bcrypt from 'bcryptjs'
 import { NextRequest } from 'next/server'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { SESSION_COOKIE, SESSION_MAX_AGE, verificarToken } from '@/lib/auth/token'
-import { REDACTOR_ID, simularSesion } from '../../helpers/sesion'
+import { CUENTA_ADMIN_ID, CUENTA_COLABORADOR_ID, REDACTOR_ID, simularSesion } from '../../helpers/sesion'
 import { crearSupabaseFalso } from '../../helpers/supabase-falso'
 
 vi.mock('@/lib/auth/intentos', () => ({
@@ -28,38 +28,52 @@ function intentar(body: unknown) {
   )
 }
 
-const HASH_REDACTOR = bcrypt.hashSync('clave-del-redactor', 4)
+const HASH_COLABORADOR = bcrypt.hashSync('clave-del-redactor', 4)
+const HASH_ADMIN = bcrypt.hashSync('clave-correcta', 4)
 
-/** Base falsa con una cuenta de redactor (o ninguna); devuelve el cliente para revisar qué se le pidió */
-function cuentaEnBase(cuenta: { activa?: boolean; version_sesion?: number } | null) {
+/** Base falsa con la cuenta del panel (o ninguna); devuelve el cliente para revisar qué se le pidió */
+function cuentaEnBase(cuenta: Record<string, unknown> | null) {
   const base = crearSupabaseFalso((c) =>
-    c.tabla === 'cuentas_redactores' && !c.ops.some((o) => o.metodo === 'update')
-      ? {
-          data: cuenta && {
-            redactor_id: REDACTOR_ID,
-            password_hash: HASH_REDACTOR,
-            activa: true,
-            version_sesion: 2,
-            ...cuenta,
-          },
-        }
-      : undefined
+    c.tabla === 'cuentas_panel' && !c.ops.some((o) => o.metodo === 'update' || o.metodo === 'insert')
+      ? { data: cuenta }
+      : { data: { id: CUENTA_ADMIN_ID, version_sesion: 0 } }
   )
   vi.mocked(createAdminClient).mockReturnValue(base.cliente)
   return base
 }
 
+const colaborador = (extra: Record<string, unknown> = {}) => ({
+  id: CUENTA_COLABORADOR_ID,
+  rol: 'colaborador',
+  redactor_id: REDACTOR_ID,
+  password_hash: HASH_COLABORADOR,
+  activa: true,
+  version_sesion: 2,
+  ...extra,
+})
+
+const admin = (extra: Record<string, unknown> = {}) => ({
+  id: CUENTA_ADMIN_ID,
+  rol: 'admin',
+  redactor_id: null,
+  password_hash: HASH_ADMIN,
+  activa: true,
+  version_sesion: 0,
+  ...extra,
+})
+
 const anotoIngreso = (base: ReturnType<typeof crearSupabaseFalso>) =>
-  base.a('cuentas_redactores').some((c) => c.ops.some((o) => o.metodo === 'update'))
+  base.a('cuentas_panel').some((c) => c.ops.some((o) => o.metodo === 'update'))
 
 describe('POST /api/auth/login', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    vi.stubEnv('ADMIN_PASSWORD_HASH', bcrypt.hashSync('clave-correcta', 4))
+    vi.stubEnv('ADMIN_PASSWORD_HASH', HASH_ADMIN)
     vi.mocked(intentos.loginBloqueado).mockResolvedValue(false)
   })
 
-  it('el admin entra con el usuario ab06 (sin distinguir mayúsculas) y se crea una cookie segura', async () => {
+  it('el primer ingreso del admin (ab06, sin distinguir mayúsculas) crea su cuenta y emite la cookie', async () => {
+    const base = cuentaEnBase(null)
     const cookies = await simularSesion(false)
     const res = await intentar({ usuario: 'AB06', password: 'clave-correcta' })
 
@@ -68,48 +82,63 @@ describe('POST /api/auth/login', () => {
     expect(cookies.set).toHaveBeenCalledOnce()
     const [nombre, valor, opciones] = cookies.set.mock.calls[0]
     expect(nombre).toBe(SESSION_COOKIE)
-    expect(await verificarToken(valor, process.env.SESSION_SECRET)).toEqual({ rol: 'admin' })
+    expect(await verificarToken(valor, process.env.SESSION_SECRET)).toEqual({ rol: 'admin', cuentaId: CUENTA_ADMIN_ID, version: 0 })
     expect(opciones).toMatchObject({ httpOnly: true, sameSite: 'strict', path: '/', maxAge: SESSION_MAX_AGE })
     expect(intentos.limpiarIntentos).toHaveBeenCalledWith('1.1.1.1')
-    expect(createAdminClient).not.toHaveBeenCalled()
+    expect(base.a('cuentas_panel').some((c) => c.ops.some((o) => o.metodo === 'insert'))).toBe(true)
   })
 
-  it('en producción la cookie solo viaja por HTTPS', async () => {
-    vi.stubEnv('NODE_ENV', 'production')
+  it('después del primer ingreso el admin entra con la contraseña guardada en la base', async () => {
+    cuentaEnBase(admin())
     const cookies = await simularSesion(false)
-    await intentar({ usuario: 'ab06', password: 'clave-correcta' })
-    expect(cookies.set.mock.calls[0][2]).toMatchObject({ secure: true })
+    const res = await intentar({ usuario: 'ab06', password: 'clave-correcta' })
+
+    expect(res.status).toBe(200)
+    expect(await verificarToken(cookies.set.mock.calls[0][1], process.env.SESSION_SECRET)).toEqual({
+      rol: 'admin',
+      cuentaId: CUENTA_ADMIN_ID,
+      version: 0,
+    })
   })
 
-  it('un redactor entra con su usuario: la sesión lleva su id y la versión de la cuenta', async () => {
-    const base = cuentaEnBase({})
+  it('la contraseña de la variable ya no abre al admin cuando su cuenta existe en la base', async () => {
+    cuentaEnBase(admin({ password_hash: bcrypt.hashSync('nueva-clave-del-admin', 4) }))
+    const cookies = await simularSesion(false)
+    expect((await intentar({ usuario: 'ab06', password: 'clave-correcta' })).status).toBe(401)
+    expect(cookies.set).not.toHaveBeenCalled()
+  })
+
+  it('un colaborador entra con su usuario: la sesión lleva su cuenta y la versión', async () => {
+    const base = cuentaEnBase(colaborador())
     const cookies = await simularSesion(false)
     const res = await intentar({ usuario: ' Redactor1 ', password: 'clave-del-redactor' })
 
     expect(res.status).toBe(200)
-    expect(await res.json()).toEqual({ success: true, rol: 'redactor' })
+    expect(await res.json()).toEqual({ success: true, rol: 'colaborador' })
     expect(await verificarToken(cookies.set.mock.calls[0][1], process.env.SESSION_SECRET)).toEqual({
-      rol: 'redactor',
-      redactorId: REDACTOR_ID,
+      rol: 'colaborador',
+      cuentaId: CUENTA_COLABORADOR_ID,
       version: 2,
     })
     // Busca el usuario en minúscula y anota el ingreso
-    expect(base.a('cuentas_redactores')[0].ops.find((o) => o.metodo === 'eq')?.args).toEqual(['usuario', 'redactor1'])
+    expect(base.a('cuentas_panel')[0].ops.find((o) => o.metodo === 'eq')?.args).toEqual(['usuario', 'redactor1'])
     expect(anotoIngreso(base)).toBe(true)
   })
 
-  it('la contraseña del admin no abre una cuenta de redactor ni al revés', async () => {
-    cuentaEnBase({})
+  it('la contraseña del admin no abre una cuenta de colaborador ni al revés', async () => {
+    cuentaEnBase(colaborador())
     await simularSesion(false)
     expect((await intentar({ usuario: 'redactor1', password: 'clave-correcta' })).status).toBe(401)
+
+    cuentaEnBase(admin({ password_hash: HASH_ADMIN }))
     expect((await intentar({ usuario: 'ab06', password: 'clave-del-redactor' })).status).toBe(401)
   })
 
   it.each([
-    ['con la contraseña mala', { activa: true }, 'otra-clave'],
-    ['con la cuenta inactiva', { activa: false }, 'clave-del-redactor'],
+    ['con la contraseña mala', colaborador({ password_hash: HASH_COLABORADOR }), 'otra-clave'],
+    ['con la cuenta inactiva', colaborador({ activa: false }), 'clave-del-redactor'],
     ['con un usuario inexistente', null, 'clave-del-redactor'],
-  ])('un redactor %s recibe el mismo 401 y no se crea sesión', async (_caso, cuenta, password) => {
+  ])('un colaborador %s recibe el mismo 401 y no se crea sesión', async (_caso, cuenta, password) => {
     const base = cuentaEnBase(cuenta)
     const cookies = await simularSesion(false)
     const res = await intentar({ usuario: 'redactor1', password })
@@ -122,6 +151,7 @@ describe('POST /api/auth/login', () => {
   })
 
   it('con la contraseña del admin incorrecta responde 401, registra el fallo y no crea sesión', async () => {
+    cuentaEnBase(null)
     const cookies = await simularSesion(false)
     const res = await intentar({ usuario: 'ab06', password: 'mala' })
 

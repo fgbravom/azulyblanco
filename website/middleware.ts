@@ -1,9 +1,7 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { SESSION_COOKIE, verificarToken } from '@/lib/auth/token';
-
-// Lo único del panel que ve un redactor
-const REDACTOR_RUTAS = ['/admin/noticias', '/admin/cuenta'];
+import { APIS_PLANTEL_COLABORADOR, RUTAS_COLABORADOR, coincideRuta } from '@/lib/auth/permisos';
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -22,18 +20,19 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  if (sesion?.rol === 'redactor') {
-    // Las APIs son solo del admin
+  if (sesion?.rol === 'colaborador') {
+    // Las APIs de cada sección revisan su permiso; aquí solo se filtra cuáles existen para él
     if (pathname.startsWith('/api/')) {
+      if (coincideRuta(pathname, APIS_PLANTEL_COLABORADOR)) return NextResponse.next();
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
-    if (REDACTOR_RUTAS.some((ruta) => pathname === ruta || pathname.startsWith(`${ruta}/`))) {
+    if (coincideRuta(pathname, RUTAS_COLABORADOR)) {
       return NextResponse.next();
     }
     return NextResponse.redirect(new URL('/admin/noticias', request.url));
   }
 
-  // Las APIs solo las usa el admin: exponen datos personales del plantel
+  // Las APIs solo las usa el panel: exponen datos personales del plantel
   if (pathname.startsWith('/api/')) {
     return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
   }

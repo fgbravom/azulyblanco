@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
-import { requireAdmin } from '@/lib/auth/session'
+import { requirePermiso } from '@/lib/auth/session'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidarSitio } from '@/lib/admin/revalidar'
 import { slugify } from '@/lib/admin/slug'
@@ -28,7 +28,7 @@ function cambios(albumId?: string) {
 }
 
 export async function listarAlbumes(): Promise<AlbumConConteo[]> {
-  await requireAdmin()
+  await requirePermiso('galeria')
   const { data, error } = await createAdminClient()
     .from('albumes')
     .select('*, fotos(count)')
@@ -41,7 +41,7 @@ export async function listarAlbumes(): Promise<AlbumConConteo[]> {
 }
 
 export async function obtenerAlbum(id: string): Promise<{ album: AlbumDB; fotos: Foto[] } | null> {
-  await requireAdmin()
+  await requirePermiso('galeria')
   const supabase = createAdminClient()
   const [{ data: album, error }, { data: fotos, error: errorFotos }] = await Promise.all([
     supabase.from('albumes').select('*').eq('id', id).maybeSingle(),
@@ -53,7 +53,7 @@ export async function obtenerAlbum(id: string): Promise<{ album: AlbumDB; fotos:
 }
 
 export async function guardarAlbum(id: string | null, input: AlbumInput): Promise<AlbumDB> {
-  await requireAdmin()
+  await requirePermiso('galeria')
 
   const parsed = albumSchema.safeParse(input)
   if (!parsed.success) throw new Error(parsed.error.issues[0]?.message ?? 'Datos inválidos')
@@ -76,7 +76,7 @@ export async function guardarAlbum(id: string | null, input: AlbumInput): Promis
 }
 
 export async function eliminarAlbum(id: string) {
-  await requireAdmin()
+  await requirePermiso('galeria')
   const supabase = createAdminClient()
 
   const { data: fotos } = await supabase.from('fotos').select('path').eq('album_id', id)
@@ -95,7 +95,7 @@ export async function agregarFotos(
   albumId: string,
   subidas: { path: string; ancho: number; alto: number }[]
 ): Promise<Foto[]> {
-  await requireAdmin()
+  await requirePermiso('galeria')
   if (subidas.some((s) => !s.path.startsWith(`galeria/${albumId}/`))) throw new Error('Ruta inválida')
 
   const supabase = createAdminClient()
@@ -128,7 +128,7 @@ export async function agregarFotos(
 }
 
 export async function actualizarDescripcionFoto(id: string, descripcion: string) {
-  await requireAdmin()
+  await requirePermiso('galeria')
   const { data, error } = await createAdminClient()
     .from('fotos')
     .update({ descripcion: descripcion.trim() || null })
@@ -140,14 +140,14 @@ export async function actualizarDescripcionFoto(id: string, descripcion: string)
 }
 
 export async function definirPortada(albumId: string, url: string) {
-  await requireAdmin()
+  await requirePermiso('galeria')
   const { error } = await createAdminClient().from('albumes').update({ portada_url: url }).eq('id', albumId)
   if (error) throw new Error(error.message)
   cambios(albumId)
 }
 
 export async function reordenarFotos(albumId: string, ids: string[]) {
-  await requireAdmin()
+  await requirePermiso('galeria')
   const supabase = createAdminClient()
   const resultados = await Promise.all(
     ids.map((id, orden) => supabase.from('fotos').update({ orden }).eq('id', id).eq('album_id', albumId))
@@ -159,7 +159,7 @@ export async function reordenarFotos(albumId: string, ids: string[]) {
 
 /** Elimina fotos y, si una era la portada, pasa la portada a la primera que quede */
 export async function eliminarFotos(albumId: string, ids: string[]): Promise<string | null> {
-  await requireAdmin()
+  await requirePermiso('galeria')
   const supabase = createAdminClient()
 
   const { data: fotos, error } = await supabase.from('fotos').select('id, path, url').eq('album_id', albumId).in('id', ids)

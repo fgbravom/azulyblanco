@@ -10,10 +10,10 @@ export default async function EditarNoticiaPage({ params }: { params: Promise<{ 
 
   const sesion = await sesionParaNoticias();
   // Un redactor no ve el catálogo de redactores; la noticia ajena llega como null (404)
-  const esRedactor = sesion.rol === 'redactor';
+  const esColaborador = sesion.rol === 'colaborador';
   const [noticia, redactores] = await Promise.all([
     obtenerNoticia(id),
-    esRedactor ? Promise.resolve([]) : listarRedactores().catch(() => []),
+    esColaborador ? Promise.resolve([]) : listarRedactores().catch(() => []),
   ]);
   if (!noticia) notFound();
 
@@ -21,8 +21,8 @@ export default async function EditarNoticiaPage({ params }: { params: Promise<{ 
     <NoticiaEditor
       noticia={noticia}
       redactores={redactores}
-      rol={esRedactor ? 'redactor' : 'admin'}
-      nombreRedactor={sesion.rol === 'redactor' ? sesion.nombre : undefined}
+      rol={esColaborador ? 'colaborador' : 'admin'}
+      nombreRedactor={sesion.rol === 'colaborador' ? sesion.nombre : undefined}
     />
   );
 }

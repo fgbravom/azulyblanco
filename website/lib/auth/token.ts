@@ -1,6 +1,6 @@
 /**
- * Token de sesión firmado: "<rol>.<redactorId|->.<version>.<expira_ms>.<hmac>".
- * El rol es "a" (admin) o "r" (redactor); el hmac firma todo lo anterior.
+ * Token de sesión firmado: "<rol>.<cuentaId>.<version>.<expira_ms>.<hmac>".
+ * El rol es "a" (admin) o "c" (colaborador); el hmac firma todo lo anterior.
  * Usa Web Crypto para funcionar igual en el middleware (edge) y en Node.
  */
 
@@ -24,18 +24,16 @@ async function hmac(data: string, secret: string): Promise<string> {
     .replace(/=+$/, '');
 }
 
-/** Lo que lleva el token: el rol y, para un redactor, quién es y la versión de su sesión */
-export type DatosToken = { rol: 'admin' } | { rol: 'redactor'; redactorId: string; version: number };
+/** Lo que lleva el token: el rol, la cuenta y la versión de su sesión */
+export type DatosToken = { rol: 'admin' | 'colaborador'; cuentaId: string; version: number };
 export type DatosSesion = DatosToken;
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const LETRA_ROL = { admin: 'a', colaborador: 'c' } as const;
 
 export async function firmarToken(secret: string, datos: DatosToken): Promise<string> {
   const expira = String(Date.now() + SESSION_MAX_AGE * 1000);
-  const cuerpo =
-    datos.rol === 'admin'
-      ? `a.-.0.${expira}`
-      : `r.${datos.redactorId}.${datos.version}.${expira}`;
+  const cuerpo = `${LETRA_ROL[datos.rol]}.${datos.cuentaId}.${datos.version}.${expira}`;
   return `${cuerpo}.${await hmac(cuerpo, secret)}`;
 }
 
@@ -44,19 +42,20 @@ export async function verificarToken(token: string | undefined, secret: string |
 
   const partes = token.split('.');
   if (partes.length !== 5) return null;
-  const [rol, id, version, expira, firma] = partes;
+  const [letra, id, version, expira, firma] = partes;
   if (!firma || !/^\d+$/.test(expira) || Number(expira) < Date.now()) return null;
+  if (!UUID.test(id) || !/^\d{1,9}$/.test(version)) return null;
 
   let datos: DatosToken;
-  if (rol === 'a' && id === '-' && version === '0') {
-    datos = { rol: 'admin' };
-  } else if (rol === 'r' && UUID.test(id) && /^\d{1,9}$/.test(version)) {
-    datos = { rol: 'redactor', redactorId: id, version: Number(version) };
+  if (letra === 'a') {
+    datos = { rol: 'admin', cuentaId: id, version: Number(version) };
+  } else if (letra === 'c') {
+    datos = { rol: 'colaborador', cuentaId: id, version: Number(version) };
   } else {
     return null;
   }
 
-  const esperada = await hmac(`${rol}.${id}.${version}.${expira}`, secret);
+  const esperada = await hmac(`${letra}.${id}.${version}.${expira}`, secret);
   if (esperada.length !== firma.length) return null;
 
   let diff = 0;

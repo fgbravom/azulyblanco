@@ -9,29 +9,26 @@ const { prepararSubida, listarMedios, registrarMedio, eliminarMedio } = await im
 
 const MEDIO = { path: 'biblioteca/2026/03/a.webp', nombre: 'a', mime: 'image/webp', bytes: 1, ancho: 1, alto: 1 }
 
-describe('medios con sesión de redactor', () => {
+describe('medios con sesión de colaborador', () => {
   beforeEach(async () => {
     vi.clearAllMocks()
-    await simularSesion('redactor')
+    await simularSesion('colaborador')
   })
 
-  it('puede subir a la biblioteca y su avatar, listar y registrar medios', async () => {
-    const falso = crearSupabaseFalso((c) => (c.tabla === 'cuentas_redactores' ? { data: { activa: true, version_sesion: 0 } } : { data: [] }))
+  it('puede subir a la biblioteca, su avatar, portadas y galerías, listar y registrar medios', async () => {
+    const falso = crearSupabaseFalso(() => ({ data: [] }))
     vi.mocked(createAdminClient).mockReturnValue(falso.cliente)
 
-    const subida = await prepararSubida({ tipo: 'biblioteca' }, 'image/webp')
-    expect(subida.path).toMatch(/^biblioteca\//)
+    expect((await prepararSubida({ tipo: 'biblioteca' }, 'image/webp')).path).toMatch(/^biblioteca\//)
     expect((await prepararSubida({ tipo: 'redactor' }, 'image/webp')).path).toMatch(/^redactores\//)
+    expect((await prepararSubida({ tipo: 'hero' }, 'image/webp')).path).toMatch(/^hero\//)
+    expect((await prepararSubida({ tipo: 'album', albumId: 'x' }, 'image/webp')).path).toMatch(/^galeria\/x\//)
     await expect(listarMedios()).resolves.toEqual([])
     await expect(registrarMedio(MEDIO)).resolves.toBeDefined()
   })
 
-  it.each([
-    [{ tipo: 'album', albumId: 'x' }],
-    [{ tipo: 'hero' }],
-    [{ tipo: 'rival' }],
-  ] as const)('prepararSubida con destino %j se rechaza', async (destino) => {
-    await expect(prepararSubida(destino, 'image/webp')).rejects.toThrow('No autorizado')
+  it('no sube escudos de rivales, que son del admin', async () => {
+    await expect(prepararSubida({ tipo: 'rival' }, 'image/webp')).rejects.toThrow('No autorizado')
   })
 
   it('no puede eliminar medios', async () => {
