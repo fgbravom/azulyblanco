@@ -139,6 +139,27 @@ describe('Encuadre', () => {
     expect(onChange).toHaveBeenCalledWith({ x: 30, y: 70, ancho: 240 })
   })
 
+  it('con la foto ya cacheada (sin evento load) el acercar queda habilitado', () => {
+    // Al editar, la foto ya está en la caché: llega completa antes de que React
+    // escuche el evento load, que nunca se dispara. El acercar no debe quedar
+    // deshabilitado esperando ese evento.
+    const naturalWidth = vi.spyOn(HTMLImageElement.prototype, 'naturalWidth', 'get').mockReturnValue(200)
+    const naturalHeight = vi.spyOn(HTMLImageElement.prototype, 'naturalHeight', 'get').mockReturnValue(200)
+    const complete = vi.spyOn(HTMLImageElement.prototype, 'complete', 'get').mockReturnValue(true)
+    const rect = vi.spyOn(Element.prototype, 'getBoundingClientRect').mockReturnValue(
+      { width: 120, height: 120, top: 0, left: 0, right: 120, bottom: 120, x: 0, y: 0, toJSON: () => ({}) } as DOMRect
+    )
+
+    preparar({ recorte: { x: 50, y: 50, ancho: null }, marcos: MARCO_UNICO })
+
+    expect(screen.getByRole('slider', { name: 'Acercar la foto' })).toBeEnabled()
+
+    naturalWidth.mockRestore()
+    naturalHeight.mockRestore()
+    complete.mockRestore()
+    rect.mockRestore()
+  })
+
   it('los marcos de proporciones distintas no ofrecen acercar (el tamaño sería distinto en cada uno)', () => {
     preparar()
     expect(screen.queryByRole('slider', { name: 'Acercar la foto' })).toBeNull()

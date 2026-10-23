@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { RotateCcw } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
@@ -72,6 +72,16 @@ function Previa({ url, recorte, onChange, marco, conZoom }: PreviaProps) {
     const { marco: m, foto: f } = medidas();
     setCobertura(Math.round((tamanoDesplegado(null, m, f).ancho / (m.ancho || 1)) * 100));
   };
+
+  // La foto suele estar ya en la caché del navegador (se ve en la lista del
+  // panel antes de abrir el editor): en ese caso el evento load no se dispara
+  // y el control de acercar quedaría deshabilitado para siempre. Este efecto
+  // detecta la imagen ya completa y calcula la cobertura igual.
+  useEffect(() => {
+    const img = foto.current;
+    if (img?.complete && img.naturalWidth > 0) alCargarFoto();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [url]);
 
   const mover = (dx: number, dy: number) => {
     const { marco, desplegado } = medidas();
