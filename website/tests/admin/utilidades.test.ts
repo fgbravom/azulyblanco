@@ -98,6 +98,8 @@ describe('recorte de las fotos', () => {
     expect(estiloRecorte({ x: 30, y: 70, ancho: 150 })).toEqual({
       width: '150%',
       height: 'auto',
+      // Anula el `img { max-width: 100% }` del preflight, que recortaría el acercamiento
+      maxWidth: 'none',
       left: '30%',
       top: '70%',
       right: 'auto',

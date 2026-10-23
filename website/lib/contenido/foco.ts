@@ -60,6 +60,9 @@ export function estiloRecorte(recorte: RecorteFoto): CSSProperties {
   return {
     width: `${recorte.ancho}%`,
     height: 'auto',
+    // El preflight de Tailwind pone `img { max-width: 100% }`: sin esto, el
+    // acercamiento (width > 100%) quedaría recortado y la foto no se vería más grande.
+    maxWidth: 'none',
     left: `${recorte.x}%`,
     top: `${recorte.y}%`,
     right: 'auto',
