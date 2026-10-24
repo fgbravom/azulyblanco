@@ -3,6 +3,7 @@
  */
 
 import { createClient } from '@/lib/supabase/server';
+import { createPublicClient } from '@/lib/supabase/public';
 import type {
   EquipoPublico,
   EquipoInsert,
@@ -69,7 +70,9 @@ export async function getCategoriaById(id: number): Promise<Categoria | null> {
  * Obtiene una categoría por nombre
  */
 export async function getCategoriaByNombre(nombre: string): Promise<Categoria | null> {
-  const supabase = await createClient();
+  // Cliente sin cookies: lo usa la página pública de series, que así puede ser estática
+  const supabase = createPublicClient();
+  if (!supabase) return null;
 
   const { data, error } = await supabase
     .from('categorias')
@@ -183,7 +186,9 @@ export async function getEquipoById(id: number): Promise<EquipoPublico | null> {
  * Obtiene equipos por categoría
  */
 export async function getEquiposByCategoria(categoriaId: number): Promise<EquipoPublico[]> {
-  const supabase = await createClient();
+  // Cliente sin cookies: lo usa la página pública de series, que así puede ser estática
+  const supabase = createPublicClient();
+  if (!supabase) return [];
 
   const { data, error } = await supabase
     .from('equipos')
