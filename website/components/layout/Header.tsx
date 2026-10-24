@@ -126,7 +126,10 @@ export function Header({ isHome = false, hideInitially = false }: HeaderProps) {
                       if (e.pointerType === 'mouse') setOpenDesktopMenu(null)
                     }}
                   >
+                  {/* No modal: el modo modal bloquea el puntero fuera del menú, y el hover
+                      deja de abrir y cerrar bien al pasar entre menús o hacia el submenú */}
                   <DropdownMenu
+                    modal={false}
                     open={openDesktopMenu === item.title}
                     onOpenChange={(open) => setOpenDesktopMenu(open ? item.title : null)}
                   >
