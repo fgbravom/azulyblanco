@@ -3,10 +3,12 @@ import { Button } from '@/components/ui/button'
 import { Header } from '@/components/layout/Header'
 import { Footer } from '@/components/layout/Footer'
 import { ProximosPartidos } from '@/components/calendario/ProximosPartidos'
-import { getEventosCalendario, getNacionalidadesPlantel, getNoticiasPublicas } from '@/lib/contenido/publico'
+import { getEscudosRivales, getEventosCalendario, getNacionalidadesPlantel, getNoticiasPublicas } from '@/lib/contenido/publico'
 import { HeroSection } from '@/components/hero/HeroSection'
 import { UltimasNoticias } from '@/components/noticias/UltimasNoticias'
+import { PosicionesHome } from '@/components/posiciones/PosicionesHome'
 import { SITE_CONFIG } from '@/lib/constants'
+import { getPosicionesSerie, SLUGS_SERIE } from '@/lib/data/posiciones'
 import Bandera from '@/components/ui/bandera'
 
 export const revalidate = 300 // respaldo; el admin regenera al guardar
@@ -52,10 +54,12 @@ const JSON_LD = JSON.stringify({
 }).replace(/</g, '\\u003c')
 
 export default async function HomePage() {
-  const [eventos, todasLasNoticias, paisesPlantel] = await Promise.all([
+  const tablas = SLUGS_SERIE.flatMap((slug) => getPosicionesSerie(slug) ?? [])
+  const [eventos, todasLasNoticias, paisesPlantel, escudos] = await Promise.all([
     getEventosCalendario(),
     getNoticiasPublicas(),
     getNacionalidadesPlantel(),
+    tablas.length > 0 ? getEscudosRivales() : {},
   ])
   return (
     <>
@@ -85,6 +89,16 @@ export default async function HomePage() {
             </Button>
           </div>
         </section>
+
+        {/* Tabla de posiciones: una pestaña por serie */}
+        {tablas.length > 0 && (
+          <section className="bg-azul-primario py-16 px-4">
+            <div className="mx-auto max-w-3xl">
+              <h2 className="text-3xl md:text-4xl font-bold text-white mb-8">POSICIONES</h2>
+              <PosicionesHome tablas={tablas} escudos={escudos} />
+            </div>
+          </section>
+        )}
 
         {/* Últimas noticias */}
         <UltimasNoticias noticias={todasLasNoticias.slice(0, 4)} />
