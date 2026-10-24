@@ -39,7 +39,6 @@ describe('tabla de posiciones ANFA', () => {
   it('las anomalías de la imagen oficial quedan documentadas', () => {
     const sinExcepciones = { ...posiciones, inconsistencias: [] }
     expect(revisarCoherencia(sinExcepciones).map((d) => `${d.serie}:${d.equipo}:${d.campo}`)).toEqual([
-      '35:Azul y Blanco:pts',
       'honor:Gonzalo Reyes:dg',
       'primera:Andres Negrete:pts',
     ])

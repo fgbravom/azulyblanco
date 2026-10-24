@@ -29,7 +29,7 @@
         { "pos": 6, "equipo": "Colo Colo", "pts": 3, "pj": 2, "g": 1, "e": 0, "p": 1, "gf": 5, "gc": 4, "dg": 1 },
         { "pos": 7, "equipo": "Patricio Gutierrez", "pts": 3, "pj": 2, "g": 1, "e": 0, "p": 1, "gf": 3, "gc": 4, "dg": -1 },
         { "pos": 8, "equipo": "Orilla de Martinez", "pts": 2, "pj": 2, "g": 0, "e": 2, "p": 0, "gf": 2, "gc": 2, "dg": 0 },
-        { "pos": 9, "equipo": "Azul y Blanco", "pts": 2, "pj": 2, "g": 0, "e": 1, "p": 1, "gf": 1, "gc": 2, "dg": -1, "es_ayb": true },
+        { "pos": 9, "equipo": "Azul y Blanco", "pts": 1, "pj": 2, "g": 0, "e": 1, "p": 1, "gf": 1, "gc": 2, "dg": -1, "es_ayb": true },
         { "pos": 10, "equipo": "Samuel Reyes", "pts": 1, "pj": 3, "g": 0, "e": 1, "p": 2, "gf": 2, "gc": 12, "dg": -10 },
         { "pos": 11, "equipo": "21 de Mayo", "pts": 0, "pj": 1, "g": 0, "e": 0, "p": 1, "gf": 1, "gc": 3, "dg": -2 },
         { "pos": 12, "equipo": "Barrio Colón", "pts": 0, "pj": 2, "g": 0, "e": 0, "p": 2, "gf": 0, "gc": 3, "dg": -3 },
@@ -90,7 +90,7 @@
     {
       "serie": "35",
       "equipo": "Azul y Blanco",
-      "detalle": "PJ 2, 0 G, 1 E, 1 P pero PTS 2 (debería ser 1)."
+      "detalle": "PJ 2, 0 G, 1 E, 1 P. La imagen de ANFA trae PTS 2, pero debería ser 1; se corrigió a 1 a pedido del club. Confirmar con ANFA."
     },
     {
       "serie": "honor",
