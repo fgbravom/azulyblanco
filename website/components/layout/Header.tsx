@@ -45,6 +45,15 @@ export function Header({ isHome = false, hideInitially = false }: HeaderProps) {
     }
   }, [isHome])
 
+  useEffect(() => {
+    if (!mobileMenuOpen) return
+    const overflowPrevio = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = overflowPrevio
+    }
+  }, [mobileMenuOpen])
+
   return (
     <>
       {/* El fondo azul es el ::after, que cubre el header y 2px más hacia abajo:
@@ -61,7 +70,7 @@ export function Header({ isHome = false, hideInitially = false }: HeaderProps) {
         data-hero-gated={hideInitially ? '' : undefined}
       >
         <div className="container mx-auto px-2 xl:px-4">
-          <div className="flex h-22 xl:h-20 items-center justify-between gap-1 xl:gap-4">
+          <div className="flex h-16 xl:h-20 items-center justify-between gap-1 xl:gap-4">
             {/* Mobile Menu Button - Visible below 1280px */}
             <button
               className="xl:hidden p-2 order-1 text-white transition-colors duration-300 relative z-[60]"
@@ -93,13 +102,13 @@ export function Header({ isHome = false, hideInitially = false }: HeaderProps) {
             </button>
 
             {/* Logo - Always centered */}
-            <Link href="/" className="flex items-center flex-shrink-0 order-2 absolute left-1/2 -translate-x-1/2 xl:top-1">
+            <Link href="/" className="flex items-center flex-shrink-0 order-2 absolute left-1/2 -translate-x-1/2 top-4 xl:top-1">
               <Image
                 src="/images/escudoazulyblanco.png"
                 alt={`Escudo ${SITE_CONFIG.name}`}
                 width={200}
                 height={200}
-                className="h-20 xl:h-35 w-auto"
+                className="h-24 xl:h-35 w-auto"
                 data-hero-crest-target=""
               />
             </Link>
@@ -216,7 +225,7 @@ export function Header({ isHome = false, hideInitially = false }: HeaderProps) {
       />
 
       <div
-        className={`fixed top-0 left-0 h-full w-[80%] max-w-md bg-white z-[56] xl:hidden transform transition-transform duration-300 ease-in-out ${
+        className={`fixed inset-0 h-dvh w-full overflow-y-auto overscroll-contain bg-white z-[56] xl:hidden transform transition-transform duration-300 ease-in-out ${
           mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >

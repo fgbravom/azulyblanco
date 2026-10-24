@@ -75,7 +75,7 @@ export default async function SeriePage({ slug, categoriaNombre, titulo: tituloB
   return (
     <>
       <Header />
-      <main className="min-h-screen pt-22 md:pt-16 lg:pt-20">
+      <main className="min-h-screen pt-16 md:pt-16 lg:pt-20">
         {/* Hero */}
         <section className="relative bg-azul-primario text-white py-20 overflow-hidden">
           {info?.imagen_url && (

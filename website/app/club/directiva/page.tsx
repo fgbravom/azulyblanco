@@ -22,7 +22,7 @@ export default function DirectivaPage() {
   return (
     <>
       <Header />
-      <main className="min-h-screen pt-22 md:pt-16 lg:pt-20">
+      <main className="min-h-screen pt-16 md:pt-16 lg:pt-20">
         {/* Hero */}
         <section className="bg-azul-primario text-white py-20">
           <div className="container mx-auto px-4 max-w-6xl text-center">
