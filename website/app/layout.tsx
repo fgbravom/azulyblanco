@@ -15,7 +15,7 @@ const openSans = Open_Sans({
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_CONFIG.url),
   title: {
-    default: `Club Deportivo ${SITE_CONFIG.name} | Fútbol amateur en Curicó`,
+    default: `Club Deportivo ${SITE_CONFIG.name}`,
     template: `%s | ${SITE_CONFIG.name}`,
   },
   description: SITE_CONFIG.description,
@@ -43,12 +43,12 @@ export const metadata: Metadata = {
     locale: 'es_CL',
     url: './',
     siteName: SITE_CONFIG.name,
-    title: `Club Deportivo ${SITE_CONFIG.name} - Fútbol amateur en Curicó`,
+    title: `Club Deportivo ${SITE_CONFIG.name}`,
     description: SITE_CONFIG.description,
   },
   twitter: {
     card: 'summary_large_image',
-    title: `Club Deportivo ${SITE_CONFIG.name} - Fútbol amateur en Curicó`,
+    title: `Club Deportivo ${SITE_CONFIG.name}`,
     description: SITE_CONFIG.description,
   },
   robots: {
