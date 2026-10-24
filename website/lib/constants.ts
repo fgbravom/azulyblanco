@@ -19,7 +19,7 @@ export const SITE_CONFIG = {
   },
   // Asociación de fútbol amateur a la que está afiliado el club
   association: {
-    name: 'Asociación de Fútbol Curicó Aguas Negras',
+    name: 'Curicó Aguas Negras.',
     instagram: 'https://www.instagram.com/asoc.curicoaguasnegras/',
   },
   social: {

@@ -29,16 +29,25 @@ export function Footer() {
               Más que un club.
             </p>
             <p className="mt-4 text-sm text-gray-400">
-              Club afiliado a la{' '}
-              <a
-                href={SITE_CONFIG.association.instagram}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-gray-300 underline underline-offset-2 hover:text-white transition-colors"
-              >
-                {SITE_CONFIG.association.name}
-              </a>
+              Club afiliado a la Asociación de Fútbol 
+              <br />
+              {SITE_CONFIG.association.name}
             </p>
+            <a
+              href={SITE_CONFIG.association.instagram}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-4 inline-block"
+              aria-label={SITE_CONFIG.association.name}
+            >
+              <Image
+                src="/images/asociacion.png"
+                alt={SITE_CONFIG.association.name}
+                width={438}
+                height={469}
+                className="h-10 w-auto"
+              />
+            </a>
           </div>
 
           {/* Column 2: Quick Links */}
