@@ -126,7 +126,8 @@ export default async function SeriePage({ slug, categoriaNombre, titulo: tituloB
             </div>
           )}
 
-          <TabsContent value="plantel" className="mt-0">
+          {/* Ambos paneles quedan montados y solo se ocultan: cambiar de pestaña no vuelve a crear las fichas ni recarga las fotos */}
+          <TabsContent value="plantel" forceMount className="mt-0 data-[state=inactive]:hidden">
             <section className="py-16 px-4">
               <div className="container mx-auto max-w-6xl">
                 <h2 className="text-3xl font-bold mb-10 text-center text-azul-primario">Plantel</h2>
@@ -167,7 +168,7 @@ export default async function SeriePage({ slug, categoriaNombre, titulo: tituloB
           </TabsContent>
 
           {tablaPosiciones && (
-            <TabsContent value="posiciones" className="mt-0">
+            <TabsContent value="posiciones" forceMount className="mt-0 data-[state=inactive]:hidden">
               <section className="py-16 px-4">
                 <div className="container mx-auto max-w-4xl">
                   <TablaPosiciones tabla={tablaPosiciones} escudos={escudos} />
