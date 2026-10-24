@@ -108,8 +108,16 @@ export function Header({ isHome = false, hideInitially = false }: HeaderProps) {
             <nav className="hidden xl:flex items-center gap-2 order-1 xl:ml-4 xl:pt-7 max-w-[40%]" suppressHydrationWarning>
               {mounted && NAVIGATION_ITEMS.map((item) => (
                 item.submenu ? (
-                  <DropdownMenu
+                  <div
                     key={item.href}
+                    onPointerEnter={(e) => {
+                      if (e.pointerType === 'mouse') setOpenDesktopMenu(item.title)
+                    }}
+                    onPointerLeave={(e) => {
+                      if (e.pointerType === 'mouse') setOpenDesktopMenu(null)
+                    }}
+                  >
+                  <DropdownMenu
                     open={openDesktopMenu === item.title}
                     onOpenChange={(open) => setOpenDesktopMenu(open ? item.title : null)}
                   >
@@ -117,7 +125,7 @@ export function Header({ isHome = false, hideInitially = false }: HeaderProps) {
                       {item.title}
                       <ChevronDown className="h-3 w-3 lg:h-4 lg:w-4 transition-transform duration-200 data-[state=open]:rotate-180" />
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="start" className="min-w-[180px] bg-azul-primario border-0 p-0 overflow-hidden">
+                    <DropdownMenuContent align="start" sideOffset={0} className="min-w-[180px] bg-azul-primario border-0 p-0 overflow-hidden">
                       {item.submenu.map((subitem) => (
                         subitem.submenu ? (
                           // Serie con secciones: submenú lateral con Plantel y Tabla de posiciones
@@ -153,6 +161,7 @@ export function Header({ isHome = false, hideInitially = false }: HeaderProps) {
                       ))}
                     </DropdownMenuContent>
                   </DropdownMenu>
+                  </div>
                 ) : (
                   <Link
                     key={item.href}
