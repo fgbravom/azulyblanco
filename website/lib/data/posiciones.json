@@ -19,7 +19,7 @@
   "series": [
     {
       "slug": "35",
-      "nombre": "Serie Senior 35 años",
+      "nombre": "Serie 35",
       "tabla": [
         { "pos": 1, "equipo": "Real Curicó", "pts": 9, "pj": 3, "g": 3, "e": 0, "p": 0, "gf": 8, "gc": 2, "dg": 6 },
         { "pos": 2, "equipo": "Curicó Unido Amateur", "pts": 6, "pj": 2, "g": 2, "e": 0, "p": 0, "gf": 8, "gc": 0, "dg": 8 },
