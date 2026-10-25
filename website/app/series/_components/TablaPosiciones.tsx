@@ -56,8 +56,8 @@ export function TablaPosiciones({ tabla, escudos = {} }: TablaPosicionesProps) {
 
   return (
     <div>
-      <h2 className="text-3xl font-bold mb-3 text-center text-azul-primario">Tabla de posiciones</h2>
-      <p className="text-center text-sm text-gray-500 mb-8">
+      <h2 className="sr-only">Tabla de posiciones</h2>
+      <p className="text-center text-sm text-gray-500 mb-6">
         {campeonato} · {torneo} · Fecha N°{fechaNumero}
       </p>
 

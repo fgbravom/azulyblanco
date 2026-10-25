@@ -77,7 +77,7 @@ export default async function SeriePage({ slug, categoriaNombre, titulo: tituloB
       <Header />
       <main className="min-h-screen pt-16 md:pt-16 lg:pt-20">
         {/* Hero */}
-        <section className="relative bg-azul-primario text-white py-20 overflow-hidden">
+        <section className="relative bg-azul-primario text-white pt-14 pb-16 md:pt-16 md:pb-20 overflow-hidden">
           {info?.imagen_url && (
             <>
               <Image src={info.imagen_url} alt="" fill priority sizes="100vw" className="object-cover" />
@@ -85,32 +85,42 @@ export default async function SeriePage({ slug, categoriaNombre, titulo: tituloB
             </>
           )}
           <div className="relative container mx-auto px-4 max-w-6xl text-center">
-            <h1 className="text-5xl md:text-6xl font-bold mb-6">{titulo}</h1>
-            <p className="text-xl text-gray-200">{descripcion}</p>
+            <h1 className="text-5xl md:text-6xl font-bold">{titulo}</h1>
+            {/* Muchas series repiten el título como descripción */}
+            {descripcion && descripcion.trim() !== titulo.trim() && (
+              <p className="mt-5 text-xl text-gray-200">{descripcion}</p>
+            )}
             {equipo?.temporada && (
-              <p className="mt-3 text-azul-claro font-medium">Temporada {equipo.temporada}</p>
+              <p className="mt-5 inline-block rounded-full bg-white/10 px-4 py-1 text-sm font-medium text-azul-claro">
+                Temporada {equipo.temporada}
+              </p>
             )}
           </div>
         </section>
 
-        {/* Información de la serie */}
-        {(datos.length > 0 || info?.contenido) && (
-          <section className="py-14 px-4 border-b border-gray-100">
-            <div className="container mx-auto max-w-4xl">
-              {datos.length > 0 && (
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10">
-                  {datos.map(({ icono: Icono, etiqueta, valor }) => (
-                    <div key={etiqueta} className="flex items-start gap-3 rounded-xl bg-gray-50 p-4">
-                      <Icono className="w-5 h-5 text-azul-claro shrink-0 mt-0.5" />
-                      <div>
-                        <p className="text-xs uppercase tracking-wide text-gray-500">{etiqueta}</p>
-                        <p className="font-semibold text-gray-800 whitespace-pre-line">{valor}</p>
-                      </div>
-                    </div>
-                  ))}
+        {/* Datos de la serie: barra flotante que cruza el borde del hero */}
+        {datos.length > 0 && (
+          <div className="relative z-10 -mt-8 px-4">
+            <div className="mx-auto flex w-fit max-w-full flex-col divide-y divide-gray-100 rounded-2xl bg-white shadow-lg ring-1 ring-gray-100 sm:max-w-4xl sm:flex-row sm:divide-x sm:divide-y-0">
+              {datos.map(({ icono: Icono, etiqueta, valor }) => (
+                <div key={etiqueta} className="flex flex-1 items-center gap-3 px-6 py-4">
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-azul-claro/10">
+                    <Icono className="h-5 w-5 text-azul-claro" />
+                  </span>
+                  <div>
+                    <p className="text-xs uppercase tracking-wide text-gray-500">{etiqueta}</p>
+                    <p className="font-semibold text-gray-800 whitespace-pre-line">{valor}</p>
+                  </div>
                 </div>
-              )}
-              {info?.contenido && <MDXRenderer content={info.contenido} />}
+              ))}
+            </div>
+          </div>
+        )}
+
+        {info?.contenido && (
+          <section className="px-4 pt-10">
+            <div className="container mx-auto max-w-4xl">
+              <MDXRenderer content={info.contenido} />
             </div>
           </section>
         )}
@@ -118,7 +128,7 @@ export default async function SeriePage({ slug, categoriaNombre, titulo: tituloB
         {/* Plantel, cuerpo técnico y tabla de posiciones (la pestaña de tabla solo existe si hay tabla publicada) */}
         <PestanasSerie tieneTabla={!!tablaPosiciones}>
           {tablaPosiciones && (
-            <div className="px-4 pt-10 flex justify-center">
+            <div className="px-4 pt-8 flex justify-center">
               <TabsList>
                 <TabsTrigger value="plantel">Plantel</TabsTrigger>
                 <TabsTrigger value="posiciones">Tabla de posiciones</TabsTrigger>
@@ -128,9 +138,10 @@ export default async function SeriePage({ slug, categoriaNombre, titulo: tituloB
 
           {/* Ambos paneles quedan montados y solo se ocultan: cambiar de pestaña no vuelve a crear las fichas ni recarga las fotos */}
           <TabsContent value="plantel" forceMount className="mt-0 data-[state=inactive]:hidden">
-            <section className="py-16 px-4">
+            <section className="py-10 px-4">
               <div className="container mx-auto max-w-6xl">
-                <h2 className="text-3xl font-bold mb-10 text-center text-azul-primario">Plantel</h2>
+                {/* La pestaña activa ya lo dice; queda para lectores de pantalla */}
+                <h2 className="sr-only">Plantel</h2>
 
                 {jugadores.length === 0 ? (
                   <Card>
@@ -145,7 +156,7 @@ export default async function SeriePage({ slug, categoriaNombre, titulo: tituloB
             </section>
 
             {cuerpoTecnico.length > 0 && (
-              <section className="py-16 px-4 bg-gray-50">
+              <section className="py-12 px-4 bg-gray-50">
                 <div className="container mx-auto max-w-6xl">
                   <h2 className="text-3xl font-bold mb-10 text-center text-azul-primario">Cuerpo Técnico</h2>
                   {/* Mismo ancho que las columnas del plantel, pero centradas */}
@@ -169,7 +180,7 @@ export default async function SeriePage({ slug, categoriaNombre, titulo: tituloB
 
           {tablaPosiciones && (
             <TabsContent value="posiciones" forceMount className="mt-0 data-[state=inactive]:hidden">
-              <section className="py-16 px-4">
+              <section className="py-10 px-4">
                 <div className="container mx-auto max-w-4xl">
                   <TablaPosiciones tabla={tablaPosiciones} escudos={escudos} />
                 </div>
