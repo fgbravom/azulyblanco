@@ -11,7 +11,7 @@ export default function SeriePrimeraPage() {
       slug="primera"
       categoriaNombre="Primera"
       titulo="Serie Primera"
-      descripcion="El equipo principal del club, representando los colores azul y blanco."
+      descripcion="Nuestra cantera representando los colores azul y blanco."
     />
   )
 }
