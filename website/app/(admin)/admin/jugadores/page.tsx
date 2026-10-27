@@ -59,7 +59,7 @@ export default function JugadoresPage() {
   const fetchJugadores = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/jugadores?activo=true');
+      const res = await fetch('/api/jugadores?activo=true&pageSize=1000');
       if (!res.ok) throw new Error('Error al cargar jugadores');
 
       const data = await res.json();

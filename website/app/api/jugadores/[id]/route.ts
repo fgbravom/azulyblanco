@@ -12,6 +12,7 @@ import {
   deleteJugadorPermanente,
   setPosicionesJugador,
 } from '@/lib/data/jugadores';
+import { revalidarSitio } from '@/lib/admin/revalidar';
 import { parsePosiciones } from '@/lib/validations/jugador';
 import type { JugadorUpdate } from '@/types/database';
 
@@ -147,6 +148,7 @@ export async function PATCH(
 
     const jugador = await updateJugador(jugadorId, updates);
     if (posicionesIds) await setPosicionesJugador(jugadorId, posicionesIds);
+    revalidarSitio('series');
 
     return NextResponse.json({
       success: true,
@@ -200,6 +202,7 @@ export async function DELETE(
     } else {
       await deleteJugador(jugadorId);
     }
+    revalidarSitio('series');
 
     return NextResponse.json({
       success: true,

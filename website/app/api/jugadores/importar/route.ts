@@ -7,6 +7,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { rechazarSinPermiso } from '@/lib/auth/session';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { createJugador, setPosicionesJugador, updateJugador } from '@/lib/data/jugadores';
+import { revalidarSitio } from '@/lib/admin/revalidar';
 import { cargarDatosReferencia, planificarImportacion } from '@/lib/jugadores/importar-csv';
 
 // El formulario completo pesa unos pocos KB: esto deja margen de sobra
@@ -71,6 +72,7 @@ export async function POST(request: NextRequest) {
           fallidos.push({ linea: fila.linea, error: error instanceof Error ? error.message : 'Error al guardar jugador' });
         }
       }
+      if (importados + actualizados > 0) revalidarSitio('series');
     }
 
     return NextResponse.json({

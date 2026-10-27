@@ -6,6 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { rechazarSinPermiso } from '@/lib/auth/session';
 import { getJugadores, createJugador, setPosicionesJugador } from '@/lib/data/jugadores';
+import { revalidarSitio } from '@/lib/admin/revalidar';
 import { parsePosiciones } from '@/lib/validations/jugador';
 import type { EstadoJugador, JugadorInsert, JugadoresFilter, QueryOptions } from '@/types/database';
 
@@ -142,6 +143,7 @@ export async function POST(request: NextRequest) {
 
     const jugador = await createJugador(jugadorData);
     await setPosicionesJugador(jugador.id, posicionesIds);
+    revalidarSitio('series');
 
     return NextResponse.json(
       {
