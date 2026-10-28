@@ -204,7 +204,7 @@ export function ProximosPartidos({ eventos, limite = 3 }: ProximosPartidosProps)
               {/* Fecha, Hora y Lugar */}
               <div className="w-full flex flex-col md:flex-row items-center justify-center gap-2 md:gap-6 text-white/90">
                 <div className="flex items-center gap-2 text-sm md:text-base">
-                  <span className="font-semibold">{fechaInfo.mes} {fechaInfo.dia}, {fechaInfo.anio}</span>
+                  <span className="font-semibold">{fechaInfo.dia} {fechaInfo.mes} {fechaInfo.anio}</span>
                 </div>
                 <div className="hidden md:block text-white/50">•</div>
                 <div className="flex items-center gap-1 text-sm md:text-base">
