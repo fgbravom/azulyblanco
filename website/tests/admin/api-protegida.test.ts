@@ -13,6 +13,9 @@ vi.mock('@/lib/data/jugadores', () => ({
   deleteJugador: vi.fn(async () => {}),
   deleteJugadorPermanente: vi.fn(async () => {}),
   setPosicionesJugador: vi.fn(async () => {}),
+  setActivoJugadores: vi.fn(async (ids: number[]) => ids.length),
+  resumenDatosJugadores: vi.fn(async () => ({ cuotas: 0, pagos: 0, montoPagado: 0 })),
+  eliminarInactivosPermanente: vi.fn(async (ids: number[]) => ids.length),
 }))
 vi.mock('@/lib/data/equipos', () => ({
   COLUMNAS_EQUIPO: 'id, nombre',
@@ -181,6 +184,42 @@ describe('rutas /api con sesión', () => {
     await llamar(PATCH, 'PATCH', '/api/jugadores/1', { telefono: '+56 9 1111 2222' })
     expect(datos.jugadores.updateJugador).toHaveBeenCalledWith(1, { telefono: '+56 9 1111 2222' })
     expect(datos.jugadores.setPosicionesJugador).not.toHaveBeenCalled()
+  })
+
+  it('POST /api/jugadores/masivo valida los ids y la acción antes de tocar datos', async () => {
+    const { POST } = rutas['/api/jugadores/masivo']
+    for (const body of [
+      { ids: [], accion: 'baja' },
+      { ids: ['1'], accion: 'baja' },
+      { ids: [1.5], accion: 'baja' },
+      { ids: [1], accion: 'borrar-todo' },
+    ]) {
+      expect((await llamar(POST, 'POST', '/api/jugadores/masivo', body)).status).toBe(400)
+    }
+    expect(datos.jugadores.setActivoJugadores).not.toHaveBeenCalled()
+    expect(datos.jugadores.eliminarInactivosPermanente).not.toHaveBeenCalled()
+  })
+
+  it('POST /api/jugadores/masivo da de baja, reactiva y elimina sin repetir ids', async () => {
+    const { POST } = rutas['/api/jugadores/masivo']
+
+    await llamar(POST, 'POST', '/api/jugadores/masivo', { ids: [1, 2, 2], accion: 'baja' })
+    expect(datos.jugadores.setActivoJugadores).toHaveBeenLastCalledWith([1, 2], false)
+
+    await llamar(POST, 'POST', '/api/jugadores/masivo', { ids: [3], accion: 'reactivar' })
+    expect(datos.jugadores.setActivoJugadores).toHaveBeenLastCalledWith([3], true)
+
+    const res = await llamar(POST, 'POST', '/api/jugadores/masivo', { ids: [4, 5], accion: 'eliminar' })
+    expect(datos.jugadores.eliminarInactivosPermanente).toHaveBeenCalledWith([4, 5])
+    expect((await res.json()).data).toEqual({ afectados: 2 })
+  })
+
+  it('GET /api/jugadores/masivo resume las cuotas y pagos que se perderían', async () => {
+    const { GET } = rutas['/api/jugadores/masivo']
+    const res = await llamar(GET, 'GET', '/api/jugadores/masivo?ids=1,2')
+    expect(datos.jugadores.resumenDatosJugadores).toHaveBeenCalledWith([1, 2])
+    expect((await res.json()).data).toEqual({ cuotas: 0, pagos: 0, montoPagado: 0 })
+    expect((await llamar(GET, 'GET', '/api/jugadores/masivo?ids=abc')).status).toBe(400)
   })
 
   it('DELETE /api/jugadores/[id] es baja lógica salvo que se pida permanente', async () => {

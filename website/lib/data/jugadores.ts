@@ -265,6 +265,87 @@ export async function deleteJugadorPermanente(id: number): Promise<void> {
 }
 
 // ============================================================================
+// ACCIONES MASIVAS
+// ============================================================================
+
+/** Datos que se pierden junto con los jugadores al eliminarlos de forma permanente */
+export interface ResumenDatosJugadores {
+  cuotas: number;
+  pagos: number;
+  /** Suma de los pagos aprobados, en pesos */
+  montoPagado: number;
+}
+
+/**
+ * Da de baja o reactiva a varios jugadores a la vez. Devuelve cuántos cambiaron.
+ */
+export async function setActivoJugadores(ids: number[], activo: boolean): Promise<number> {
+  const supabase = createAdminClient();
+
+  const { data, error } = await supabase
+    .from('jugadores')
+    .update({ activo, estado: activo ? 'Activo' : 'Inactivo' })
+    .in('id', ids)
+    .select('id');
+
+  if (error) {
+    console.error('Error al cambiar el estado de los jugadores:', error);
+    throw new Error(`Error al actualizar jugadores: ${error.message}`);
+  }
+
+  return data?.length ?? 0;
+}
+
+/**
+ * Cuotas y pagos que arrastraría borrar a estos jugadores (se eliminan en cascada)
+ */
+export async function resumenDatosJugadores(ids: number[]): Promise<ResumenDatosJugadores> {
+  const supabase = createAdminClient();
+
+  const { data, error } = await supabase
+    .from('cuotas')
+    .select('id, pagos(monto, estado)')
+    .in('jugador_id', ids);
+
+  if (error) {
+    console.error('Error al resumir los datos de los jugadores:', error);
+    throw new Error(`Error al revisar los datos de los jugadores: ${error.message}`);
+  }
+
+  const resumen: ResumenDatosJugadores = { cuotas: 0, pagos: 0, montoPagado: 0 };
+  for (const cuota of (data ?? []) as unknown as { pagos: { monto: number; estado: string }[] | null }[]) {
+    resumen.cuotas++;
+    for (const pago of cuota.pagos ?? []) {
+      resumen.pagos++;
+      if (pago.estado === 'aprobado') resumen.montoPagado += pago.monto;
+    }
+  }
+  return resumen;
+}
+
+/**
+ * Elimina de forma permanente a varios jugadores, solo si ya están inactivos:
+ * un jugador activo nunca se borra por esta vía. Devuelve cuántos se eliminaron.
+ */
+export async function eliminarInactivosPermanente(ids: number[]): Promise<number> {
+  const supabase = createAdminClient();
+
+  const { data, error } = await supabase
+    .from('jugadores')
+    .delete()
+    .in('id', ids)
+    .eq('activo', false)
+    .select('id');
+
+  if (error) {
+    console.error('Error al eliminar jugadores:', error);
+    throw new Error(`Error al eliminar jugadores: ${error.message}`);
+  }
+
+  return data?.length ?? 0;
+}
+
+// ============================================================================
 // FUNCIONES AUXILIARES
 // ============================================================================
 

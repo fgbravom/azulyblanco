@@ -3,12 +3,13 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { FileDown, FileUp, Plus, Search } from 'lucide-react';
+import { FileDown, FileUp, Plus, RotateCcw, Search, Trash2 } from 'lucide-react';
 import JugadoresTable from '@/components/admin/jugadores/JugadoresTable';
 import JugadorForm from '@/components/admin/jugadores/JugadorForm';
 import JugadorFicha from '@/components/admin/jugadores/JugadorFicha';
 import ImportarJugadoresDialog from '@/components/admin/jugadores/ImportarJugadoresDialog';
 import EliminarJugadorDialog from '@/components/admin/jugadores/EliminarJugadorDialog';
+import AccionMasivaDialog, { type AccionMasiva } from '@/components/admin/jugadores/AccionMasivaDialog';
 import { jugadoresACsv } from '@/lib/jugadores/exportar-csv';
 import type { JugadorCompleto } from '@/types/database';
 import { toast } from 'sonner';
@@ -34,14 +35,24 @@ export default function JugadoresPage() {
   const [eliminando, setEliminando] = useState(false);
   const [serie, setSerie] = useState('Todas');
   const [busqueda, setBusqueda] = useState('');
+  const [vista, setVista] = useState<'activos' | 'inactivos'>('activos');
+  const [seleccion, setSeleccion] = useState<Set<number>>(new Set());
+  const [accionMasiva, setAccionMasiva] = useState<{ accion: AccionMasiva; jugadores: JugadorCompleto[] } | null>(null);
+  const [procesando, setProcesando] = useState(false);
+
+  const enVista = useMemo(
+    () => jugadores.filter((j) => j.activo === (vista === 'activos')),
+    [jugadores, vista]
+  );
+  const totalActivos = jugadores.filter((j) => j.activo).length;
 
   const series = useMemo(
-    () => ['Todas', ...Array.from(new Set(jugadores.map((j) => j.categoria).filter(Boolean)))],
-    [jugadores]
+    () => ['Todas', ...Array.from(new Set(enVista.map((j) => j.categoria).filter(Boolean)))],
+    [enVista]
   );
 
   const termino = normalizar(busqueda);
-  const visibles = jugadores
+  const visibles = enVista
     .filter((j) => serie === 'Todas' || j.categoria === serie)
     .filter(
       (j) =>
@@ -59,11 +70,12 @@ export default function JugadoresPage() {
   const fetchJugadores = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/jugadores?activo=true&pageSize=1000');
+      const res = await fetch('/api/jugadores?pageSize=1000');
       if (!res.ok) throw new Error('Error al cargar jugadores');
 
       const data = await res.json();
       setJugadores(data.data || []);
+      setSeleccion(new Set());
     } catch (error) {
       console.error('Error al cargar jugadores:', error);
       toast.error('Error al cargar jugadores');
@@ -81,6 +93,53 @@ export default function JugadoresPage() {
     a.download = `plantel-${serie === 'Todas' ? 'completo' : `serie-${serie}`}-${new Date().toISOString().slice(0, 10)}.csv`;
     a.click();
     URL.revokeObjectURL(url);
+  };
+
+  const cambiarVista = (nueva: 'activos' | 'inactivos') => {
+    setVista(nueva);
+    setSerie('Todas');
+    setSeleccion(new Set());
+  };
+
+  const alternar = (id: number) =>
+    setSeleccion((previa) => {
+      const nueva = new Set(previa);
+      if (!nueva.delete(id)) nueva.add(id);
+      return nueva;
+    });
+
+  // Los marcados que siguen a la vista (un filtro nuevo puede ocultar a alguno)
+  const marcados = visibles.filter((j) => seleccion.has(j.id));
+
+  const alternarTodos = () =>
+    setSeleccion(marcados.length === visibles.length ? new Set() : new Set(visibles.map((j) => j.id)));
+
+  const ejecutarAccion = async (accion: AccionMasiva, afectados: JugadorCompleto[]) => {
+    setProcesando(true);
+    try {
+      const res = await fetch('/api/jugadores/masivo', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids: afectados.map((j) => j.id), accion }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) throw new Error(data.error || 'Error al actualizar jugadores');
+
+      const n = data.data.afectados as number;
+      const [singular, plural] = {
+        reactivar: ['reactivado', 'reactivados'],
+        baja: ['dado de baja', 'dados de baja'],
+        eliminar: ['eliminado', 'eliminados'],
+      }[accion];
+      toast.success(n === 1 ? `1 jugador ${singular}` : `${n} jugadores ${plural}`);
+      setAccionMasiva(null);
+      await fetchJugadores();
+    } catch (error) {
+      console.error('Error en la acción masiva:', error);
+      toast.error('No se pudo completar la acción. Inténtalo de nuevo.');
+    } finally {
+      setProcesando(false);
+    }
   };
 
   const handleCreate = () => {
@@ -149,6 +208,16 @@ export default function JugadoresPage() {
         }
       />
 
+      <FiltroChips
+        etiqueta="Ver jugadores"
+        valor={vista}
+        onChange={cambiarVista}
+        opciones={[
+          { valor: 'activos', etiqueta: 'Activos', cantidad: totalActivos },
+          { valor: 'inactivos', etiqueta: 'Inactivos', cantidad: jugadores.length - totalActivos },
+        ]}
+      />
+
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
         <div className="relative sm:w-72 sm:shrink-0">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
@@ -171,12 +240,53 @@ export default function JugadoresPage() {
               opciones={series.map((s) => ({
                 valor: s,
                 etiqueta: s === 'Todas' ? 'Todas las series' : `Serie ${s}`,
-                cantidad: s === 'Todas' ? jugadores.length : jugadores.filter((j) => j.categoria === s).length,
+                cantidad: s === 'Todas' ? enVista.length : enVista.filter((j) => j.categoria === s).length,
               }))}
             />
           </div>
         )}
       </div>
+
+      {marcados.length > 0 && (
+        <div
+          role="region"
+          aria-label="Acciones sobre los jugadores seleccionados"
+          className="flex flex-wrap items-center gap-2 rounded-xl border border-azul-primario/30 bg-azul-primario/5 px-4 py-3"
+        >
+          <span className="mr-auto text-sm font-medium text-azul-primario">
+            {marcados.length === 1 ? '1 jugador seleccionado' : `${marcados.length} jugadores seleccionados`}
+          </span>
+          <Button variant="outline" size="sm" onClick={() => setSeleccion(new Set())}>
+            Quitar selección
+          </Button>
+          {vista === 'inactivos' ? (
+            <>
+              <Button
+                size="sm"
+                className="bg-green-700 text-white hover:bg-green-800"
+                onClick={() => setAccionMasiva({ accion: 'reactivar', jugadores: marcados })}
+              >
+                <RotateCcw /> Reactivar
+              </Button>
+              <Button
+                size="sm"
+                className="bg-red-600 text-white hover:bg-red-700"
+                onClick={() => setAccionMasiva({ accion: 'eliminar', jugadores: marcados })}
+              >
+                <Trash2 /> Eliminar definitivamente
+              </Button>
+            </>
+          ) : (
+            <Button
+              size="sm"
+              className="bg-red-600 text-white hover:bg-red-700"
+              onClick={() => setAccionMasiva({ accion: 'baja', jugadores: marcados })}
+            >
+              <Trash2 /> Dar de baja
+            </Button>
+          )}
+        </div>
+      )}
 
       <JugadoresTable
         jugadores={visibles}
@@ -184,8 +294,15 @@ export default function JugadoresPage() {
         hayFiltro={hayFiltro}
         onView={handleView}
         onEdit={handleEdit}
-        onDelete={setAEliminar}
+        onDelete={(jugador) =>
+          vista === 'inactivos' ? setAccionMasiva({ accion: 'eliminar', jugadores: [jugador] }) : setAEliminar(jugador)
+        }
         onCreate={handleCreate}
+        modo={vista}
+        onReactivar={(jugador) => ejecutarAccion('reactivar', [jugador])}
+        seleccion={seleccion}
+        onToggle={alternar}
+        onToggleTodos={alternarTodos}
       />
 
       {/* Modal de ficha completa */}
@@ -208,6 +325,14 @@ export default function JugadoresPage() {
         eliminando={eliminando}
         onCancelar={() => setAEliminar(null)}
         onConfirmar={confirmarEliminar}
+      />
+
+      <AccionMasivaDialog
+        accion={accionMasiva?.accion ?? null}
+        jugadores={accionMasiva?.jugadores ?? []}
+        procesando={procesando}
+        onCancelar={() => setAccionMasiva(null)}
+        onConfirmar={() => accionMasiva && ejecutarAccion(accionMasiva.accion, accionMasiva.jugadores)}
       />
 
       <ImportarJugadoresDialog open={importarOpen} onOpenChange={setImportarOpen} onImportado={fetchJugadores} />

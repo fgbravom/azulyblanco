@@ -2,7 +2,7 @@
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { Edit, Trash2, Eye, Plus, Users } from 'lucide-react';
+import { Edit, Trash2, Eye, Plus, RotateCcw, Users } from 'lucide-react';
 import { MenuAcciones, Vacio } from '@/components/admin/ui';
 import type { JugadorCompleto } from '@/types/database';
 import { recorteDe } from '@/lib/contenido/foco';
@@ -19,6 +19,39 @@ interface Props {
   onEdit: (jugador: JugadorCompleto) => void;
   onDelete: (jugador: JugadorCompleto) => void;
   onCreate: () => void;
+  /** Vista que se muestra: los inactivos se reactivan o se eliminan de forma definitiva */
+  modo: 'activos' | 'inactivos';
+  onReactivar: (jugador: JugadorCompleto) => void;
+  /** Ids marcados para una acción masiva */
+  seleccion: Set<number>;
+  onToggle: (id: number) => void;
+  onToggleTodos: () => void;
+}
+
+function Casilla({
+  marcada,
+  indeterminada,
+  etiqueta,
+  onChange,
+}: {
+  marcada: boolean;
+  indeterminada?: boolean;
+  etiqueta: string;
+  onChange: () => void;
+}) {
+  return (
+    <input
+      type="checkbox"
+      checked={marcada}
+      ref={(el) => {
+        if (el) el.indeterminate = Boolean(indeterminada);
+      }}
+      onChange={onChange}
+      onClick={(e) => e.stopPropagation()}
+      aria-label={etiqueta}
+      className="h-4 w-4 shrink-0 cursor-pointer rounded border-gray-300 accent-azul-primario"
+    />
+  );
 }
 
 function Avatar({ jugador, className, sizes }: { jugador: JugadorCompleto; className: string; sizes: string }) {
@@ -103,7 +136,23 @@ function Esqueleto() {
   );
 }
 
-export default function JugadoresTable({ jugadores, loading, hayFiltro, onView, onEdit, onDelete, onCreate }: Props) {
+export default function JugadoresTable({
+  jugadores,
+  loading,
+  hayFiltro,
+  onView,
+  onEdit,
+  onDelete,
+  onCreate,
+  modo,
+  onReactivar,
+  seleccion,
+  onToggle,
+  onToggleTodos,
+}: Props) {
+  const marcados = jugadores.filter((j) => seleccion.has(j.id)).length;
+  const inactivos = modo === 'inactivos';
+
   if (loading) {
     return <Esqueleto />;
   }
@@ -114,6 +163,12 @@ export default function JugadoresTable({ jugadores, loading, hayFiltro, onView, 
         icono={Users}
         titulo="Ningún jugador coincide"
         descripcion="Revisa el texto de la búsqueda o cambia la serie."
+      />
+    ) : inactivos ? (
+      <Vacio
+        icono={Users}
+        titulo="No hay jugadores inactivos"
+        descripcion="Los jugadores dados de baja aparecen aquí, donde puedes reactivarlos o eliminarlos."
       />
     ) : (
       <Vacio
@@ -135,6 +190,11 @@ export default function JugadoresTable({ jugadores, loading, hayFiltro, onView, 
       <ul className="space-y-3 md:hidden">
         {jugadores.map((jugador) => (
           <li key={jugador.id} className="flex items-center gap-3 rounded-xl border border-gray-200 bg-white p-3 shadow-sm">
+            <Casilla
+              marcada={seleccion.has(jugador.id)}
+              etiqueta={`Seleccionar a ${jugador.nombre_completo}`}
+              onChange={() => onToggle(jugador.id)}
+            />
             <button
               type="button"
               onClick={() => onView(jugador)}
@@ -158,7 +218,13 @@ export default function JugadoresTable({ jugadores, loading, hayFiltro, onView, 
               acciones={[
                 { etiqueta: 'Ver ficha', icono: Eye, onSelect: () => onView(jugador) },
                 { etiqueta: 'Editar', icono: Edit, onSelect: () => onEdit(jugador) },
-                { etiqueta: 'Eliminar', icono: Trash2, peligro: true, onSelect: () => onDelete(jugador) },
+                ...(inactivos ? [{ etiqueta: 'Reactivar', icono: RotateCcw, onSelect: () => onReactivar(jugador) }] : []),
+                {
+                  etiqueta: inactivos ? 'Eliminar definitivamente' : 'Eliminar',
+                  icono: Trash2,
+                  peligro: true,
+                  onSelect: () => onDelete(jugador),
+                },
               ]}
             />
           </li>
@@ -170,17 +236,32 @@ export default function JugadoresTable({ jugadores, loading, hayFiltro, onView, 
         <Table>
           <TableHeader>
             <TableRow className="bg-gray-50 hover:bg-gray-50">
+              <TableHead className="w-10">
+                <Casilla
+                  marcada={marcados > 0 && marcados === jugadores.length}
+                  indeterminada={marcados > 0 && marcados < jugadores.length}
+                  etiqueta="Seleccionar todos los jugadores de la lista"
+                  onChange={onToggleTodos}
+                />
+              </TableHead>
               <TableHead className="w-16 text-center">#</TableHead>
               <TableHead>Jugador</TableHead>
               <TableHead>Posición</TableHead>
               <TableHead>Serie</TableHead>
               <TableHead>Estado</TableHead>
-              <TableHead className="w-32 text-right">Acciones</TableHead>
+              <TableHead className="w-40 text-right">Acciones</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {jugadores.map((jugador) => (
               <TableRow key={jugador.id} className="cursor-pointer hover:bg-azul-claro/5" onClick={() => onView(jugador)}>
+                <TableCell className="w-10">
+                  <Casilla
+                    marcada={seleccion.has(jugador.id)}
+                    etiqueta={`Seleccionar a ${jugador.nombre_completo}`}
+                    onChange={() => onToggle(jugador.id)}
+                  />
+                </TableCell>
                 <TableCell className="text-center font-mono text-base font-bold text-azul-primario">
                   {jugador.dorsal ?? '-'}
                 </TableCell>
@@ -232,11 +313,25 @@ export default function JugadoresTable({ jugadores, loading, hayFiltro, onView, 
                     >
                       <Edit className="h-4 w-4 text-gray-700" />
                     </Button>
+                    {inactivos && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        aria-label={`Reactivar a ${jugador.nombre_completo}`}
+                        title="Reactivar jugador"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onReactivar(jugador);
+                        }}
+                      >
+                        <RotateCcw className="h-4 w-4 text-green-700" />
+                      </Button>
+                    )}
                     <Button
                       variant="ghost"
                       size="sm"
-                      aria-label={`Eliminar a ${jugador.nombre_completo}`}
-                      title="Eliminar jugador"
+                      aria-label={`${inactivos ? 'Eliminar definitivamente a' : 'Eliminar a'} ${jugador.nombre_completo}`}
+                      title={inactivos ? 'Eliminar definitivamente' : 'Eliminar jugador'}
                       onClick={(e) => {
                         e.stopPropagation();
                         onDelete(jugador);
