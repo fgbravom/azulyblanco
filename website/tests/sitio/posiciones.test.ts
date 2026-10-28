@@ -13,7 +13,7 @@ describe('tabla de posiciones ANFA', () => {
     const tabla = getPosicionesSerie('primera')
     expect(tabla?.campeonato).toBe('Campeonato ANFA 2026')
     expect(tabla?.torneo).toBe('Clausura')
-    expect(tabla?.fechaNumero).toBe(23)
+    expect(tabla?.fechaNumero).toBe(24)
     expect(tabla?.organizador).toBe('Asociación de Fútbol Curicó Aguas Negras')
   })
 
@@ -39,8 +39,7 @@ describe('tabla de posiciones ANFA', () => {
   it('las anomalías de la imagen oficial quedan documentadas', () => {
     const sinExcepciones = { ...posiciones, inconsistencias: [] }
     expect(revisarCoherencia(sinExcepciones).map((d) => `${d.serie}:${d.equipo}:${d.campo}`)).toEqual([
-      'honor:Gonzalo Reyes:dg',
-      'primera:Andres Negrete:pts',
+      'honor:J. Aguas Negras:dg',
     ])
   })
 
