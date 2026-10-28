@@ -220,7 +220,7 @@ export function ProximosPartidos({ eventos, limite = 3 }: ProximosPartidosProps)
 
             {/* Banda inferior con información adicional */}
             <div className="bg-azul-primario/30 backdrop-blur-sm px-4 md:px-8 py-2">
-              <div className="w-full max-w-5xl mx-auto flex items-center justify-between text-white/80 text-xs md:text-sm">
+              <div className="w-full max-w-5xl mx-auto flex flex-wrap items-center justify-center gap-x-6 gap-y-1 text-white/80 text-xs md:text-sm">
                 <span className="font-medium">
                   {esEvento ? 'Evento Especial' : esEntrenamiento ? 'Entrenamiento' : (evento.tipoPartido || 'Partido')}
                   {evento.series && evento.series.length > 0 && (
