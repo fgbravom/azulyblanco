@@ -11,7 +11,7 @@ describe('TablaPosiciones', () => {
   it('muestra la fecha, la fuente y las 13 filas de la serie', () => {
     render(<TablaPosiciones tabla={primera!} />)
     expect(screen.getByRole('heading', { name: 'Tabla de posiciones' })).toBeInTheDocument()
-    expect(screen.getByText('Campeonato ANFA 2026 · Clausura · Fecha N°24')).toBeInTheDocument()
+    expect(screen.getByText('Campeonato ANFA 2026 · Clausura · Fecha N°25')).toBeInTheDocument()
     expect(screen.getAllByRole('row')).toHaveLength(14)
     expect(screen.getByText(/Asociación de Fútbol Curicó Aguas Negras/)).toBeInTheDocument()
   })
@@ -19,9 +19,9 @@ describe('TablaPosiciones', () => {
   it('respeta el orden y los valores de la tabla oficial', () => {
     render(<TablaPosiciones tabla={primera!} />)
     const filas = screen.getAllByRole('row').slice(1)
-    expect(within(filas[0]).getByText('Orilla de Martinez')).toBeInTheDocument()
-    expect(within(filas[0]).getByText('9')).toBeInTheDocument()
-    expect(within(filas[0]).getByText('+5')).toBeInTheDocument()
+    expect(within(filas[0]).getByText('J. Valvanera')).toBeInTheDocument()
+    expect(within(filas[0]).getByText('10')).toBeInTheDocument()
+    expect(within(filas[0]).getByText('+7')).toBeInTheDocument()
     expect(within(filas[12]).getByText('U de Chile')).toBeInTheDocument()
     expect(within(filas[12]).getByText('-9')).toBeInTheDocument()
   })
@@ -36,7 +36,7 @@ describe('TablaPosiciones', () => {
   it('explica las siglas con el título de la columna', () => {
     render(<TablaPosiciones tabla={primera!} />)
     expect(screen.getByTitle('Partidos jugados')).toHaveTextContent('PJ')
-    expect(screen.getByTitle('Diferencia de gol (tal como figura en la imagen)')).toHaveTextContent('DG')
+    expect(screen.getByTitle('Diferencia de gol')).toHaveTextContent('DG')
   })
   it('muestra el escudo entre la posición y el equipo, con el logo del catálogo cruzado sin tildes', () => {
     const escudos = { [claveEquipo('San Martín')]: 'https://ejemplo.test/sm.png' }

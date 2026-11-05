@@ -116,7 +116,7 @@ export function TablaPosiciones({ tabla, escudos = {} }: TablaPosicionesProps) {
       </div>
 
       <p className="mt-4 text-center text-xs text-gray-500">
-        Fuente: {organizador}. Las cifras se publican tal como figuran en la tabla oficial.
+        Fuente: {organizador}. Cifras de la tabla oficial; si una fila no cuadra, PJ y DG se ajustan a los resultados.
       </p>
     </div>
   )

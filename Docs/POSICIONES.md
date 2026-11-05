@@ -8,15 +8,15 @@ La Asociación de Fútbol Curicó Aguas Negras publica cada fecha una imagen con
 
 1. Guarda la imagen nueva de ANFA.
 2. Transcribe las tres series a `website/lib/data/posiciones.json` (o pídele a un agente que lea la imagen y actualice el archivo). Mantén la forma: `fecha_numero`, `leyenda`, `series[].tabla[]` con `pos, equipo, pts, pj, g, e, p, gf, gc, dg`, y `es_ayb: true` en la fila de Azul y Blanco.
-3. Actualiza `fecha_numero` y revisa `inconsistencias`: si la imagen nueva corrige una anomalía, quita esa entrada.
-4. Corre `npm test`. La prueba `tests/sitio/posiciones.test.ts` falla si una cifra no cuadra con G, E y P, si la numeración tiene saltos o si dejaste una discrepancia sin documentar en `inconsistencias`.
+3. Actualiza `fecha_numero` y reemplaza `correcciones` por las de esta imagen (si no hubo ninguna, déjala vacía).
+4. Corre `npm test`. La prueba `tests/sitio/posiciones.test.ts` falla si PTS, PJ o DG no cuadran con G, E, P, GF y GC, o si la numeración tiene saltos. Si falla por una cifra de la imagen, corrígela como indica el punto siguiente.
 5. Push a `Principal`: el despliegue publica los cambios en las tres páginas.
 
 ## Criterios de transcripción
 
-- Las cifras se copian tal como están en la imagen, aunque no cuadren entre sí (PTS, PJ, DG). No se corrigen.
+- Las cifras se copian de la imagen. Cuando una fila no cuadra consigo misma (PJ distinto de G+E+P, DG distinto de GF−GC, PTS distinto de 3G+E), la tabla publicada refleja lo que indican los resultados: G, E, P, GF y GC mandan, y PJ, DG y PTS se recalculan.
 - Los nombres de equipo se escriben como en la imagen, salvo erratas evidentes de la propia imagen (`SAN MARTN` → `San Martin`). Conviene usar el mismo nombre entre series para el mismo club.
-- Cada anomalía detectada se documenta en `inconsistencias` con serie, equipo y detalle. La web no las muestra: quedan registradas para consultarlas con la asociación.
+- Cada corrección se anota en `correcciones` con serie, equipo y lo que decía la imagen. La web no las muestra: quedan registradas para consultarlas con la asociación.
 - Si una serie no aparece en la imagen, se quita del JSON: la sección no se renderiza en esa página.
 - El flag `es_ayb` resalta la fila del club en la tabla pública.
 

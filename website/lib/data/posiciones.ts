@@ -33,7 +33,7 @@ const serieSchema = z.object({
   tabla: z.array(filaSchema).min(1),
 })
 
-const inconsistenciaSchema = z.object({
+const correccionSchema = z.object({
   serie: z.enum(SLUGS_SERIE),
   equipo: z.string().min(1),
   detalle: z.string().min(1),
@@ -50,12 +50,12 @@ const posicionesSchema = z.object({
   // Nombre en la tabla → nombre en el catálogo de rivales, cuando no coinciden (para el escudo)
   equivalencias_catalogo: z.record(z.string(), z.string()),
   notas: z.array(z.string()),
-  inconsistencias: z.array(inconsistenciaSchema),
+  correcciones: z.array(correccionSchema),
 })
 
 export type FilaPosicion = z.infer<typeof filaSchema>
 export type SeriePosiciones = z.infer<typeof serieSchema>
-export type Inconsistencia = z.infer<typeof inconsistenciaSchema>
+export type Correccion = z.infer<typeof correccionSchema>
 export type DatosPosiciones = z.infer<typeof posicionesSchema>
 
 /** JSON validado una sola vez al cargar el módulo */
@@ -113,19 +113,15 @@ export interface Discrepancia {
 }
 
 /**
- * Filas cuyo PTS, PJ o DG no cuadran con G, E y P. La tabla oficial trae
- * anomalías reales y se publica tal cual: esto sirve para revisar una
- * transcripción nueva. Las filas ya documentadas en `inconsistencias` se
- * omiten, para que el resultado vacío signifique "nada nuevo que revisar".
+ * Filas cuyo PTS, PJ o DG no cuadran con G, E, P, GF y GC. La imagen oficial
+ * trae anomalías reales: al transcribir se corrigen con los resultados y se
+ * anotan en `correcciones`. El resultado debe quedar siempre vacío.
  */
 export function revisarCoherencia(datos: DatosPosiciones = posiciones): Discrepancia[] {
-  const documentadas = new Set(datos.inconsistencias.map((i) => `${i.serie}:${i.equipo}`))
   const discrepancias: Discrepancia[] = []
 
   for (const serie of datos.series) {
     for (const fila of serie.tabla) {
-      if (documentadas.has(`${serie.slug}:${fila.equipo}`)) continue
-
       const esperados: [Discrepancia['campo'], number, number][] = [
         ['pts', fila.g * 3 + fila.e, fila.pts],
         ['pj', fila.g + fila.e + fila.p, fila.pj],
