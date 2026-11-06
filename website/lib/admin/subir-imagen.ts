@@ -4,12 +4,20 @@ import { createClient } from '@/lib/supabase/client'
 import { BUCKET_MEDIOS } from '@/lib/contenido/tipos'
 import { prepararSubida, type DestinoSubida } from '@/app/(admin)/admin/medios/actions'
 
-const LADO_MAXIMO = 2400
+// Las imágenes se sirven tal cual (sin optimizador de Vercel, ver next.config.mjs):
+// el tamaño con que se suben es el que descarga el visitante.
+const LADO_MAXIMO = 1920
+// Los escudos de rivales se muestran a 80 px como mucho: 256 px cubre pantallas 3x
+const LADO_MAXIMO_POR_DESTINO: Partial<Record<DestinoSubida['tipo'], number>> = {
+  rival: 256,
+}
 const CALIDAD = 0.85
 
 export interface OpcionesImagen {
+  /** Lado mayor máximo en px (por defecto LADO_MAXIMO) */
+  ladoMaximo?: number
   /**
-   * En vez de limitar el lado mayor a 2400 px, reduce solo lo justo para que
+   * En vez de limitar el lado mayor, reduce solo lo justo para que
    * la foto siga cubriendo esta caja. Para fotos que el servidor reprocesa.
    */
   cubrir?: { ancho: number; alto: number }
@@ -26,7 +34,7 @@ export interface ImagenSubida {
 }
 
 /**
- * Reduce la foto a 2400 px por lado y la recomprime en WebP (o JPEG si el
+ * Reduce la foto a 1920 px por lado (o al máximo del destino) y la recomprime en WebP (o JPEG si el
  * navegador no sabe codificar WebP). Una foto de celular de 6 MB queda en
  * unos 400-800 KB sin pérdida visible.
  */
@@ -45,7 +53,7 @@ async function prepararImagen(
 
   const escala = opciones.cubrir
     ? Math.min(1, Math.max(opciones.cubrir.ancho / width, opciones.cubrir.alto / height))
-    : Math.min(1, LADO_MAXIMO / Math.max(width, height))
+    : Math.min(1, (opciones.ladoMaximo ?? LADO_MAXIMO) / Math.max(width, height))
   const ancho = Math.round(width * escala)
   const alto = Math.round(height * escala)
 
@@ -73,7 +81,10 @@ async function prepararImagen(
 export async function subirImagen(file: File, destino: DestinoSubida, opciones?: OpcionesImagen): Promise<ImagenSubida> {
   if (!file.type.startsWith('image/')) throw new Error(`${file.name} no es una imagen`)
 
-  const { archivo, mime, ancho, alto } = await prepararImagen(file, opciones)
+  const { archivo, mime, ancho, alto } = await prepararImagen(file, {
+    ladoMaximo: LADO_MAXIMO_POR_DESTINO[destino.tipo],
+    ...opciones,
+  })
   const { path, token } = await prepararSubida(destino, mime)
 
   const { error } = await createClient()
