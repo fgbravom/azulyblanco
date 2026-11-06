@@ -62,6 +62,14 @@ const SUBMENUS_SERIES: NavItem[] = (
   ],
 }))
 
+// Rutina en casa para todos los jugadores. En escritorio el Header la saca del
+// menú de la izquierda (ya no cabe a 1280px sin chocar con el escudo) y la muestra
+// como botón junto a Intranet; en el menú móvil y en el footer va como un ítem más
+export const ENLACE_ENTRENAMIENTO: NavItem = {
+  title: 'ENTRENAMIENTO',
+  href: '/entrenamiento',
+}
+
 export const NAVIGATION_ITEMS: NavItem[] = [
   {
     title: 'CLUB',
@@ -85,6 +93,7 @@ export const NAVIGATION_ITEMS: NavItem[] = [
     title: 'PARTIDOS',
     href: '/partidos',
   },
+  ENLACE_ENTRENAMIENTO,
   {
     title: 'GALERÍA',
     href: '/galeria',

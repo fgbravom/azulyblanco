@@ -3,7 +3,7 @@
 import { useState, useEffect, useSyncExternalStore } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { SITE_CONFIG, NAVIGATION_ITEMS } from '@/lib/constants'
+import { SITE_CONFIG, NAVIGATION_ITEMS, ENLACE_ENTRENAMIENTO } from '@/lib/constants'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -14,7 +14,7 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { ChevronDown, LogIn } from 'lucide-react'
+import { ChevronDown, Dumbbell, LogIn } from 'lucide-react'
 import { FaInstagram } from 'react-icons/fa'
 
 interface HeaderProps {
@@ -115,7 +115,7 @@ export function Header({ isHome = false, hideInitially = false }: HeaderProps) {
 
             {/* Navigation - Desktop (visible from 1280px: notebooks de 14" al 150%) */}
             <nav className="hidden xl:flex items-center gap-2 order-1 xl:ml-4 xl:pt-7 max-w-[40%]" suppressHydrationWarning>
-              {mounted && NAVIGATION_ITEMS.map((item) => (
+              {mounted && NAVIGATION_ITEMS.filter((item) => item !== ENLACE_ENTRENAMIENTO).map((item) => (
                 item.submenu ? (
                   <div
                     key={item.href}
@@ -202,6 +202,12 @@ export function Header({ isHome = false, hideInitially = false }: HeaderProps) {
 
             {/* CTA Buttons - Right side, visible from 1280px */}
             <div className="hidden xl:flex items-center gap-2 flex-shrink-0 order-4 xl:pt-3">
+              <Button asChild variant="ghost" className="text-white hover:bg-white hover:text-azul-primario text-sm px-3 h-10 transition-colors">
+                <Link href={ENLACE_ENTRENAMIENTO.href}>
+                  <Dumbbell aria-hidden="true" />
+                  Entrenamiento
+                </Link>
+              </Button>
               <Button asChild variant="ghost" className="text-white hover:bg-white hover:text-azul-primario text-sm px-3 h-10 transition-colors">
                 <Link href="/admin/login" target="_blank" rel="noopener noreferrer">
                   <LogIn aria-hidden="true" />
