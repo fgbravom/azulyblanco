@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest'
 import nextConfig from '@/next.config.mjs'
 
 describe('cabeceras de seguridad (next.config.mjs)', async () => {
-  const reglas = await nextConfig.headers()
+  const reglas = (await nextConfig.headers?.()) ?? []
   const global = reglas.find((r: { source: string }) => r.source === '/:path*')
   const cabeceras = Object.fromEntries(
     (global?.headers ?? []).map((h: { key: string; value: string }) => [h.key.toLowerCase(), h.value])
@@ -28,10 +28,12 @@ describe('cabeceras de seguridad (next.config.mjs)', async () => {
     expect(maxAge).toBeGreaterThanOrEqual(31536000)
   })
 
-  it('las imágenes remotas solo vienen del storage público de Supabase', () => {
-    for (const patron of nextConfig.images.remotePatterns) {
-      expect(patron.pathname).toBe('/storage/v1/object/public/**')
-    }
+})
+
+describe('imágenes (next.config.mjs)', () => {
+  // En Hobby, pasar las 5K transformaciones al mes deja sin cargar las imágenes nuevas (402)
+  it('no usan el optimizador de Vercel', () => {
+    expect(nextConfig.images?.unoptimized).toBe(true)
   })
 })
 

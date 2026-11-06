@@ -1,10 +1,4 @@
 /** @type {import('next').NextConfig} */
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-  ? new URL(process.env.NEXT_PUBLIC_SUPABASE_URL)
-  : new URL('https://*.supabase.co')
-// Supabase local (npm run db:start) sirve las imágenes desde 127.0.0.1
-const supabaseLocal = ['127.0.0.1', 'localhost'].includes(supabaseUrl.hostname)
-
 const nextConfig = {
   pageExtensions: ['js', 'jsx', 'ts', 'tsx'],
   // El admin del hero carga sharp en tiempo de ejecución (lib/admin/sharp.ts),
@@ -25,22 +19,12 @@ const nextConfig = {
     },
   },
   images: {
-    // Imágenes subidas desde el admin (bucket público "medios" de Supabase Storage)
-    remotePatterns: [
-      {
-        protocol: supabaseUrl.protocol.replace(':', ''),
-        hostname: supabaseUrl.hostname,
-        pathname: '/storage/v1/object/public/**',
-      },
-    ],
-    // Next bloquea optimizar imágenes de IPs privadas; solo se permite con el Supabase local
-    dangerouslyAllowLocalIP: supabaseLocal,
-    formats: ['image/webp', 'image/avif'],
-    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
-    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
-    // Las rutas de Storage son únicas (UUID) y nunca se sobrescriben: cachear 31 días
-    // evita transformar otra vez la misma imagen cada minuto
-    minimumCacheTTL: 2678400,
+    // Sin la optimización de Vercel: en el plan Hobby cada imagen × ancho × formato
+    // cuenta como transformación (5K al mes) y, pasado el límite, las imágenes
+    // nuevas responden 402 y no cargan. Las imágenes se sirven tal cual porque ya
+    // llegan livianas: el admin las reduce y recomprime en WebP al subirlas
+    // (lib/admin/subir-imagen.ts) y las del repo están optimizadas a mano.
+    unoptimized: true,
   },
   async redirects() {
     return [
