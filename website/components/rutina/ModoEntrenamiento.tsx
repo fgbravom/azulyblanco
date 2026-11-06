@@ -37,7 +37,8 @@ const EVENTO_ABRIR = 'rutina:abrir'
 // cierra en vez de salir de la página
 const HASH = '#entrenar'
 
-// Pasos que avisan los últimos tres segundos con pitidos cortos (3, 2, 1)
+// Pasos que avisan los últimos segundos con un pitido corto por segundo (5, 4, 3, 2, 1)
+const SEGUNDOS_CUENTA_REGRESIVA = 5
 const CON_CUENTA_REGRESIVA: Paso['tipo'][] = ['descanso', 'serie', 'cambio']
 
 export function BotonEmpezar({ className, children }: { className?: string; children: ReactNode }) {
@@ -283,9 +284,9 @@ export function ModoEntrenamiento({ rutina }: { rutina: Rutina }) {
     }
   }, [abierto, paso])
 
-  // Cuenta regresiva audible en los últimos tres segundos
+  // Cuenta regresiva audible en los últimos segundos
   useEffect(() => {
-    if (corriendo && CON_CUENTA_REGRESIVA.includes(paso.tipo) && segundoEntero >= 1 && segundoEntero <= 3) pitido()
+    if (corriendo && CON_CUENTA_REGRESIVA.includes(paso.tipo) && segundoEntero >= 1 && segundoEntero <= SEGUNDOS_CUENTA_REGRESIVA) pitido()
   }, [corriendo, paso, segundoEntero])
 
   if (!abierto) return null
@@ -382,8 +383,8 @@ export function ModoEntrenamiento({ rutina }: { rutina: Rutina }) {
                 <li className="flex gap-3">
                   <Volume2 className="mt-0.5 h-5 w-5 shrink-0 text-azul-brillante" />
                   <span>
-                    <strong className="text-white">3, 2, 1 y un pitido largo:</strong> ¡a trabajar!{' '}
-                    <strong className="text-white">Doble pitido:</strong> terminó la serie, descansa.
+                    <strong className="text-white">Cuenta regresiva de 5 segundos y pitido largo:</strong> ¡a trabajar!{' '}
+                    <strong className="text-white">Cuenta regresiva y doble pitido:</strong> terminó la serie, descansa.
                   </span>
                 </li>
                 <li className="flex gap-3">
