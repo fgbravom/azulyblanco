@@ -1,9 +1,30 @@
 'use client'
 
 import { useEffect, useMemo, useReducer, useState, type ReactNode } from 'react'
-import { ChevronLeft, Droplets, Pause, Play, Plus, SkipForward, Trophy, Volume2, VolumeX, X } from 'lucide-react'
+import {
+  ArrowLeftRight,
+  ChevronLeft,
+  Droplets,
+  Pause,
+  Play,
+  Plus,
+  Smartphone,
+  SkipForward,
+  Trophy,
+  Volume2,
+  VolumeX,
+  X,
+} from 'lucide-react'
 import type { Rutina } from '@/lib/data/entrenamiento'
-import { armarPasos, esTemporizado, formatoTiempo, type Paso, type Siguiente } from '@/lib/rutina/pasos'
+import {
+  armarPasos,
+  esTemporizado,
+  formatoTiempo,
+  nombrePierna,
+  segundosDesde,
+  type Paso,
+  type Siguiente,
+} from '@/lib/rutina/pasos'
 import { entrarPaso, reducirEntrenamiento, segundosRestantes } from '@/lib/rutina/estado'
 import { desbloquearAudio, pitido, silenciarAudio, vibrar } from '@/lib/rutina/avisos'
 import { VideoEjercicio } from './VideoEjercicio'
@@ -16,20 +37,46 @@ const EVENTO_ABRIR = 'rutina:abrir'
 // cierra en vez de salir de la página
 const HASH = '#entrenar'
 
+// Pasos que avisan los últimos tres segundos con pitidos cortos (3, 2, 1)
+const CON_CUENTA_REGRESIVA: Paso['tipo'][] = ['descanso', 'serie', 'cambio']
+
 export function BotonEmpezar({ className, children }: { className?: string; children: ReactNode }) {
   return (
-    <button type="button" onClick={() => window.dispatchEvent(new Event(EVENTO_ABRIR))} className={className}>
+    <button
+      type="button"
+      onClick={() => {
+        // El toque del usuario habilita el audio en el celular desde el primer paso
+        desbloquearAudio()
+        window.dispatchEvent(new Event(EVENTO_ABRIR))
+      }}
+      className={className}
+    >
       {children}
     </button>
   )
 }
 
-function Anillo({ fraccion, children }: { fraccion: number; children: ReactNode }) {
+/** Segundos sueltos bajo un minuto ("40"), minutos y segundos desde ahí ("1:30") */
+function reloj(segundos: number) {
+  return segundos < 60 ? String(Math.max(0, Math.ceil(segundos))) : formatoTiempo(segundos)
+}
+
+function Anillo({
+  fraccion,
+  chico = false,
+  trazo = 'stroke-azul-brillante',
+  children,
+}: {
+  fraccion: number
+  chico?: boolean
+  trazo?: string
+  children: ReactNode
+}) {
   const radio = 54
   const circunferencia = 2 * Math.PI * radio
   const acotada = Math.min(Math.max(fraccion, 0), 1)
   return (
-    <div className="relative mx-auto aspect-square w-56 max-w-[65vw] sm:w-64">
+    <div className={cn('relative mx-auto aspect-square', chico ? 'w-40 sm:w-44' : 'w-56 max-w-[65vw] sm:w-64')}>
       <svg viewBox="0 0 120 120" className="h-full w-full -rotate-90" aria-hidden="true">
         <circle cx="60" cy="60" r={radio} fill="none" strokeWidth="7" className="stroke-white/10" />
         <circle
@@ -41,7 +88,7 @@ function Anillo({ fraccion, children }: { fraccion: number; children: ReactNode 
           strokeLinecap="round"
           strokeDasharray={circunferencia}
           strokeDashoffset={circunferencia * (1 - acotada)}
-          className="stroke-azul-brillante transition-[stroke-dashoffset] duration-300 ease-linear"
+          className={cn(trazo, 'transition-[stroke-dashoffset] duration-300 ease-linear')}
         />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">{children}</div>
@@ -57,7 +104,7 @@ function PuntosSeries({ total, actual }: { total: number; actual: number }) {
           key={i}
           className={cn(
             'h-2 rounded-full transition-all',
-            i + 1 < actual ? 'w-6 bg-azul-brillante' : i + 1 === actual ? 'w-10 bg-white' : 'w-6 bg-white/20',
+            i + 1 < actual ? 'w-6 bg-white/70' : i + 1 === actual ? 'w-10 bg-white' : 'w-6 bg-white/20',
           )}
         />
       ))}
@@ -67,22 +114,34 @@ function PuntosSeries({ total, actual }: { total: number; actual: number }) {
 
 function AContinuacion({ siguiente }: { siguiente: Siguiente }) {
   return (
-    <div className="rounded-2xl bg-white/5 px-4 py-3">
-      <p className="text-xs uppercase tracking-wider text-white/50">A continuación</p>
-      <p className="font-semibold">{siguiente.titulo}</p>
-      {siguiente.detalle && <p className="text-sm text-azul-cielo">{siguiente.detalle}</p>}
+    <div className="space-y-3 rounded-2xl bg-white/5 px-4 py-3 text-left">
+      <div className="text-center">
+        <p className="text-xs uppercase tracking-wider text-white/50">A continuación</p>
+        <p className="text-lg font-semibold">{siguiente.titulo}</p>
+        {siguiente.detalle && <p className="text-sm text-azul-cielo">{siguiente.detalle}</p>}
+      </div>
+      {siguiente.video && (
+        <>
+          <VideoEjercicio id={siguiente.video.id} titulo={siguiente.video.titulo} />
+          <p className="text-sm text-white/80">{siguiente.video.descripcion}</p>
+        </>
+      )}
     </div>
   )
 }
 
 function etiquetaBloque(paso: Paso, rutina: Rutina): string {
   switch (paso.tipo) {
-    case 'calentamiento':
-      return 'Calentamiento'
+    case 'inicio':
+      return 'Antes de empezar'
+    case 'movilidad':
+      return `Calentamiento ${paso.indiceBloque + 1} de ${rutina.movilidad.length}`
     case 'serie':
       return `Ejercicio ${paso.indiceEjercicio + 1} de ${rutina.ejercicios.length}`
+    case 'cambio':
+      return 'Cambio de pierna'
     case 'descanso':
-      return 'Descanso'
+      return paso.titulo === 'Prepárate' ? 'Prepárate' : 'Descanso'
     case 'estiramiento':
       return `Estiramiento ${paso.indiceEstiramiento + 1} de ${rutina.estiramientos.length}`
     case 'pausa':
@@ -92,8 +151,29 @@ function etiquetaBloque(paso: Paso, rutina: Rutina): string {
   }
 }
 
+/** Lo que anuncia el lector de pantalla al cambiar de paso */
+function anuncio(paso: Paso): string {
+  switch (paso.tipo) {
+    case 'movilidad':
+      return `Calentamiento: ${paso.bloque.nombre}, ${paso.segundos} segundos`
+    case 'serie':
+      return `${paso.ejercicio.nombre}${paso.lado ? `, ${nombrePierna(paso.lado).toLowerCase()}` : ''}, serie ${paso.serie} de ${paso.ejercicio.series}: ${paso.segundos} segundos`
+    case 'cambio':
+      return 'Cambia de pierna'
+    case 'descanso':
+      return `${paso.titulo}: ${formatoTiempo(paso.segundos)}`
+    case 'estiramiento':
+      return `${paso.estiramiento.nombre}${paso.lado ? `, lado ${paso.lado}` : ''}: mantén ${paso.segundos} segundos`
+    case 'fin':
+      return 'Rutina completa'
+    default:
+      return ''
+  }
+}
+
 export function ModoEntrenamiento({ rutina }: { rutina: Rutina }) {
   const pasos = useMemo(() => armarPasos(rutina), [rutina])
+  const total = useMemo(() => segundosDesde(pasos), [pasos])
   const [abierto, setAbierto] = useState(false)
   const [silencio, setSilencio] = useState(false)
   const [confirmarSalida, setConfirmarSalida] = useState(false)
@@ -176,22 +256,36 @@ export function ModoEntrenamiento({ rutina }: { rutina: Rutina }) {
     return () => window.clearInterval(id)
   }, [corriendo])
 
-  // Aviso al empezar a trabajar y al soltar un estiramiento
+  // Avisos al cambiar de paso: pitido largo para trabajar, doble para descansar,
+  // corto para las transiciones (calentamiento, cambio de pierna, soltar un estiramiento)
   useEffect(() => {
     if (!abierto) return
-    if (paso.tipo === 'serie' || paso.tipo === 'estiramiento') {
-      pitido(true)
-      vibrar(250)
-    } else if (paso.tipo === 'pausa') {
-      pitido()
-    } else if (paso.tipo === 'fin') {
-      vibrar([150, 100, 150, 100, 300])
+    switch (paso.tipo) {
+      case 'serie':
+      case 'estiramiento':
+        pitido(true)
+        vibrar(250)
+        break
+      case 'descanso':
+        pitido(true, 2)
+        vibrar([200, 100, 200])
+        break
+      case 'movilidad':
+      case 'cambio':
+      case 'pausa':
+        pitido()
+        vibrar(100)
+        break
+      case 'fin':
+        pitido(true, 3)
+        vibrar([150, 100, 150, 100, 300])
+        break
     }
   }, [abierto, paso])
 
-  // Cuenta regresiva audible en los últimos tres segundos del descanso
+  // Cuenta regresiva audible en los últimos tres segundos
   useEffect(() => {
-    if (corriendo && paso.tipo === 'descanso' && segundoEntero >= 1 && segundoEntero <= 3) pitido()
+    if (corriendo && CON_CUENTA_REGRESIVA.includes(paso.tipo) && segundoEntero >= 1 && segundoEntero <= 3) pitido()
   }, [corriendo, paso, segundoEntero])
 
   if (!abierto) return null
@@ -211,18 +305,29 @@ export function ModoEntrenamiento({ rutina }: { rutina: Rutina }) {
     silenciarAudio(!silencio)
     setSilencio(!silencio)
   }
+  const empezar = (indice: number) => {
+    desbloquearAudio()
+    ir(indice)
+  }
 
-  const progreso = estado.indice / (pasos.length - 1)
   const temporizado = esTemporizado(paso)
+  const pendiente = (temporizado ? restante : 0) + segundosDesde(pasos, estado.indice + 1)
+  const progreso = 1 - pendiente / total
+  const minutosPendientes = Math.ceil(pendiente / 60)
+  const trabajando = paso.tipo === 'serie'
+  const indicePrimerEjercicio = pasos.findIndex((p) => p.tipo === 'descanso')
 
   return (
     <div
       role="dialog"
       aria-modal="true"
       aria-label={`Rutina: ${rutina.titulo}`}
-      className="fixed inset-0 z-[100] flex h-dvh flex-col bg-azul-profundo text-white"
+      className={cn(
+        'fixed inset-0 z-[100] flex h-dvh flex-col text-white transition-colors duration-500',
+        trabajando && !enPausa ? 'bg-azul-medio' : 'bg-azul-profundo',
+      )}
     >
-      {/* Barra superior: salir, en qué parte va y sonido */}
+      {/* Barra superior: salir, en qué parte va, cuánto falta y sonido */}
       <div className="shrink-0 px-4 pt-[max(0.75rem,env(safe-area-inset-top))]">
         <div className="flex items-center justify-between gap-3">
           <button
@@ -233,7 +338,16 @@ export function ModoEntrenamiento({ rutina }: { rutina: Rutina }) {
           >
             <X className="h-6 w-6" />
           </button>
-          <p className="truncate text-sm font-semibold uppercase tracking-wider text-azul-cielo">{etiquetaBloque(paso, rutina)}</p>
+          <div className="min-w-0 text-center">
+            <p className="truncate text-sm font-semibold uppercase tracking-wider text-white/80">
+              {etiquetaBloque(paso, rutina)}
+            </p>
+            {paso.tipo !== 'inicio' && paso.tipo !== 'fin' && (
+              <p className="text-xs text-white/60">
+                {minutosPendientes <= 1 ? 'Queda menos de 1 min' : `Quedan ${minutosPendientes} min`}
+              </p>
+            )}
+          </div>
           <button
             type="button"
             onClick={alternarSilencio}
@@ -245,50 +359,101 @@ export function ModoEntrenamiento({ rutina }: { rutina: Rutina }) {
           </button>
         </div>
         <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/10">
-          <div
-            className="h-full rounded-full bg-azul-claro transition-[width] duration-500"
-            style={{ width: `${progreso * 100}%` }}
-          />
+          <div className="h-full rounded-full bg-white transition-[width] duration-500" style={{ width: `${progreso * 100}%` }} />
         </div>
       </div>
 
       {/* Contenido del paso */}
       <div key={estado.indice} className="paso-entrada flex-1 overflow-y-auto px-5 py-6">
         <div className="mx-auto flex min-h-full max-w-md flex-col justify-center gap-5 text-center">
-          {paso.tipo === 'calentamiento' && (
+          {paso.tipo === 'inicio' && (
             <>
-              <h2 className="text-3xl font-bold">Primero, calienta</h2>
-              <p className="text-lg text-azul-pastel">{rutina.calentamiento}</p>
-              <ul className="list-disc space-y-2 rounded-2xl bg-white/5 py-4 pr-4 pl-8 text-left text-sm text-white/80 marker:text-azul-brillante">
-                <li>Ten agua a mano.</li>
-                <li>Los descansos corren solos y suenan al terminar.</li>
-                <li>Cuando termines cada serie, toca &quot;Serie lista&quot;.</li>
+              <div>
+                <h2 className="text-3xl font-bold">Así funciona</h2>
+                <p className="mt-2 text-lg text-azul-pastel">
+                  {Math.round(total / 60)} minutos que corren solos: no tienes que tocar nada.
+                </p>
+              </div>
+              <ul className="space-y-3 rounded-2xl bg-white/5 p-4 text-left text-sm text-white/85">
+                <li className="flex gap-3">
+                  <Smartphone className="mt-0.5 h-5 w-5 shrink-0 text-azul-brillante" />
+                  <span>Deja el celular apoyado donde puedas verlo y con el volumen arriba. En iPhone, quita el modo silencio.</span>
+                </li>
+                <li className="flex gap-3">
+                  <Volume2 className="mt-0.5 h-5 w-5 shrink-0 text-azul-brillante" />
+                  <span>
+                    <strong className="text-white">3, 2, 1 y un pitido largo:</strong> ¡a trabajar!{' '}
+                    <strong className="text-white">Doble pitido:</strong> terminó la serie, descansa.
+                  </span>
+                </li>
+                <li className="flex gap-3">
+                  <ArrowLeftRight className="mt-0.5 h-5 w-5 shrink-0 text-azul-brillante" />
+                  <span>En los ejercicios de una pierna, te avisa cuándo cambiar.</span>
+                </li>
+                <li className="flex gap-3">
+                  <Droplets className="mt-0.5 h-5 w-5 shrink-0 text-azul-brillante" />
+                  <span>Ten agua a mano. En cada descanso ves el video del ejercicio que sigue.</span>
+                </li>
               </ul>
+              <p className="text-sm text-white/60">
+                Parte con {Math.round(segundosDesde(pasos.slice(1, indicePrimerEjercicio)) / 60)} minutos de calentamiento
+                guiado.
+              </p>
+            </>
+          )}
+
+          {paso.tipo === 'movilidad' && (
+            <>
+              <div>
+                <p className="text-sm font-semibold uppercase tracking-wider text-azul-brillante">Calentamiento</p>
+                <h2 className="mt-1 text-3xl font-bold leading-tight">{paso.bloque.nombre}</h2>
+              </div>
+              <Anillo fraccion={restante / paso.segundos}>
+                <span className="text-6xl font-bold tabular-nums" aria-hidden="true">
+                  {reloj(restante)}
+                </span>
+                {enPausa && <span className="mt-1 text-sm uppercase tracking-wider text-azul-cielo">En pausa</span>}
+              </Anillo>
+              <p className="text-lg text-azul-pastel">{paso.bloque.indicacion}</p>
+              {paso.siguiente && <p className="text-sm text-white/50">Después: {paso.siguiente.titulo}</p>}
             </>
           )}
 
           {paso.tipo === 'serie' && (
             <>
-              <VideoEjercicio id={paso.ejercicio.video} titulo={paso.ejercicio.nombre} />
-              <div>
-                <p className="text-sm font-semibold uppercase tracking-wider text-azul-brillante">
+              <div className="space-y-2">
+                <p className="text-sm font-semibold uppercase tracking-wider text-white/80">
                   Serie {paso.serie} de {paso.ejercicio.series}
                 </p>
-                <h2 className="mt-1 text-3xl font-bold leading-tight">{paso.ejercicio.nombre}</h2>
-                {paso.ejercicio.alias && <p className="text-sm text-white/60">{paso.ejercicio.alias}</p>}
+                <PuntosSeries total={paso.ejercicio.series} actual={paso.serie} />
+                <h2 className="pt-1 text-3xl font-bold leading-tight">{paso.ejercicio.nombre}</h2>
+                {paso.lado && (
+                  <p className="mx-auto w-fit rounded-full bg-white px-5 py-1.5 text-lg font-bold text-azul-primario">
+                    {nombrePierna(paso.lado)}
+                  </p>
+                )}
               </div>
-              <p className="mx-auto rounded-full bg-white px-5 py-2 text-xl font-bold text-azul-primario">
-                {paso.ejercicio.objetivo}
+              <Anillo fraccion={restante / paso.segundos} trazo="stroke-white">
+                <span className="text-7xl font-bold tabular-nums" aria-hidden="true">
+                  {reloj(restante)}
+                </span>
+                <span className="mt-1 text-sm font-semibold uppercase tracking-wider text-white/80">
+                  {enPausa ? 'En pausa' : '¡Dale!'}
+                </span>
+              </Anillo>
+              <p className="text-white/80">
+                Referencia: {paso.ejercicio.referencia}
+                {paso.lado ? ' con esta pierna' : ''}. Prioriza la buena técnica.
               </p>
-              <PuntosSeries total={paso.ejercicio.series} actual={paso.serie} />
               {paso.ejercicio.aviso && (
-                <p className="rounded-xl bg-amber-400/15 px-4 py-2 text-sm font-semibold text-amber-200">{paso.ejercicio.aviso}</p>
+                <p className="rounded-xl bg-amber-400/20 px-4 py-2 text-sm font-semibold text-amber-100">{paso.ejercicio.aviso}</p>
               )}
-              <details className="group rounded-2xl bg-white/5 text-left">
-                <summary className="cursor-pointer list-none px-4 py-3 font-semibold text-azul-cielo">
+              <details className="group rounded-2xl bg-white/10 text-left">
+                <summary className="cursor-pointer list-none px-4 py-3 font-semibold">
                   Cómo se hace <span className="float-right transition-transform group-open:rotate-45">+</span>
                 </summary>
-                <div className="space-y-3 px-4 pb-4 text-sm text-white/80">
+                <div className="space-y-3 px-4 pb-4 text-sm text-white/85">
+                  <VideoEjercicio id={paso.ejercicio.video} titulo={paso.ejercicio.nombre} />
                   <p>{paso.ejercicio.descripcion}</p>
                   <p>
                     <span className="font-semibold text-white">Variante: </span>
@@ -299,12 +464,28 @@ export function ModoEntrenamiento({ rutina }: { rutina: Rutina }) {
             </>
           )}
 
-          {paso.tipo === 'descanso' && (
+          {paso.tipo === 'cambio' && (
             <>
-              <h2 className="text-3xl font-bold">Descansa</h2>
+              <h2 className="text-3xl font-bold">Cambia de pierna</h2>
               <Anillo fraccion={restante / paso.segundos}>
                 <span className="text-6xl font-bold tabular-nums" aria-hidden="true">
-                  {formatoTiempo(restante)}
+                  {reloj(restante)}
+                </span>
+                {enPausa && <span className="mt-1 text-sm uppercase tracking-wider text-azul-cielo">En pausa</span>}
+              </Anillo>
+              <AContinuacion siguiente={paso.siguiente} />
+            </>
+          )}
+
+          {paso.tipo === 'descanso' && (
+            <>
+              <h2 className="text-3xl font-bold">{paso.titulo}</h2>
+              <Anillo fraccion={restante / paso.segundos} chico={Boolean(paso.siguiente.video)}>
+                <span
+                  className={cn('font-bold tabular-nums', paso.siguiente.video ? 'text-5xl' : 'text-6xl')}
+                  aria-hidden="true"
+                >
+                  {reloj(restante)}
                 </span>
                 {enPausa && <span className="mt-1 text-sm uppercase tracking-wider text-azul-cielo">En pausa</span>}
               </Anillo>
@@ -316,9 +497,11 @@ export function ModoEntrenamiento({ rutina }: { rutina: Rutina }) {
                 <Plus className="h-4 w-4" /> 30 s
               </button>
               <AContinuacion siguiente={paso.siguiente} />
-              <p className="flex items-center justify-center gap-2 text-sm text-azul-pastel">
-                <Droplets className="h-4 w-4" /> Aprovecha de tomar agua
-              </p>
+              {paso.titulo === 'Descansa' && (
+                <p className="flex items-center justify-center gap-2 text-sm text-azul-pastel">
+                  <Droplets className="h-4 w-4" /> Aprovecha de tomar agua
+                </p>
+              )}
             </>
           )}
 
@@ -378,19 +561,20 @@ export function ModoEntrenamiento({ rutina }: { rutina: Rutina }) {
 
       {/* Lector de pantalla: solo anuncia el cambio de paso, no cada segundo */}
       <p className="sr-only" aria-live="polite">
-        {paso.tipo === 'serie'
-          ? `${paso.ejercicio.nombre}, serie ${paso.serie} de ${paso.ejercicio.series}: ${paso.ejercicio.objetivo}`
-          : paso.tipo === 'descanso'
-            ? `Descanso de ${formatoTiempo(paso.segundos)}`
-            : paso.tipo === 'estiramiento'
-              ? `${paso.estiramiento.nombre}${paso.lado ? `, lado ${paso.lado}` : ''}: mantén ${paso.segundos} segundos`
-              : paso.tipo === 'fin'
-                ? 'Rutina completa'
-                : ''}
+        {anuncio(paso)}
       </p>
 
       {/* Controles */}
       <div className="shrink-0 border-t border-white/10 px-4 pt-3 pb-[max(1rem,env(safe-area-inset-bottom))]">
+        {paso.tipo === 'inicio' && indicePrimerEjercicio > 1 && (
+          <button
+            type="button"
+            onClick={() => empezar(indicePrimerEjercicio)}
+            className="mx-auto mb-2 block rounded-full px-4 py-1 text-sm font-semibold text-azul-cielo hover:bg-white/10"
+          >
+            Ya calenté: ir a los ejercicios
+          </button>
+        )}
         <div className="mx-auto flex max-w-md items-center gap-3">
           <button
             type="button"
@@ -402,25 +586,13 @@ export function ModoEntrenamiento({ rutina }: { rutina: Rutina }) {
             <ChevronLeft className="h-6 w-6" />
           </button>
 
-          {paso.tipo === 'calentamiento' && (
+          {paso.tipo === 'inicio' && (
             <button
               type="button"
-              onClick={() => {
-                desbloquearAudio()
-                siguiente()
-              }}
-              className="h-14 flex-1 rounded-full bg-azul-claro text-lg font-bold hover:bg-azul-brillante active:scale-[0.98]"
+              onClick={() => empezar(1)}
+              className="flex h-14 flex-1 items-center justify-center gap-2 rounded-full bg-azul-claro text-lg font-bold hover:bg-azul-brillante active:scale-[0.98]"
             >
-              Empezar
-            </button>
-          )}
-          {paso.tipo === 'serie' && (
-            <button
-              type="button"
-              onClick={siguiente}
-              className="h-14 flex-1 rounded-full bg-azul-claro text-lg font-bold hover:bg-azul-brillante active:scale-[0.98]"
-            >
-              Serie lista
+              <Play className="h-5 w-5 fill-current" /> Empezar
             </button>
           )}
           {temporizado && (
@@ -443,7 +615,7 @@ export function ModoEntrenamiento({ rutina }: { rutina: Rutina }) {
             </button>
           )}
 
-          {paso.tipo !== 'fin' && paso.tipo !== 'calentamiento' && (
+          {paso.tipo !== 'fin' && paso.tipo !== 'inicio' && (
             <button
               type="button"
               onClick={siguiente}

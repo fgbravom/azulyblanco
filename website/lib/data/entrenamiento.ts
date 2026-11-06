@@ -9,8 +9,12 @@ export interface Ejercicio {
   alias?: string
   musculos: string[]
   descripcion: string
-  /** Lo que se hace en cada serie, tal como se le dice al jugador */
-  objetivo: string
+  /** Segundos de trabajo de cada serie (de cada pierna, si porLado) */
+  trabajo: number
+  /** Se hace primero con una pierna y después con la otra, con un cambio entre medio */
+  porLado: boolean
+  /** Repeticiones de la pauta original: el ritmo al que apuntar dentro del tiempo */
+  referencia: string
   series: number
   /** Descanso después de cada serie, en segundos */
   descanso: number
@@ -36,14 +40,21 @@ export interface Estiramiento {
   video: string
 }
 
+/** Bloque del calentamiento guiado */
+export interface Movilidad {
+  nombre: string
+  indicacion: string
+  segundos: number
+}
+
 export interface Rutina {
   titulo: string
-  /** Duración que se informa en la portada, en minutos */
-  duracionMinutos: number
   objetivo: string
   materiales: string
   consideraciones: string[]
   calentamiento: string
+  /** Calentamiento guiado con temporizador, al abrir el modo entrenamiento */
+  movilidad: Movilidad[]
   sugerencias: string[]
   ejercicios: Ejercicio[]
   estiramientos: Estiramiento[]
@@ -60,7 +71,6 @@ export interface Rutina {
 }
 
 export const RUTINA_EN_CASA: Rutina = {
-  duracionMinutos: 60,
   titulo: 'Potencia, agilidad y velocidad',
   objetivo:
     'Mejorar la potencia muscular, la agilidad y la velocidad con ejercicios explosivos (pliometría), más una pauta de estiramientos para cerrar.',
@@ -72,6 +82,17 @@ export const RUTINA_EN_CASA: Rutina = {
   ],
   calentamiento:
     'Antes de empezar, haz movilidad articular (tobillos, rodillas, caderas, hombros) y algunos estiramientos dinámicos.',
+  movilidad: [
+    { nombre: 'Tobillos', indicacion: 'Haz círculos con cada tobillo, hacia un lado y hacia el otro.', segundos: 30 },
+    { nombre: 'Rodillas', indicacion: 'Pies juntos y manos en las rodillas: círculos suaves.', segundos: 30 },
+    { nombre: 'Caderas', indicacion: 'Manos en la cintura, círculos amplios con la cadera.', segundos: 30 },
+    { nombre: 'Hombros', indicacion: 'Círculos con los brazos, hacia adelante y hacia atrás.', segundos: 30 },
+    {
+      nombre: 'Estiramientos dinámicos',
+      indicacion: 'Balancea cada pierna adelante y atrás, y termina con trote suave en el lugar.',
+      segundos: 60,
+    },
+  ],
   sugerencias: [
     'Hidrátate durante toda la sesión.',
     'Descansa entre 1:30 y 2 minutos entre series para no sobrecargarte.',
@@ -84,9 +105,11 @@ export const RUTINA_EN_CASA: Rutina = {
       musculos: ['Cuádriceps', 'Glúteo', 'Gemelo', 'Sóleo', 'Isquiotibiales'],
       descripcion:
         'Pon dos marcas (conos o botellas) a dos metros de distancia. Impúlsate con un solo pie hacia el costado y, apenas caigas, repite hacia el otro lado con el pie contrario, despegando bien la planta del suelo.',
-      objetivo: '15 saltos por pierna',
+      trabajo: 40,
+      porLado: false,
+      referencia: '15 saltos por pierna',
       series: 4,
-      descanso: 120,
+      descanso: 90,
       variante: 'Salta con peso en los brazos: un disco, un balón medicinal o algo pesado fácil de tomar.',
       video: 'LyRRekZLJPw',
     },
@@ -96,9 +119,11 @@ export const RUTINA_EN_CASA: Rutina = {
       musculos: ['Glúteo', 'Isquiotibiales', 'Erector espinal', 'Core'],
       descripcion:
         'Acuéstate de espalda con las plantas de los pies apoyadas en el suelo. Eleva los glúteos hasta formar un ángulo de 90° entre el muslo y la pantorrilla, y baja controlando.',
-      objetivo: '10 a 15 repeticiones',
+      trabajo: 40,
+      porLado: false,
+      referencia: '10 a 15 repeticiones',
       series: 4,
-      descanso: 120,
+      descanso: 90,
       variante: 'Pon peso sobre el abdomen: un disco, un balón medicinal o un objeto que puedas sostener cómodo.',
       video: 'oDXM-a-gBt8',
     },
@@ -109,9 +134,11 @@ export const RUTINA_EN_CASA: Rutina = {
       musculos: ['Cuádriceps', 'Glúteo', 'Isquiotibiales', 'Aductores', 'Gemelo', 'Sóleo', 'Core'],
       descripcion:
         'Siéntate en una silla. Estira una pierna al frente y apoya la planta completa del otro pie en el suelo, con los brazos extendidos hacia adelante. Ponte de pie usando solo la pierna de apoyo.',
-      objetivo: '10 a 15 repeticiones por pierna',
+      trabajo: 30,
+      porLado: true,
+      referencia: '10 a 15 repeticiones',
       series: 4,
-      descanso: 120,
+      descanso: 90,
       variante: 'Sostén peso con los brazos extendidos al frente (disco, balón medicinal): además trabaja el core.',
       video: 'wScWJWqbXGY',
     },
@@ -121,9 +148,11 @@ export const RUTINA_EN_CASA: Rutina = {
       musculos: ['Cuádriceps', 'Glúteo', 'Isquiotibiales', 'Aductores', 'Gemelo', 'Sóleo', 'Core'],
       descripcion:
         'Ponte en posición de sentadilla búlgara, con el pie de atrás apoyado en una silla. Con el pie que queda en el suelo, da pequeños saltos hacia los lados sin perder la estabilidad. Puedes poner un objeto en el suelo que marque el lado derecho y el izquierdo.',
-      objetivo: '10 a 15 repeticiones por pierna',
+      trabajo: 30,
+      porLado: true,
+      referencia: '10 a 15 repeticiones',
       series: 4,
-      descanso: 120,
+      descanso: 90,
       variante: 'Haz tres movimientos seguidos: dos saltos laterales y uno hacia adelante.',
       video: 'Bkg0HCH34tI',
     },
@@ -133,9 +162,11 @@ export const RUTINA_EN_CASA: Rutina = {
       musculos: ['Cuádriceps', 'Glúteo', 'Isquiotibiales', 'Aductores', 'Gemelo', 'Sóleo', 'Core', 'Estabilizadores de tobillo, rodilla y cadera'],
       descripcion:
         'Manos en la cintura o en posición de carrera. Baja en estocada con el tronco recto y las piernas a 90°, sube con fuerza y salta cambiando de pierna en el aire.',
-      objetivo: '10 a 15 repeticiones por pierna',
+      trabajo: 40,
+      porLado: false,
+      referencia: '10 a 15 repeticiones por pierna, alternando',
       series: 4,
-      descanso: 120,
+      descanso: 90,
       variante:
         'Estocada sin salto, pero con peso extra: mancuernas, discos, botellas con agua o bolsas de arroz.',
       video: 't8xeXiubV0I',
@@ -147,9 +178,11 @@ export const RUTINA_EN_CASA: Rutina = {
       musculos: ['Cuádriceps', 'Glúteo', 'Isquiotibiales', 'Aductores', 'Gemelo', 'Sóleo', 'Core', 'Estabilizadores de tobillo, rodilla y cadera'],
       descripcion:
         'Arrodíllate en el suelo con los brazos extendidos para ayudarte a tomar impulso. Desde ahí, salta para caer con las plantas de los pies en sentadilla profunda y termina de pie.',
-      objetivo: '10 repeticiones',
+      trabajo: 30,
+      porLado: false,
+      referencia: '10 repeticiones',
       series: 3,
-      descanso: 120,
+      descanso: 90,
       variante: 'Sin impulso: apoya primero un pie, después el otro, y ponte de pie.',
       aviso: 'No agregues carga ni peso extra en este ejercicio.',
       video: '4qK55avGyy4',

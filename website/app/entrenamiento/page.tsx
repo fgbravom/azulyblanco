@@ -5,6 +5,8 @@ import { RUTINA_EN_CASA as rutina } from '@/lib/data/entrenamiento'
 import { BotonEmpezar, ModoEntrenamiento } from '@/components/rutina/ModoEntrenamiento'
 import { VideoEjercicio } from '@/components/rutina/VideoEjercicio'
 import { CalculadoraAgua } from '@/components/rutina/CalculadoraAgua'
+import { duracionMinutos } from '@/lib/rutina/pasos'
+import type { Ejercicio } from '@/lib/data/entrenamiento'
 
 export const metadata = {
   title: 'Entrenamiento en casa',
@@ -15,6 +17,13 @@ export const metadata = {
 function minutos(segundos: number) {
   return segundos % 60 === 0 ? `${segundos / 60} min` : `${Math.floor(segundos / 60)}:${String(segundos % 60).padStart(2, '0')} min`
 }
+
+/** "40 s" o "30 s por pierna" */
+function trabajo(ejercicio: Ejercicio) {
+  return `${ejercicio.trabajo} s${ejercicio.porLado ? ' por pierna' : ''}`
+}
+
+const duracion = duracionMinutos(rutina)
 
 function Titulo({ icono: Icono, children, id }: { icono: typeof Dumbbell; children: React.ReactNode; id: string }) {
   return (
@@ -45,7 +54,7 @@ export default function EntrenamientoPage() {
               {[
                 { valor: rutina.ejercicios.length, etiqueta: 'ejercicios' },
                 { valor: rutina.estiramientos.length, etiqueta: 'estiramientos' },
-                { valor: rutina.duracionMinutos, etiqueta: 'minutos' },
+                { valor: duracion, etiqueta: 'minutos' },
               ].map(({ valor, etiqueta }) => (
                 <div key={etiqueta} className="rounded-2xl bg-white/10 px-2 py-3">
                   <dt className="sr-only">{etiqueta}</dt>
@@ -60,7 +69,7 @@ export default function EntrenamientoPage() {
             <BotonEmpezar className="mt-8 flex h-14 w-full items-center justify-center gap-2 rounded-full bg-white text-lg font-bold text-azul-primario shadow-lg transition hover:bg-azul-pastel active:scale-[0.98] sm:w-auto sm:px-10">
               <Play className="h-5 w-5 fill-current" /> Empezar rutina
             </BotonEmpezar>
-            <p className="mt-3 text-sm text-azul-cielo">Te guía serie por serie, con descansos y estiramientos cronometrados.</p>
+            <p className="mt-3 text-sm text-azul-cielo">Todo corre con tiempo: te avisa con sonido cuándo trabajar y cuándo descansar.</p>
           </div>
         </section>
 
@@ -110,7 +119,7 @@ export default function EntrenamientoPage() {
                       <span className="min-w-0 flex-1">
                         <span className="block font-bold text-gray-900">{ejercicio.nombre}</span>
                         <span className="block text-sm text-gray-500">
-                          {ejercicio.series} series de {ejercicio.objetivo}
+                          {ejercicio.series} series de {trabajo(ejercicio)}
                         </span>
                       </span>
                       <ChevronDown className="h-5 w-5 shrink-0 text-gray-400 transition-transform group-open:rotate-180" />
@@ -124,8 +133,9 @@ export default function EntrenamientoPage() {
                             <Timer className="h-3.5 w-3.5" /> Método
                           </p>
                           <p className="mt-1 font-semibold text-gray-900">
-                            {ejercicio.series} series de {ejercicio.objetivo}
+                            {ejercicio.series} series de {trabajo(ejercicio)}
                           </p>
+                          <p className="mt-0.5 text-gray-500">Referencia: {ejercicio.referencia}</p>
                         </div>
                         <div className="rounded-xl bg-gray-50 p-3">
                           <p className="flex items-center gap-1 text-xs uppercase tracking-wide text-gray-500">
@@ -229,7 +239,7 @@ export default function EntrenamientoPage() {
         {/* En el celular el botón queda siempre a mano */}
         <div className="fixed inset-x-0 bottom-0 z-40 border-t border-gray-200 bg-white/95 px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur md:hidden">
           <BotonEmpezar className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-azul-primario font-bold text-white active:scale-[0.98]">
-            <Play className="h-4 w-4 fill-current" /> Empezar rutina ({rutina.duracionMinutos} min)
+            <Play className="h-4 w-4 fill-current" /> Empezar rutina ({duracion} min)
           </BotonEmpezar>
         </div>
       </main>
