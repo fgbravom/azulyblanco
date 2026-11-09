@@ -35,6 +35,12 @@ const nextConfig = {
         destination: 'https://www.azulyblanco.cl/:path*',
         permanent: true,
       },
+      {
+        // /index respondía la portada con 200: era un duplicado de '/' para Google
+        source: '/index',
+        destination: '/',
+        permanent: true,
+      },
     ]
   },
   async headers() {

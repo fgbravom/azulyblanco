@@ -10,8 +10,24 @@ import { PosicionesHome } from '@/components/posiciones/PosicionesHome'
 import { SITE_CONFIG } from '@/lib/constants'
 import { getPosicionesSerie, SLUGS_SERIE } from '@/lib/data/posiciones'
 import Bandera from '@/components/ui/bandera'
+import type { Metadata } from 'next'
 
 export const revalidate = 300 // respaldo; el admin regenera al guardar
+
+// En la raíz, el './' del layout se resuelve como '/index': Google tomaba
+// www.azulyblanco.cl/index como canónica de la portada. Aquí se fija '/'.
+// openGraph reemplaza entero al del layout: se repiten sus campos.
+export const metadata: Metadata = {
+  alternates: { canonical: '/' },
+  openGraph: {
+    type: 'website',
+    locale: 'es_CL',
+    url: '/',
+    siteName: SITE_CONFIG.name,
+    title: `Club Deportivo ${SITE_CONFIG.name}`,
+    description: SITE_CONFIG.description,
+  },
+}
 
 // Datos estructurados: le dicen a Google quién es el club y cómo se llama el sitio
 const NOMBRE_COMPLETO = `Club Deportivo ${SITE_CONFIG.name}`
