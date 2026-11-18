@@ -11,7 +11,7 @@ describe('TablaPosiciones', () => {
   it('muestra la fecha, la fuente y las 13 filas de la serie', () => {
     render(<TablaPosiciones tabla={primera!} />)
     expect(screen.getByRole('heading', { name: 'Tabla de posiciones' })).toBeInTheDocument()
-    expect(screen.getByText('Campeonato ANFA 2026 · Clausura · Fecha N°25')).toBeInTheDocument()
+    expect(screen.getByText('Campeonato ANFA 2026 · Clausura · Fecha N°27')).toBeInTheDocument()
     expect(screen.getAllByRole('row')).toHaveLength(14)
     expect(screen.getByText(/Asociación de Fútbol Curicó Aguas Negras/)).toBeInTheDocument()
   })
@@ -20,10 +20,10 @@ describe('TablaPosiciones', () => {
     render(<TablaPosiciones tabla={primera!} />)
     const filas = screen.getAllByRole('row').slice(1)
     expect(within(filas[0]).getByText('J. Valvanera')).toBeInTheDocument()
-    expect(within(filas[0]).getByText('10')).toBeInTheDocument()
-    expect(within(filas[0]).getByText('+7')).toBeInTheDocument()
+    expect(within(filas[0]).getByText('16')).toBeInTheDocument()
+    expect(within(filas[0]).getByText('+15')).toBeInTheDocument()
     expect(within(filas[12]).getByText('U de Chile')).toBeInTheDocument()
-    expect(within(filas[12]).getByText('-9')).toBeInTheDocument()
+    expect(within(filas[12]).getByText('-15')).toBeInTheDocument()
   })
 
   it('destaca la fila de Azul y Blanco', () => {
@@ -41,9 +41,9 @@ describe('TablaPosiciones', () => {
   it('muestra el escudo entre la posición y el equipo, con el logo del catálogo cruzado sin tildes', () => {
     const escudos = { [claveEquipo('San Martín')]: 'https://ejemplo.test/sm.png' }
     render(<TablaPosiciones tabla={getPosicionesSerie('honor')!} escudos={escudos} />)
-    const fila = screen.getAllByRole('row')[1]
+    const fila = screen.getAllByRole('row')[3]
     const celdas = within(fila).getAllByRole('cell')
-    expect(celdas[0]).toHaveTextContent('1')
+    expect(celdas[0]).toHaveTextContent('3')
     expect(celdas[1].querySelector('img')).not.toBeNull()
     expect(celdas[2]).toHaveTextContent('San Martin')
   })
